@@ -9,7 +9,7 @@ from __future__ import annotations
       save_cluster_visualization(vectors, labels, counts, centroids, scaler, ...)
 
 - 단독 실행 (daily_news_features 개별 행 사용):
-      python shared/news/visualize_clusters.py
+      python shared/cluster/visualize.py
 """
 
 import json
@@ -28,7 +28,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from shared.news.volatility_cluster import (
+from shared.cluster.model import (
     CLUSTER_FEATURE_COLS,
     VOLATILITY_LABELS,
     load_cluster_model,
@@ -63,7 +63,6 @@ def _plot_scatter(
     point_labels: list[str],
     cen_2d: np.ndarray,
     pca: PCA,
-    subtitle: str = "",
 ) -> None:
     for label in VOLATILITY_LABELS:
         mask = np.array([l == label for l in point_labels])
@@ -104,10 +103,7 @@ def _plot_scatter(
     var2 = pca.explained_variance_ratio_[1] * 100
     ax.set_xlabel(f"PC1  ({var1:.1f}% variance explained)", fontsize=10)
     ax.set_ylabel(f"PC2  ({var2:.1f}% variance explained)", fontsize=10)
-    title = "All News Vectors + Cluster Centroids (★)"
-    if subtitle:
-        title += f"\n{subtitle}"
-    ax.set_title(title, fontsize=10.5)
+    ax.set_title("All News Vectors + Cluster Centroids (★)", fontsize=10.5)
     ax.legend(loc="upper right", fontsize=7.5, framealpha=0.75, borderpad=0.6)
     ax.grid(True, alpha=0.22)
 
@@ -118,9 +114,7 @@ def _plot_heatmap(
     counts: np.ndarray,
     scaler: StandardScaler,
 ) -> None:
-    """중심점 피처 프로파일을 min-max 정규화된 히트맵으로 표시한다."""
     centroid_orig = scaler.inverse_transform(centroids_scaled)
-
     col_min = centroid_orig.min(axis=0)
     col_max = centroid_orig.max(axis=0)
     centroid_norm = (centroid_orig - col_min) / (col_max - col_min + 1e-9)
@@ -134,7 +128,6 @@ def _plot_heatmap(
     ax.set_yticks(range(len(VOLATILITY_LABELS)))
     ax.set_yticklabels(y_labels, fontsize=8.5)
 
-    # 셀마다 원래 스케일 수치를 표시한다
     for r in range(len(VOLATILITY_LABELS)):
         for c in range(len(CLUSTER_FEATURE_COLS)):
             ax.text(
@@ -159,22 +152,11 @@ def save_cluster_visualization(
     horizon: int = 15,
     window_days: int = 15,
 ) -> None:
-    """학습에 사용한 15일 창 벡터와 7개 중심점을 PCA 2D로 투영해 PNG로 저장한다.
-
-    Parameters
-    ----------
-    vectors   : build_event_dataset 반환값 — (N, 13) 원래 스케일
-    labels    : 각 벡터의 실제 수익률 레이블
-    counts    : fit_news_centroids 반환 counts — 각 클러스터 샘플 수
-    centroids : fit_news_centroids 반환값 — 스케일된 공간의 중심점 (7, 13)
-    scaler    : fit된 StandardScaler
-    output_path : PNG 저장 경로
-    """
+    """학습에 사용한 15일 창 벡터와 7개 중심점을 PCA 2D로 투영해 PNG로 저장한다."""
     vectors_scaled = scaler.transform(vectors)
 
-    all_points = np.vstack([vectors_scaled, centroids])
     pca = PCA(n_components=2, random_state=42)
-    pca.fit(all_points)
+    pca.fit(np.vstack([vectors_scaled, centroids]))
 
     pts_2d = pca.transform(vectors_scaled)
     cen_2d = pca.transform(centroids)
@@ -189,11 +171,8 @@ def save_cluster_visualization(
     )
 
     gs = fig.add_gridspec(1, 2, width_ratios=[3, 2], wspace=0.38)
-    ax_scatter = fig.add_subplot(gs[0])
-    ax_heat = fig.add_subplot(gs[1])
-
-    _plot_scatter(ax_scatter, pts_2d, labels, cen_2d, pca)
-    _plot_heatmap(ax_heat, centroids, counts, scaler)
+    _plot_scatter(fig.add_subplot(gs[0]), pts_2d, labels, cen_2d, pca)
+    _plot_heatmap(fig.add_subplot(gs[1]), centroids, counts, scaler)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(output_path, dpi=150, bbox_inches="tight")
@@ -202,12 +181,7 @@ def save_cluster_visualization(
 
 
 def main() -> None:
-    """단독 실행 모드.
-
-    cluster_model.json 과 daily_news_features.csv 를 읽어
-    개별 뉴스 날짜 벡터를 클러스터 공간에 투영한다.
-    (15일 창 평균이 아닌 1일 단위 행이므로 파이프라인 버전과 미세하게 다르다.)
-    """
+    """단독 실행 모드 — cluster_model.json 과 daily_news_features.csv 로 시각화를 재생성한다."""
     from shared.common.utils import crawler_data_path, training_data_path
 
     model_path = training_data_path("comparison", "qqq_volatility_cluster_model.json")
@@ -220,10 +194,6 @@ def main() -> None:
     centroids, scaler = load_cluster_model(model_dict)
 
     news_df = pd.read_csv(news_path, encoding="utf-8-sig")
-    missing = [c for c in CLUSTER_FEATURE_COLS if c not in news_df.columns]
-    if missing:
-        raise ValueError(f"daily_news_features missing columns: {missing}")
-
     X_raw = news_df[CLUSTER_FEATURE_COLS].dropna().to_numpy(dtype=float)
     X_scaled = scaler.transform(X_raw)
 

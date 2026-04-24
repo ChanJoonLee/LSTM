@@ -111,8 +111,7 @@ def build_event_dataset(
 
     news = daily_news_df.copy()
     news["date"] = pd.to_datetime(news["date"], errors="coerce").dt.tz_localize(None)
-    news = news.sort_values("date")
-    news_indexed = news.set_index("date").sort_index()
+    news_indexed = news.sort_values("date").set_index("date").sort_index()
 
     vectors: list[np.ndarray] = []
     labels: list[str] = []
@@ -151,7 +150,6 @@ def fit_news_centroids(
     centroids = np.zeros((len(VOLATILITY_LABELS), n_features))
     counts = np.zeros(len(VOLATILITY_LABELS), dtype=int)
 
-    label_index = {label: i for i, label in enumerate(VOLATILITY_LABELS)}
     for i, label in enumerate(VOLATILITY_LABELS):
         idx = [j for j, l in enumerate(labels) if l == label]
         counts[i] = len(idx)

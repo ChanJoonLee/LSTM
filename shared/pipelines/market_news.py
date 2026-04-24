@@ -23,6 +23,14 @@ from shared.config.schema import MarketNewsTrainingConfig
 from shared.market.data import build_market_feature_frame, download_market_data
 from shared.news.features import build_daily_news_feature_table, load_news_source_table
 from shared.news.merge import merge_news_features_into_market_frame
+from shared.cluster import (
+    CLUSTER_FEATURE_COLS,
+    VOLATILITY_LABELS,
+    build_cluster_summary,
+    build_event_dataset,
+    fit_news_centroids,
+    save_cluster_visualization,
+)
 from shared.training.xgboost_pipeline import (
     build_comparison_artifacts,
     run_aligned_horizon_comparison_suite,
@@ -235,6 +243,42 @@ def run_market_news_training_pipeline(
     )
     comparison_df.to_csv(config.comparison_output_path, index=False, encoding="utf-8-sig")
     comparison_payload["aligned_shared_period_comparison"] = aligned_comparison_payload
+
+    # 7) 뉴스 클러스터 모델을 학습하고 저장한다.
+    vectors, labels, cluster_dates = build_event_dataset(
+        market_feature_df,
+        daily_news_features,
+        horizon=config.cluster_horizon,
+        window_days=config.cluster_window_days,
+    )
+    centroids, counts, scaler = fit_news_centroids(vectors, labels)
+    cluster_summary = build_cluster_summary(labels, cluster_dates, centroids, counts, scaler)
+
+    cluster_model_payload: dict = {
+        "centroids": centroids.tolist(),
+        "scaler_mean": scaler.mean_.tolist(),
+        "scaler_scale": scaler.scale_.tolist(),
+        "feature_columns": CLUSTER_FEATURE_COLS,
+        "labels": VOLATILITY_LABELS,
+        "horizon": config.cluster_horizon,
+        "window_days": config.cluster_window_days,
+    }
+    write_json(cluster_model_payload, config.cluster_model_output_path)
+
+    cluster_report_payload: dict = {"clusters": cluster_summary}
+    write_json(cluster_report_payload, config.cluster_report_output_path)
+    comparison_payload["volatility_cluster_report"] = cluster_report_payload
+
+    save_cluster_visualization(
+        vectors=vectors,
+        labels=labels,
+        counts=counts,
+        centroids=centroids,
+        scaler=scaler,
+        output_path=config.cluster_visualization_output_path,
+        horizon=config.cluster_horizon,
+        window_days=config.cluster_window_days,
+    )
 
     write_json(comparison_payload, config.comparison_metadata_output_path)
     return comparison_payload
