@@ -20,23 +20,23 @@
       "hyg_ret",
       "target_spy_rel_ret"
     ],
-    "feature_frame_start_date": "2015-02-02",
+    "feature_frame_start_date": "2019-01-31",
     "feature_frame_end_date": "2025-12-09",
-    "train_rows": 2184,
-    "test_rows": 547,
-    "train_start_date": "2015-02-02",
-    "train_end_date": "2023-10-04",
-    "test_start_date": "2023-10-05",
+    "train_rows": 1380,
+    "test_rows": 345,
+    "train_start_date": "2019-01-31",
+    "train_end_date": "2024-07-25",
+    "test_start_date": "2024-07-26",
     "test_end_date": "2025-12-09",
     "metrics": {
-      "mae": 15.609118482223154,
-      "rmse": 20.54094966323648,
-      "r2_score": 0.9096712895930689,
-      "direction_accuracy": 0.7221206581352834,
-      "mape": 3.262468733492789,
-      "baseline_mae": 17.13020171282278,
-      "baseline_rmse": 21.596423713197996,
-      "baseline_mape": 3.555569752913789
+      "mae": 15.992252462257982,
+      "rmse": 22.27337713955099,
+      "r2_score": 0.8212313644444547,
+      "direction_accuracy": 0.6695652173913044,
+      "mape": 3.1498888183986233,
+      "baseline_mae": 17.909430816208108,
+      "baseline_rmse": 22.813982230158864,
+      "baseline_mape": 3.4731197656608543
     },
     "config": {
       "target_ticker": "QQQ",
@@ -47,7 +47,7 @@
         "HYG",
         "UUP"
       ],
-      "start_date": "2015-01-01",
+      "start_date": "2019-01-01",
       "end_date": "2026-01-01",
       "news_input_path": "C:\\Users\\admin\\data-ml\\data\\crawler\\features\\merged_finbert.csv",
       "market_only_training_frame_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\market_only\\qqq_market_only_training_frame.csv",
@@ -65,6 +65,7 @@
       "aligned_comparison_metadata_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\comparison\\qqq_market_model_comparison_aligned.json",
       "cluster_model_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\comparison\\qqq_volatility_cluster_model.json",
       "cluster_report_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\comparison\\qqq_volatility_cluster_report.json",
+      "cluster_visualization_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\comparison\\qqq_cluster_visualization.png",
       "cluster_horizon": 15,
       "cluster_window_days": 15,
       "horizon_candidates": [
@@ -111,23 +112,23 @@
       "days_since_news",
       "body_sentiment_decay_3d"
     ],
-    "feature_frame_start_date": "2015-01-08",
+    "feature_frame_start_date": "2019-01-08",
     "feature_frame_end_date": "2025-12-09",
-    "train_rows": 2197,
-    "test_rows": 550,
-    "train_start_date": "2015-01-08",
-    "train_end_date": "2023-09-29",
-    "test_start_date": "2023-10-02",
+    "train_rows": 1392,
+    "test_rows": 349,
+    "train_start_date": "2019-01-08",
+    "train_end_date": "2024-07-19",
+    "test_start_date": "2024-07-22",
     "test_end_date": "2025-12-09",
     "metrics": {
-      "mae": 15.4618027514208,
-      "rmse": 20.403944977494174,
-      "r2_score": 0.9124875450391319,
-      "direction_accuracy": 0.72,
-      "mape": 3.237555594186297,
-      "baseline_mae": 17.071179476651277,
-      "baseline_rmse": 21.543078836267725,
-      "baseline_mape": 3.5460482832163067
+      "mae": 16.024361469162233,
+      "rmse": 21.9923315068953,
+      "r2_score": 0.8275420267454489,
+      "direction_accuracy": 0.6790830945558739,
+      "mape": 3.1534374590630647,
+      "baseline_mae": 17.890895723271846,
+      "baseline_rmse": 22.778380119206368,
+      "baseline_mape": 3.4742847496956144
     },
     "config": {
       "target_ticker": "QQQ",
@@ -138,7 +139,7 @@
         "HYG",
         "UUP"
       ],
-      "start_date": "2015-01-01",
+      "start_date": "2019-01-01",
       "end_date": "2026-01-01",
       "news_input_path": "C:\\Users\\admin\\data-ml\\data\\crawler\\features\\merged_finbert.csv",
       "market_only_training_frame_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\market_only\\qqq_market_only_training_frame.csv",
@@ -156,6 +157,7 @@
       "aligned_comparison_metadata_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\comparison\\qqq_market_model_comparison_aligned.json",
       "cluster_model_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\comparison\\qqq_volatility_cluster_model.json",
       "cluster_report_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\comparison\\qqq_volatility_cluster_report.json",
+      "cluster_visualization_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\comparison\\qqq_cluster_visualization.png",
       "cluster_horizon": 15,
       "cluster_window_days": 15,
       "horizon_candidates": [
@@ -176,11 +178,11 @@
     "feature_selection_mode": "fixed_regression_style"
   },
   "delta_market_news_minus_market_only": {
-    "direction_accuracy": -0.002120658135283393,
-    "rmse": -0.13700468574230484,
-    "mae": -0.1473157308023545,
-    "r2_score": 0.0028162554460630096,
-    "mape": -0.02491313930649186
+    "direction_accuracy": 0.009517877164569533,
+    "rmse": -0.28104563265569027,
+    "mae": 0.03210900690425156,
+    "r2_score": 0.0063106623009941964,
+    "mape": 0.0035486406644413826
   },
   "aligned_shared_period_comparison": {
     "comparison_mode": "shared_horizon_shared_period",
@@ -217,14 +219,14 @@
           "test_start_date": "2024-08-16",
           "test_end_date": "2025-12-23",
           "metrics": {
-            "mae": 10.576643358871104,
-            "rmse": 13.948560392031396,
-            "r2_score": 0.9296834949281474,
-            "direction_accuracy": 0.5911764705882353,
-            "mape": 2.043788743267352,
-            "baseline_mae": 10.99822369743796,
-            "baseline_rmse": 14.10014297414198,
-            "baseline_mape": 2.1203443454268993
+            "mae": 10.570471849148399,
+            "rmse": 13.981457544915687,
+            "r2_score": 0.9293514283339295,
+            "direction_accuracy": 0.6,
+            "mape": 2.042125407561417,
+            "baseline_mae": 10.998223248650046,
+            "baseline_rmse": 14.100144017022558,
+            "baseline_mape": 2.1203442822526735
           },
           "config": {
             "target_ticker": "QQQ",
@@ -235,7 +237,7 @@
               "HYG",
               "UUP"
             ],
-            "start_date": "2015-01-01",
+            "start_date": "2019-01-01",
             "end_date": "2026-01-01",
             "news_input_path": "C:\\Users\\admin\\data-ml\\data\\crawler\\features\\merged_finbert.csv",
             "market_only_training_frame_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\market_only\\qqq_market_only_training_frame.csv",
@@ -253,6 +255,7 @@
             "aligned_comparison_metadata_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\comparison\\qqq_market_model_comparison_aligned.json",
             "cluster_model_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\comparison\\qqq_volatility_cluster_model.json",
             "cluster_report_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\comparison\\qqq_volatility_cluster_report.json",
+            "cluster_visualization_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\comparison\\qqq_cluster_visualization.png",
             "cluster_horizon": 15,
             "cluster_window_days": 15,
             "horizon_candidates": [
@@ -308,14 +311,14 @@
           "test_start_date": "2024-08-16",
           "test_end_date": "2025-12-23",
           "metrics": {
-            "mae": 10.689249389227552,
-            "rmse": 14.113738047672392,
-            "r2_score": 0.9280082703365984,
-            "direction_accuracy": 0.5852941176470589,
-            "mape": 2.0626242266414305,
-            "baseline_mae": 10.99822369743796,
-            "baseline_rmse": 14.10014297414198,
-            "baseline_mape": 2.1203443454268993
+            "mae": 10.561383861404797,
+            "rmse": 14.00675009857629,
+            "r2_score": 0.9290955896238604,
+            "direction_accuracy": 0.5970588235294118,
+            "mape": 2.0404246718900443,
+            "baseline_mae": 10.998223248650046,
+            "baseline_rmse": 14.100144017022558,
+            "baseline_mape": 2.1203442822526735
           },
           "config": {
             "target_ticker": "QQQ",
@@ -326,7 +329,7 @@
               "HYG",
               "UUP"
             ],
-            "start_date": "2015-01-01",
+            "start_date": "2019-01-01",
             "end_date": "2026-01-01",
             "news_input_path": "C:\\Users\\admin\\data-ml\\data\\crawler\\features\\merged_finbert.csv",
             "market_only_training_frame_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\market_only\\qqq_market_only_training_frame.csv",
@@ -344,6 +347,7 @@
             "aligned_comparison_metadata_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\comparison\\qqq_market_model_comparison_aligned.json",
             "cluster_model_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\comparison\\qqq_volatility_cluster_model.json",
             "cluster_report_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\comparison\\qqq_volatility_cluster_report.json",
+            "cluster_visualization_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\comparison\\qqq_cluster_visualization.png",
             "cluster_horizon": 15,
             "cluster_window_days": 15,
             "horizon_candidates": [
@@ -364,11 +368,11 @@
           "feature_selection_mode": "fixed_regression_style"
         },
         "delta_market_news_minus_market_only": {
-          "direction_accuracy": -0.00588235294117645,
-          "rmse": 0.16517765564099562,
-          "mae": 0.11260603035644756,
-          "r2_score": -0.0016752245915490072,
-          "mape": 0.0188354833740787
+          "direction_accuracy": -0.002941176470588225,
+          "rmse": 0.0252925536606039,
+          "mae": -0.009087987743601644,
+          "r2_score": -0.00025583871006906733,
+          "mape": -0.001700735671372744
         },
         "comparison_scope": "aligned_shared_period",
         "shared_horizon": 5,
@@ -406,14 +410,14 @@
           "test_start_date": "2024-08-12",
           "test_end_date": "2025-12-16",
           "metrics": {
-            "mae": 14.103639285000748,
-            "rmse": 18.53784532028261,
-            "r2_score": 0.875738676222167,
-            "direction_accuracy": 0.6224188790560472,
-            "mape": 2.746844437147166,
-            "baseline_mae": 14.590028205804066,
-            "baseline_rmse": 18.631516051570507,
-            "baseline_mape": 2.818004158138784
+            "mae": 13.991057304927638,
+            "rmse": 18.51877630616373,
+            "r2_score": 0.8759941930598485,
+            "direction_accuracy": 0.616519174041298,
+            "mape": 2.7277210041739397,
+            "baseline_mae": 14.590034147279452,
+            "baseline_rmse": 18.631521469975947,
+            "baseline_mape": 2.8180052244831644
           },
           "config": {
             "target_ticker": "QQQ",
@@ -424,7 +428,7 @@
               "HYG",
               "UUP"
             ],
-            "start_date": "2015-01-01",
+            "start_date": "2019-01-01",
             "end_date": "2026-01-01",
             "news_input_path": "C:\\Users\\admin\\data-ml\\data\\crawler\\features\\merged_finbert.csv",
             "market_only_training_frame_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\market_only\\qqq_market_only_training_frame.csv",
@@ -442,6 +446,7 @@
             "aligned_comparison_metadata_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\comparison\\qqq_market_model_comparison_aligned.json",
             "cluster_model_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\comparison\\qqq_volatility_cluster_model.json",
             "cluster_report_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\comparison\\qqq_volatility_cluster_report.json",
+            "cluster_visualization_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\comparison\\qqq_cluster_visualization.png",
             "cluster_horizon": 15,
             "cluster_window_days": 15,
             "horizon_candidates": [
@@ -497,14 +502,14 @@
           "test_start_date": "2024-08-12",
           "test_end_date": "2025-12-16",
           "metrics": {
-            "mae": 14.06512357470443,
-            "rmse": 18.6053199789946,
-            "r2_score": 0.8748324490593244,
-            "direction_accuracy": 0.6283185840707964,
-            "mape": 2.742408315261981,
-            "baseline_mae": 14.590028205804066,
-            "baseline_rmse": 18.631516051570507,
-            "baseline_mape": 2.818004158138784
+            "mae": 14.195413777916922,
+            "rmse": 18.74864006785745,
+            "r2_score": 0.8728966507550205,
+            "direction_accuracy": 0.6224188790560472,
+            "mape": 2.7658815786403315,
+            "baseline_mae": 14.590034147279452,
+            "baseline_rmse": 18.631521469975947,
+            "baseline_mape": 2.8180052244831644
           },
           "config": {
             "target_ticker": "QQQ",
@@ -515,7 +520,7 @@
               "HYG",
               "UUP"
             ],
-            "start_date": "2015-01-01",
+            "start_date": "2019-01-01",
             "end_date": "2026-01-01",
             "news_input_path": "C:\\Users\\admin\\data-ml\\data\\crawler\\features\\merged_finbert.csv",
             "market_only_training_frame_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\market_only\\qqq_market_only_training_frame.csv",
@@ -533,6 +538,7 @@
             "aligned_comparison_metadata_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\comparison\\qqq_market_model_comparison_aligned.json",
             "cluster_model_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\comparison\\qqq_volatility_cluster_model.json",
             "cluster_report_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\comparison\\qqq_volatility_cluster_report.json",
+            "cluster_visualization_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\comparison\\qqq_cluster_visualization.png",
             "cluster_horizon": 15,
             "cluster_window_days": 15,
             "horizon_candidates": [
@@ -554,10 +560,10 @@
         },
         "delta_market_news_minus_market_only": {
           "direction_accuracy": 0.005899705014749235,
-          "rmse": 0.06747465871199054,
-          "mae": -0.03851571029631806,
-          "r2_score": -0.0009062271628424989,
-          "mape": -0.004436121885184718
+          "rmse": 0.22986376169372136,
+          "mae": 0.20435647298928394,
+          "r2_score": -0.0030975423048279493,
+          "mape": 0.03816057446639176
         },
         "comparison_scope": "aligned_shared_period",
         "shared_horizon": 10,
@@ -595,14 +601,14 @@
           "test_start_date": "2024-08-06",
           "test_end_date": "2025-12-09",
           "metrics": {
-            "mae": 16.051745947198363,
-            "rmse": 22.04857886273817,
-            "r2_score": 0.8240199838690442,
-            "direction_accuracy": 0.6804733727810651,
-            "mape": 3.1489721463773663,
-            "baseline_mae": 17.84067061384754,
-            "baseline_rmse": 22.802054054143888,
-            "baseline_mape": 3.4522438023273003
+            "mae": 15.936798236427702,
+            "rmse": 21.81247930858352,
+            "r2_score": 0.8277686535414602,
+            "direction_accuracy": 0.6775147928994083,
+            "mape": 3.1284129330724553,
+            "baseline_mae": 17.840672509910085,
+            "baseline_rmse": 22.802055340423987,
+            "baseline_mape": 3.4522441830765276
           },
           "config": {
             "target_ticker": "QQQ",
@@ -613,7 +619,7 @@
               "HYG",
               "UUP"
             ],
-            "start_date": "2015-01-01",
+            "start_date": "2019-01-01",
             "end_date": "2026-01-01",
             "news_input_path": "C:\\Users\\admin\\data-ml\\data\\crawler\\features\\merged_finbert.csv",
             "market_only_training_frame_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\market_only\\qqq_market_only_training_frame.csv",
@@ -631,6 +637,7 @@
             "aligned_comparison_metadata_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\comparison\\qqq_market_model_comparison_aligned.json",
             "cluster_model_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\comparison\\qqq_volatility_cluster_model.json",
             "cluster_report_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\comparison\\qqq_volatility_cluster_report.json",
+            "cluster_visualization_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\comparison\\qqq_cluster_visualization.png",
             "cluster_horizon": 15,
             "cluster_window_days": 15,
             "horizon_candidates": [
@@ -686,14 +693,14 @@
           "test_start_date": "2024-08-06",
           "test_end_date": "2025-12-09",
           "metrics": {
-            "mae": 16.107743296439196,
-            "rmse": 22.000588833493445,
-            "r2_score": 0.8247852118995714,
-            "direction_accuracy": 0.6775147928994083,
-            "mape": 3.157042740553715,
-            "baseline_mae": 17.84067061384754,
-            "baseline_rmse": 22.802054054143888,
-            "baseline_mape": 3.4522438023273003
+            "mae": 16.186616244303522,
+            "rmse": 22.107959325710155,
+            "r2_score": 0.8230708276575389,
+            "direction_accuracy": 0.6715976331360947,
+            "mape": 3.1726149154667462,
+            "baseline_mae": 17.840672509910085,
+            "baseline_rmse": 22.802055340423987,
+            "baseline_mape": 3.4522441830765276
           },
           "config": {
             "target_ticker": "QQQ",
@@ -704,7 +711,7 @@
               "HYG",
               "UUP"
             ],
-            "start_date": "2015-01-01",
+            "start_date": "2019-01-01",
             "end_date": "2026-01-01",
             "news_input_path": "C:\\Users\\admin\\data-ml\\data\\crawler\\features\\merged_finbert.csv",
             "market_only_training_frame_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\market_only\\qqq_market_only_training_frame.csv",
@@ -722,6 +729,7 @@
             "aligned_comparison_metadata_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\comparison\\qqq_market_model_comparison_aligned.json",
             "cluster_model_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\comparison\\qqq_volatility_cluster_model.json",
             "cluster_report_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\comparison\\qqq_volatility_cluster_report.json",
+            "cluster_visualization_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\comparison\\qqq_cluster_visualization.png",
             "cluster_horizon": 15,
             "cluster_window_days": 15,
             "horizon_candidates": [
@@ -742,11 +750,11 @@
           "feature_selection_mode": "fixed_regression_style"
         },
         "delta_market_news_minus_market_only": {
-          "direction_accuracy": -0.00295857988165682,
-          "rmse": -0.04799002924472617,
-          "mae": 0.055997349240833216,
-          "r2_score": 0.0007652280305272541,
-          "mape": 0.008070594176348589
+          "direction_accuracy": -0.00591715976331364,
+          "rmse": 0.29548001712663563,
+          "mae": 0.2498180078758203,
+          "r2_score": -0.004697825883921314,
+          "mape": 0.04420198239429096
         },
         "comparison_scope": "aligned_shared_period",
         "shared_horizon": 15,
@@ -784,14 +792,14 @@
           "test_start_date": "2024-07-31",
           "test_end_date": "2025-12-02",
           "metrics": {
-            "mae": 17.64433162215584,
-            "rmse": 24.39975507499423,
-            "r2_score": 0.7842795977731397,
-            "direction_accuracy": 0.7477744807121661,
-            "mape": 3.4565673692760854,
-            "baseline_mae": 20.490815839003385,
-            "baseline_rmse": 25.852747499705675,
-            "baseline_mape": 3.949314144729504
+            "mae": 17.729985119104196,
+            "rmse": 24.521238308645117,
+            "r2_score": 0.7821261685552692,
+            "direction_accuracy": 0.7418397626112759,
+            "mape": 3.474856374827817,
+            "baseline_mae": 20.490820819617024,
+            "baseline_rmse": 25.852752803842108,
+            "baseline_mape": 3.949315148748366
           },
           "config": {
             "target_ticker": "QQQ",
@@ -802,7 +810,7 @@
               "HYG",
               "UUP"
             ],
-            "start_date": "2015-01-01",
+            "start_date": "2019-01-01",
             "end_date": "2026-01-01",
             "news_input_path": "C:\\Users\\admin\\data-ml\\data\\crawler\\features\\merged_finbert.csv",
             "market_only_training_frame_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\market_only\\qqq_market_only_training_frame.csv",
@@ -820,6 +828,7 @@
             "aligned_comparison_metadata_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\comparison\\qqq_market_model_comparison_aligned.json",
             "cluster_model_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\comparison\\qqq_volatility_cluster_model.json",
             "cluster_report_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\comparison\\qqq_volatility_cluster_report.json",
+            "cluster_visualization_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\comparison\\qqq_cluster_visualization.png",
             "cluster_horizon": 15,
             "cluster_window_days": 15,
             "horizon_candidates": [
@@ -875,14 +884,14 @@
           "test_start_date": "2024-07-31",
           "test_end_date": "2025-12-02",
           "metrics": {
-            "mae": 17.53774907540536,
-            "rmse": 24.165808163167146,
-            "r2_score": 0.7883964571638713,
-            "direction_accuracy": 0.744807121661721,
-            "mape": 3.4358739925194106,
-            "baseline_mae": 20.490815839003385,
-            "baseline_rmse": 25.852747499705675,
-            "baseline_mape": 3.949314144729504
+            "mae": 17.50456258419458,
+            "rmse": 24.06705328180512,
+            "r2_score": 0.7901223882280659,
+            "direction_accuracy": 0.7626112759643917,
+            "mape": 3.426402661305267,
+            "baseline_mae": 20.490820819617024,
+            "baseline_rmse": 25.852752803842108,
+            "baseline_mape": 3.949315148748366
           },
           "config": {
             "target_ticker": "QQQ",
@@ -893,7 +902,7 @@
               "HYG",
               "UUP"
             ],
-            "start_date": "2015-01-01",
+            "start_date": "2019-01-01",
             "end_date": "2026-01-01",
             "news_input_path": "C:\\Users\\admin\\data-ml\\data\\crawler\\features\\merged_finbert.csv",
             "market_only_training_frame_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\market_only\\qqq_market_only_training_frame.csv",
@@ -911,6 +920,7 @@
             "aligned_comparison_metadata_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\comparison\\qqq_market_model_comparison_aligned.json",
             "cluster_model_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\comparison\\qqq_volatility_cluster_model.json",
             "cluster_report_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\comparison\\qqq_volatility_cluster_report.json",
+            "cluster_visualization_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\comparison\\qqq_cluster_visualization.png",
             "cluster_horizon": 15,
             "cluster_window_days": 15,
             "horizon_candidates": [
@@ -931,11 +941,11 @@
           "feature_selection_mode": "fixed_regression_style"
         },
         "delta_market_news_minus_market_only": {
-          "direction_accuracy": -0.0029673590504450953,
-          "rmse": -0.23394691182708272,
-          "mae": -0.10658254675047729,
-          "r2_score": 0.0041168593907315865,
-          "mape": -0.02069337675667482
+          "direction_accuracy": 0.020771513353115778,
+          "rmse": -0.4541850268399976,
+          "mae": -0.22542253490961528,
+          "r2_score": 0.007996219672796734,
+          "mape": -0.048453713522550235
         },
         "comparison_scope": "aligned_shared_period",
         "shared_horizon": 20,
@@ -945,12 +955,12 @@
     ],
     "skipped_horizons": [],
     "summary": {
-      "best_shared_horizon_by_direction_accuracy_delta": 10,
-      "direction_accuracy_delta": 0.005899705014749235,
-      "rmse_delta": 0.06747465871199054,
-      "mae_delta": -0.03851571029631806,
-      "r2_score_delta": -0.0009062271628424989,
-      "mape_delta": -0.004436121885184718
+      "best_shared_horizon_by_direction_accuracy_delta": 20,
+      "direction_accuracy_delta": 0.020771513353115778,
+      "rmse_delta": -0.4541850268399976,
+      "mae_delta": -0.22542253490961528,
+      "r2_score_delta": 0.007996219672796734,
+      "mape_delta": -0.048453713522550235
     }
   },
   "volatility_cluster_report": {
