@@ -69,7 +69,7 @@ class MarketNewsTrainingConfig:
     """
     target_ticker: str = "QQQ"
     macro_tickers: tuple[str, ...] = ("SPY", "^VIX", "TLT", "HYG", "UUP")
-    start_date: str = "2015-01-01"
+    start_date: str = "2019-01-01"
     end_date: str = "2026-01-01"
     news_input_path: Path = field(
         default_factory=lambda: crawler_data_path("features", "merged_finbert.csv")
