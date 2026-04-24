@@ -170,19 +170,6 @@ def main() -> None:
         f"{config.aligned_comparison_metadata_output_path}"
     )
 
-    cluster_report = result.get("volatility_cluster_report", {})
-    clusters = cluster_report.get("clusters", [])
-    if clusters:
-        print("--- Volatility cluster centroids (15-day forward return labels) ---")
-        for cluster in clusters:
-            label = cluster["label"]
-            count = cluster["count"]
-            dr = cluster.get("date_range", {})
-            date_str = f"{dr.get('first', '?')} ~ {dr.get('last', '?')}" if dr else "N/A"
-            print(f"  [{label:8s}]  n={count:4d}  ({date_str})")
-        print(f"Cluster model saved to:         {config.cluster_model_output_path}")
-        print(f"Cluster report saved to:        {config.cluster_report_output_path}")
-        print(f"Cluster visualization saved to: {config.cluster_visualization_output_path}")
 
 
 if __name__ == "__main__":
