@@ -161,6 +161,12 @@ class MarketNewsTrainingConfig:
             "qqq_volatility_cluster_report.json",
         )
     )
+    cluster_visualization_output_path: Path = field(
+        default_factory=lambda: training_data_path(
+            "comparison",
+            "qqq_cluster_visualization.png",
+        )
+    )
     cluster_horizon: int = 15
     cluster_window_days: int = 15
     horizon_candidates: tuple[int, ...] = (5, 10, 15, 20)

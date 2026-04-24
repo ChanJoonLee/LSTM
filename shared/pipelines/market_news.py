@@ -23,6 +23,7 @@ from shared.config.schema import MarketNewsTrainingConfig
 from shared.market.data import build_market_feature_frame, download_market_data
 from shared.news.features import build_daily_news_feature_table, load_news_source_table
 from shared.news.merge import merge_news_features_into_market_frame
+from shared.news.visualize_clusters import save_cluster_visualization
 from shared.news.volatility_cluster import (
     CLUSTER_FEATURE_COLS,
     VOLATILITY_LABELS,
@@ -268,6 +269,17 @@ def run_market_news_training_pipeline(
     cluster_report_payload: dict = {"clusters": cluster_summary}
     write_json(cluster_report_payload, config.cluster_report_output_path)
     comparison_payload["volatility_cluster_report"] = cluster_report_payload
+
+    save_cluster_visualization(
+        vectors=vectors,
+        labels=labels,
+        counts=counts,
+        centroids=centroids,
+        scaler=scaler,
+        output_path=config.cluster_visualization_output_path,
+        horizon=config.cluster_horizon,
+        window_days=config.cluster_window_days,
+    )
 
     write_json(comparison_payload, config.comparison_metadata_output_path)
     return comparison_payload
