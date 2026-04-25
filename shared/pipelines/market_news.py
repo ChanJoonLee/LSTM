@@ -54,11 +54,15 @@ __all__ = [
 
 REGRESSION_STYLE_MARKET_FEATURE_COLUMNS = [
     "ret_5",
+    "ret_10",
     "ret_accel",
     "dist_to_ma5",
     "bb_pos",
+    "bb_width",
     "rsi_14",
+    "macd_hist",
     "vol_shock",
+    "vol_20",
     "vix_z_score_5",
     "drawdown",
     "vol_ratio",
@@ -76,6 +80,8 @@ REGRESSION_STYLE_NEWS_FEATURE_COLUMNS = [
     "body_sentiment_score",
     "days_since_news",
     "body_sentiment_decay_3d",
+    "body_sentiment_decay_7d",
+    "body_sentiment_decay_15d",
 ]
 
 
@@ -245,7 +251,7 @@ def run_market_news_training_pipeline(
     comparison_payload["aligned_shared_period_comparison"] = aligned_comparison_payload
 
     # 7) 뉴스 클러스터 모델을 학습하고 저장한다.
-    vectors, labels, cluster_dates = build_event_dataset(
+    vectors, labels, cluster_dates, quantile_thresholds = build_event_dataset(
         market_feature_df,
         daily_news_features,
         horizon=config.cluster_horizon,
@@ -260,6 +266,7 @@ def run_market_news_training_pipeline(
         "scaler_scale": scaler.scale_.tolist(),
         "feature_columns": CLUSTER_FEATURE_COLS,
         "labels": VOLATILITY_LABELS,
+        "quantile_thresholds": list(quantile_thresholds),
         "horizon": config.cluster_horizon,
         "window_days": config.cluster_window_days,
     }

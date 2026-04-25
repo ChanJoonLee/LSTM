@@ -167,15 +167,15 @@ class MarketNewsTrainingConfig:
             "qqq_cluster_visualization.png",
         )
     )
-    cluster_horizon: int = 15
-    cluster_window_days: int = 15
-    horizon_candidates: tuple[int, ...] = (5, 10, 15, 20)
+    cluster_horizon: int = 7
+    cluster_window_days: int = 7
+    horizon_candidates: tuple[int, ...] = (5, 7, 10, 15)
     top_feature_count: int = 25
     optuna_trials: int = 50
     train_ratio: float = 0.8
     random_seed: int = 42
     aligned_comparison_start_date: str | None = None
-    regression_style_fixed_horizon: int = 15
+    regression_style_fixed_horizon: int = 7
 
 
 @dataclass(frozen=True)
@@ -211,5 +211,5 @@ class VolatilityClusterConfig:
             "qqq_cluster_visualization.png",
         )
     )
-    cluster_horizon: int = 15
-    cluster_window_days: int = 15
+    cluster_horizon: int = 7
+    cluster_window_days: int = 7

@@ -36,13 +36,11 @@ from shared.cluster.model import (
 
 
 _LABEL_COLORS: dict[str, str] = {
-    "rise_3+": "#1a6e1a",
-    "rise_2+": "#43a047",
-    "rise_1+": "#a5d6a7",
-    "flat":    "#9e9e9e",
-    "fall_1+": "#ffab91",
-    "fall_2+": "#e53935",
-    "fall_3+": "#7f0000",
+    "rise_strong": "#1a6e1a",
+    "rise":        "#43a047",
+    "flat":        "#9e9e9e",
+    "fall":        "#e53935",
+    "fall_strong": "#7f0000",
 }
 
 
@@ -152,7 +150,7 @@ def save_cluster_visualization(
     horizon: int = 15,
     window_days: int = 15,
 ) -> None:
-    """학습에 사용한 15일 창 벡터와 7개 중심점을 PCA 2D로 투영해 PNG로 저장한다."""
+    """학습에 사용한 뉴스 창 벡터와 5개 중심점을 PCA 2D로 투영해 PNG로 저장한다."""
     vectors_scaled = scaler.transform(vectors)
 
     pca = PCA(n_components=2, random_state=42)
@@ -191,7 +189,7 @@ def main() -> None:
     with open(model_path, encoding="utf-8") as f:
         model_dict = json.load(f)
 
-    centroids, scaler = load_cluster_model(model_dict)
+    centroids, scaler, _thresholds = load_cluster_model(model_dict)
 
     news_df = pd.read_csv(news_path, encoding="utf-8-sig")
     X_raw = news_df[CLUSTER_FEATURE_COLS].dropna().to_numpy(dtype=float)

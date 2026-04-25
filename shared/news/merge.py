@@ -29,6 +29,8 @@ REGRESSION_STYLE_NEWS_FEATURE_COLUMNS = [
     "body_sentiment_score",
     "days_since_news",
     "body_sentiment_decay_3d",
+    "body_sentiment_decay_7d",
+    "body_sentiment_decay_15d",
 ]
 
 
@@ -99,11 +101,11 @@ def _build_regression_style_news_features(merged: pd.DataFrame) -> list[str]:
     merged["sentiment_shock"] = (
         merged["sentiment_gap"] - merged["sentiment_gap"].rolling(5).mean()
     )
-    # 반감기 3일 감쇠: 같은 감성 점수라도 오래된 뉴스일수록 영향력을 줄인다.
-    # days_since_news는 _merge_daily_news_table에서 이미 계산되어 있다.
-    merged["body_sentiment_decay_3d"] = merged["body_sentiment_score"] * (
-        0.5 ** (merged["days_since_news"] / 3.0)
-    )
+    # 반감기 3/7/15일 감쇠 — days_since_news 는 항상 현재 날짜 이전 뉴스 기준이므로 lookahead 없음
+    for half_life in (3, 7, 15):
+        merged[f"body_sentiment_decay_{half_life}d"] = merged["body_sentiment_score"] * (
+            0.5 ** (merged["days_since_news"] / half_life)
+        )
     merged = merged.fillna(0.0)
     return REGRESSION_STYLE_NEWS_FEATURE_COLUMNS.copy()
 
