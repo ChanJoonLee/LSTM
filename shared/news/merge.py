@@ -23,14 +23,18 @@ SENTIMENT_FILL_ZERO_COLUMNS = [
 ]
 
 REGRESSION_STYLE_NEWS_FEATURE_COLUMNS = [
+    "news_count_5d",
+    "days_since_news",
     "sentiment_gap",
     "body_sentiment_gap",
     "sentiment_shock",
-    "body_sentiment_score",
-    "days_since_news",
+    "body_sentiment_5d_mean",
+    "title_sentiment_5d_mean",
+    "negative_news_spike_5d",
     "body_sentiment_decay_3d",
-    "body_sentiment_decay_7d",
-    "body_sentiment_decay_15d",
+    "fomc_sentiment",
+    "fomc_recent_5d",
+    "sentiment_divergence",
 ]
 
 
@@ -72,7 +76,7 @@ def _merge_daily_news_table(
         (merged["Date"] - last_news_date).dt.days.clip(upper=30).fillna(30).astype(float)
     )
 
-    merged = merged.ffill().fillna(0.0)
+    merged = merged.fillna(0.0)
     merged["news_count_lag1"] = merged["news_count"].shift(1).fillna(0.0)
     return merged.drop(columns=["date"], errors="ignore")
 
@@ -84,6 +88,7 @@ def _build_regression_style_news_features(merged: pd.DataFrame) -> list[str]:
     merged["body_sentiment_3d_mean"] = merged["body_sentiment_score"].rolling(3).mean()
     merged["body_sentiment_5d_mean"] = merged["body_sentiment_score"].rolling(5).mean()
     merged["title_sentiment_3d_mean"] = merged["title_sentiment_score"].rolling(3).mean()
+    merged["title_sentiment_5d_mean"] = merged["title_sentiment_score"].rolling(5).mean()
     merged["body_sentiment_trend"] = (
         merged["body_sentiment_score"] - merged["body_sentiment_score"].shift(3)
     )
@@ -94,6 +99,11 @@ def _build_regression_style_news_features(merged: pd.DataFrame) -> list[str]:
         merged["body_negative_prob"]
         / (merged["body_negative_prob"].rolling(10).mean() + 1e-9)
     )
+    merged["negative_news_spike_5d"] = (
+        merged["body_negative_prob"]
+        / (merged["body_negative_prob"].rolling(5).mean() + 1e-9)
+    )
+    merged["news_count_5d"] = merged["news_count"].rolling(5).sum()
     merged["sentiment_gap"] = merged["title_positive_prob"] - merged["title_negative_prob"]
     merged["body_sentiment_gap"] = (
         merged["body_positive_prob"] - merged["body_negative_prob"]
@@ -101,12 +111,17 @@ def _build_regression_style_news_features(merged: pd.DataFrame) -> list[str]:
     merged["sentiment_shock"] = (
         merged["sentiment_gap"] - merged["sentiment_gap"].rolling(5).mean()
     )
+    merged["fomc_sentiment"] = merged["body_sentiment_score"] * merged["category_FOMC"]
+    merged["fomc_recent_5d"] = merged["category_FOMC"].rolling(5).max()
+    merged["sentiment_divergence"] = (
+        merged["title_sentiment_score"] - merged["body_sentiment_score"]
+    ).abs()
     # 반감기 3/7/15일 감쇠 — days_since_news 는 항상 현재 날짜 이전 뉴스 기준이므로 lookahead 없음
     for half_life in (3, 7, 15):
         merged[f"body_sentiment_decay_{half_life}d"] = merged["body_sentiment_score"] * (
             0.5 ** (merged["days_since_news"] / half_life)
         )
-    merged = merged.fillna(0.0)
+    merged.fillna(0.0, inplace=True)
     return REGRESSION_STYLE_NEWS_FEATURE_COLUMNS.copy()
 
 

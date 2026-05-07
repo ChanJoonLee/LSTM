@@ -120,7 +120,7 @@ def _add_trend_and_distance_features(df: pd.DataFrame) -> list[str]:
         moving_average = price.rolling(window).mean()
         df[f"price_to_ma_{window}"] = price / moving_average - 1.0
 
-    for window in [20, 60, 120, 200]:
+    for window in [5, 20, 60, 120, 200]:
         df[f"slope_{window}"] = np.log(price / price.shift(window)) / window
 
     rolling_max = price.rolling(window=252, min_periods=1).max()
@@ -135,6 +135,7 @@ def _add_trend_and_distance_features(df: pd.DataFrame) -> list[str]:
         "price_to_ma_20",
         "price_to_ma_60",
         "price_to_ma_120",
+        "slope_5",
         "slope_20",
         "slope_60",
         "slope_120",
@@ -178,7 +179,16 @@ def _add_intraday_and_technical_features(df: pd.DataFrame) -> list[str]:
     bb_lower = bb_mid - 2 * bb_std
     df["bb_width"] = (bb_upper - bb_lower) / bb_mid
     df["bb_pos"] = (price - bb_lower) / (bb_upper - bb_lower)
-    df["ret_accel"] = df["ret_1"] - df["ret_5"]
+
+    bb_mid_5 = price.rolling(5).mean()
+    bb_std_5 = price.rolling(5).std()
+    bb_upper_5 = bb_mid_5 + 2 * bb_std_5
+    bb_lower_5 = bb_mid_5 - 2 * bb_std_5
+    df["bb_width_5"] = (bb_upper_5 - bb_lower_5) / bb_mid_5
+    df["bb_pos_5"] = (price - bb_lower_5) / (bb_upper_5 - bb_lower_5)
+
+    # 1일 vs 3일 수익률 차이 → 단기 가속/감속 (train_regression.py 기준)
+    df["ret_accel"] = (df["ret_1"] / 1.0) - (df["ret_3"] / 3.0)
     df["vol_breakout"] = df["ret_1"] / (df["vol_5"] + 1e-9)
     df["bb_high_dist"] = (high_price - bb_upper) / (bb_upper + 1e-9)
 
@@ -191,6 +201,8 @@ def _add_intraday_and_technical_features(df: pd.DataFrame) -> list[str]:
         "macd_hist",
         "bb_width",
         "bb_pos",
+        "bb_width_5",
+        "bb_pos_5",
         "ret_accel",
         "vol_breakout",
         "bb_high_dist",
@@ -227,7 +239,7 @@ def _add_macro_context_features(df: pd.DataFrame) -> list[str]:
     df["vix_ret_5"] = vix.pct_change(5)
     df["vix_to_ma_20"] = vix / vix.rolling(20).mean() - 1.0
     df["vix_z_score"] = _z_score(vix, 20)
-    df["vix_z_score_5"] = (vix - vix.rolling(5).mean()) / (vix.rolling(5).std() + 1e-9)
+    df["vix_z_score_5"] = (vix - vix.rolling(5).mean()) / vix.rolling(5).std()
     df["vix_speed"] = vix.pct_change(3)
 
     df["tlt_ret_1"] = tlt.pct_change(1)
@@ -237,7 +249,9 @@ def _add_macro_context_features(df: pd.DataFrame) -> list[str]:
     df["tlt_shock_5"] = tlt.pct_change(5)
 
     df["hyg_ret"] = hyg.pct_change(10)
+    df["hyg_ret_5"] = hyg.pct_change(5)
     df["uup_ret"] = uup.pct_change(10)
+    df["uup_ret_5"] = uup.pct_change(5)
     df["uup_shock_5"] = uup.pct_change(5)
     df["hyg_z_score"] = _z_score(hyg, 20)
     df["uup_z_score"] = _z_score(uup, 20)
@@ -257,7 +271,9 @@ def _add_macro_context_features(df: pd.DataFrame) -> list[str]:
         "tlt_to_ma_60",
         "tlt_shock_5",
         "hyg_ret",
+        "hyg_ret_5",
         "uup_ret",
+        "uup_ret_5",
         "uup_shock_5",
         "hyg_z_score",
         "uup_z_score",
@@ -284,7 +300,10 @@ def _add_relative_strength_features(df: pd.DataFrame) -> list[str]:
     df["target_tlt_ratio_20"] = df["target_tlt_ratio"] / df["target_tlt_ratio"].rolling(20).mean() - 1.0
     df["target_spy_rel_ret"] = (price / spy).pct_change(10)
     df["target_tlt_rel_ret"] = (price / tlt).pct_change(10)
+    df["target_spy_rel_ret_5"] = (price / spy).pct_change(5)
+    df["target_tlt_rel_ret_5"] = (price / tlt).pct_change(5)
     df["vol_ratio"] = price.pct_change().rolling(10).std() / (spy.pct_change().rolling(10).std() + 1e-9)
+    df["vol_ratio_5"] = price.pct_change().rolling(5).std() / (spy.pct_change().rolling(5).std() + 1e-9)
     df["rel_strength_5"] = price.pct_change(5) - spy.pct_change(5)
 
     return [
@@ -292,7 +311,10 @@ def _add_relative_strength_features(df: pd.DataFrame) -> list[str]:
         "target_tlt_ratio_20",
         "target_spy_rel_ret",
         "target_tlt_rel_ret",
+        "target_spy_rel_ret_5",
+        "target_tlt_rel_ret_5",
         "vol_ratio",
+        "vol_ratio_5",
         "rel_strength_5",
     ]
 

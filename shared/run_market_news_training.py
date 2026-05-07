@@ -102,7 +102,28 @@ def parse_args() -> argparse.Namespace:
             "training/train_regression.py."
         ),
     )
+    parser.add_argument(
+        "--market-news-only",
+        action="store_true",
+        default=False,
+        help="Skip market-only baseline and aligned comparison — run only market+news training.",
+    )
     return parser.parse_args()
+
+
+def _print_high_conf_report(metrics: dict) -> None:
+    threshold = metrics.get("high_conf_threshold")
+    long_acc = metrics.get("high_conf_long_accuracy")
+    long_n = metrics.get("high_conf_long_count", 0)
+    short_acc = metrics.get("high_conf_short_accuracy")
+    short_n = metrics.get("high_conf_short_count", 0)
+    if threshold is None:
+        return
+    print(f"  [고확신 상위 30%] 기준 문턱값(LogRet 절대값): {threshold:.4f}")
+    if long_acc is not None:
+        print(f"  상승(Long) 확신 시 정확도: {long_acc * 100:.2f}%  (n={long_n})")
+    if short_acc is not None:
+        print(f"  하락(Short) 확신 시 정확도: {short_acc * 100:.2f}%  (n={short_n})")
 
 
 def main() -> None:
@@ -127,48 +148,57 @@ def main() -> None:
         random_seed=args.random_seed,
         aligned_comparison_start_date=args.aligned_start_date,
         regression_style_fixed_horizon=args.regression_style_fixed_horizon,
+        market_news_only=args.market_news_only,
     )
 
     result = run_market_news_training_pipeline(config)
-    market_only = result["market_only"]
     market_news = result["market_news"]
-    delta = result["delta_market_news_minus_market_only"]
-    aligned = result["aligned_shared_period_comparison"]
-    aligned_summary = aligned["summary"]
 
-    print("=== Shared XGBoost Comparison Completed ===")
+    print("=== Shared XGBoost Training Completed ===")
     print(f"Target ticker: {config.target_ticker}")
-    print("--- Market only ---")
-    print(f"Best horizon: {market_only['best_horizon']} trading days")
-    print(f"Selected features: {market_only['selected_feature_count']}")
-    print(f"RMSE: {market_only['metrics']['rmse']:.4f}")
-    print(f"Direction accuracy: {market_only['metrics']['direction_accuracy'] * 100:.2f}%")
+
+    if not config.market_news_only:
+        market_only = result["market_only"]
+        delta = result["delta_market_news_minus_market_only"]
+        aligned = result["aligned_shared_period_comparison"]
+        aligned_summary = aligned["summary"]
+
+        print("--- Market only ---")
+        print(f"Best horizon: {market_only['best_horizon']} trading days")
+        print(f"Selected features: {market_only['selected_feature_count']}")
+        print(f"RMSE: {market_only['metrics']['rmse']:.4f}")
+        print(f"Direction accuracy: {market_only['metrics']['direction_accuracy'] * 100:.2f}%")
+        _print_high_conf_report(market_only["metrics"])
+
     print("--- Market + crawler news ---")
     print(f"Best horizon: {market_news['best_horizon']} trading days")
     print(f"Selected features: {market_news['selected_feature_count']}")
     print(f"RMSE: {market_news['metrics']['rmse']:.4f}")
     print(f"Direction accuracy: {market_news['metrics']['direction_accuracy'] * 100:.2f}%")
-    print("--- Delta (market+news - market_only) ---")
-    print(f"RMSE delta: {delta['rmse']:.4f}")
-    print(f"Direction accuracy delta: {delta['direction_accuracy'] * 100:.2f}%")
-    print("--- Fair aligned comparison (shared horizon + shared period) ---")
-    print(f"Aligned start date: {aligned['aligned_start_date']}")
-    print(
-        "Best shared horizon by direction accuracy delta: "
-        f"{aligned_summary['best_shared_horizon_by_direction_accuracy_delta']} trading days"
-    )
-    print(
-        "Aligned direction accuracy delta: "
-        f"{aligned_summary['direction_accuracy_delta'] * 100:.2f}%"
-    )
-    print(f"Aligned RMSE delta: {aligned_summary['rmse_delta']:.4f}")
-    print(f"Comparison CSV saved to: {config.comparison_output_path}")
-    print(f"Comparison JSON saved to: {config.comparison_metadata_output_path}")
-    print(f"Aligned comparison CSV saved to: {config.aligned_comparison_output_path}")
-    print(
-        "Aligned comparison JSON saved to: "
-        f"{config.aligned_comparison_metadata_output_path}"
-    )
+    _print_high_conf_report(market_news["metrics"])
+
+    if not config.market_news_only:
+        print("--- Delta (market+news - market_only) ---")
+        print(f"RMSE delta: {delta['rmse']:.4f}")
+        print(f"Direction accuracy delta: {delta['direction_accuracy'] * 100:.2f}%")
+        print("--- Fair aligned comparison (shared horizon + shared period) ---")
+        print(f"Aligned start date: {aligned['aligned_start_date']}")
+        print(
+            "Best shared horizon by direction accuracy delta: "
+            f"{aligned_summary['best_shared_horizon_by_direction_accuracy_delta']} trading days"
+        )
+        print(
+            "Aligned direction accuracy delta: "
+            f"{aligned_summary['direction_accuracy_delta'] * 100:.2f}%"
+        )
+        print(f"Aligned RMSE delta: {aligned_summary['rmse_delta']:.4f}")
+        print(f"Comparison CSV saved to: {config.comparison_output_path}")
+        print(f"Comparison JSON saved to: {config.comparison_metadata_output_path}")
+        print(f"Aligned comparison CSV saved to: {config.aligned_comparison_output_path}")
+        print(
+            "Aligned comparison JSON saved to: "
+            f"{config.aligned_comparison_metadata_output_path}"
+        )
 
     cluster_report = result.get("volatility_cluster_report", {})
     clusters = cluster_report.get("clusters", [])

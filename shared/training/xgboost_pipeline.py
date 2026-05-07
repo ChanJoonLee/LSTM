@@ -332,6 +332,22 @@ def evaluate_model(
         np.mean(np.abs((future_price - baseline_future_price) / future_price)) * 100
     )
 
+    conf_cutoff = float(np.quantile(np.abs(predicted_logret), 0.7))
+    high_conf_mask = np.abs(predicted_logret) >= conf_cutoff
+    long_mask = high_conf_mask & (predicted_logret > 0)
+    short_mask = high_conf_mask & (predicted_logret < 0)
+
+    long_count = int(long_mask.sum())
+    short_count = int(short_mask.sum())
+    high_conf_long_accuracy: float | None = (
+        float((future_price[long_mask] > current_price[long_mask]).mean())
+        if long_count > 0 else None
+    )
+    high_conf_short_accuracy: float | None = (
+        float((future_price[short_mask] < current_price[short_mask]).mean())
+        if short_count > 0 else None
+    )
+
     metrics = {
         "mae": mae,
         "rmse": rmse,
@@ -341,6 +357,11 @@ def evaluate_model(
         "baseline_mae": baseline_mae,
         "baseline_rmse": baseline_rmse,
         "baseline_mape": baseline_mape,
+        "high_conf_threshold": conf_cutoff,
+        "high_conf_long_accuracy": high_conf_long_accuracy,
+        "high_conf_long_count": long_count,
+        "high_conf_short_accuracy": high_conf_short_accuracy,
+        "high_conf_short_count": short_count,
     }
 
     predictions = pd.DataFrame(

@@ -10,6 +10,7 @@ CATEGORY_TO_PREFIX = {
     "FOMC": "fomc",
     "BIS": "bis",
     "UCSB": "ucsb",
+    "UCSB Presidency Project": "ucsb",
 }
 
 DOC_TYPE_TO_FEATURE = {
@@ -35,6 +36,21 @@ def _validate_required_columns(
             f"{source_name} is missing required columns: {missing_columns}. "
             f"Available columns: {list(df.columns)}"
         )
+
+
+def _normalize_category(raw_value: object) -> str:
+    text = "" if pd.isna(raw_value) else str(raw_value).strip()
+    if not text:
+        return "Unknown"
+
+    upper_text = text.upper()
+    if upper_text == "FOMC":
+        return "FOMC"
+    if upper_text == "BIS":
+        return "BIS"
+    if "UCSB" in upper_text or "PRESIDENCY PROJECT" in upper_text:
+        return "UCSB"
+    return text
 
 
 def _normalize_doc_type(raw_value: object) -> str:
@@ -105,7 +121,7 @@ def load_news_source_table(input_path) -> pd.DataFrame:
     prepared["date"] = pd.to_datetime(prepared["date"], errors="coerce")
     prepared = prepared.dropna(subset=["date"]).copy()
 
-    prepared["category"] = prepared["category"].fillna("Unknown").astype(str)
+    prepared["category"] = prepared["category"].map(_normalize_category)
     prepared["doc_type"] = prepared["doc_type"].fillna("unknown").astype(str)
     prepared["title"] = prepared["title"].fillna("").astype(str)
     prepared["body"] = prepared["body"].fillna("").astype(str)

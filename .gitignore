@@ -7,3 +7,4 @@ env/
 !data/crawler/features/*.csv
 **/__pycache__/
 *.py[cod]
+training/train_regression/.yfinance_cache/

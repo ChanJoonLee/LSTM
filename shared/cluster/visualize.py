@@ -37,8 +37,9 @@ from shared.cluster.model import (
 
 _LABEL_COLORS: dict[str, str] = {
     "rise_strong": "#1a6e1a",
+    "rise_mid":    "#2e7d32",
     "rise":        "#43a047",
-    "flat":        "#9e9e9e",
+    "neutral":     "#9e9e9e",
     "fall":        "#e53935",
     "fall_strong": "#7f0000",
 }
@@ -189,7 +190,7 @@ def main() -> None:
     with open(model_path, encoding="utf-8") as f:
         model_dict = json.load(f)
 
-    centroids, scaler, _thresholds = load_cluster_model(model_dict)
+    centroids, scaler = load_cluster_model(model_dict)
 
     news_df = pd.read_csv(news_path, encoding="utf-8-sig")
     X_raw = news_df[CLUSTER_FEATURE_COLS].dropna().to_numpy(dtype=float)

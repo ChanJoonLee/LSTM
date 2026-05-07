@@ -2,102 +2,122 @@
   "clusters": [
     {
       "label": "rise_strong",
-      "count": 297,
+      "count": 253,
       "date_range": {
-        "first": "2019-03-27",
+        "first": "2017-07-03",
+        "last": "2026-04-10"
+      },
+      "centroid_feature_means": {
+        "news_count": 1.5548,
+        "category_FOMC": 0.1482,
+        "category_UCSB": 0.6472,
+        "title_positive_prob": 0.1249,
+        "title_negative_prob": 0.1549,
+        "title_neutral_prob": 0.7202,
+        "title_sentiment_score": -0.03,
+        "body_positive_prob": 0.225,
+        "body_negative_prob": 0.14,
+        "body_neutral_prob": 0.6349
+      }
+    },
+    {
+      "label": "rise_mid",
+      "count": 361,
+      "date_range": {
+        "first": "2017-01-30",
         "last": "2025-12-17"
       },
       "centroid_feature_means": {
-        "news_count": 1.615,
-        "category_FOMC": 0.0719,
-        "category_UCSB": 0.676,
-        "title_positive_prob": 0.1932,
-        "title_negative_prob": 0.4582,
-        "title_neutral_prob": 0.1554,
-        "title_sentiment_score": 0.322,
-        "body_positive_prob": 0.1709,
-        "body_negative_prob": 0.5071,
-        "body_neutral_prob": 0.1511
+        "news_count": 1.4696,
+        "category_FOMC": 0.1703,
+        "category_UCSB": 0.641,
+        "title_positive_prob": 0.1308,
+        "title_negative_prob": 0.1564,
+        "title_neutral_prob": 0.7128,
+        "title_sentiment_score": -0.0257,
+        "body_positive_prob": 0.2152,
+        "body_negative_prob": 0.1538,
+        "body_neutral_prob": 0.631
       }
     },
     {
       "label": "rise",
-      "count": 270,
+      "count": 511,
       "date_range": {
-        "first": "2019-03-22",
-        "last": "2025-12-18"
+        "first": "2017-01-13",
+        "last": "2026-03-19"
       },
       "centroid_feature_means": {
-        "news_count": 1.6255,
-        "category_FOMC": 0.0902,
-        "category_UCSB": 0.6455,
-        "title_positive_prob": 0.1983,
-        "title_negative_prob": 0.4428,
-        "title_neutral_prob": 0.1607,
-        "title_sentiment_score": 0.3359,
-        "body_positive_prob": 0.1522,
-        "body_negative_prob": 0.5119,
-        "body_neutral_prob": 0.1837
+        "news_count": 1.4756,
+        "category_FOMC": 0.1711,
+        "category_UCSB": 0.6229,
+        "title_positive_prob": 0.1351,
+        "title_negative_prob": 0.1507,
+        "title_neutral_prob": 0.7142,
+        "title_sentiment_score": -0.0156,
+        "body_positive_prob": 0.1965,
+        "body_negative_prob": 0.1581,
+        "body_neutral_prob": 0.6454
       }
     },
     {
-      "label": "flat",
-      "count": 266,
+      "label": "neutral",
+      "count": 711,
       "date_range": {
-        "first": "2019-06-14",
-        "last": "2025-12-12"
+        "first": "2017-02-13",
+        "last": "2026-03-17"
       },
       "centroid_feature_means": {
-        "news_count": 1.5371,
-        "category_FOMC": 0.0965,
-        "category_UCSB": 0.6439,
-        "title_positive_prob": 0.1946,
-        "title_negative_prob": 0.482,
-        "title_neutral_prob": 0.1288,
-        "title_sentiment_score": 0.3014,
-        "body_positive_prob": 0.1748,
-        "body_negative_prob": 0.5237,
-        "body_neutral_prob": 0.1266
+        "news_count": 1.5031,
+        "category_FOMC": 0.1654,
+        "category_UCSB": 0.6228,
+        "title_positive_prob": 0.136,
+        "title_negative_prob": 0.1684,
+        "title_neutral_prob": 0.6955,
+        "title_sentiment_score": -0.0324,
+        "body_positive_prob": 0.1994,
+        "body_negative_prob": 0.1586,
+        "body_neutral_prob": 0.642
       }
     },
     {
       "label": "fall",
-      "count": 294,
+      "count": 156,
       "date_range": {
-        "first": "2019-05-23",
-        "last": "2025-12-19"
+        "first": "2017-06-06",
+        "last": "2026-03-11"
       },
       "centroid_feature_means": {
-        "news_count": 1.6337,
-        "category_FOMC": 0.0778,
-        "category_UCSB": 0.6159,
-        "title_positive_prob": 0.198,
-        "title_negative_prob": 0.4543,
-        "title_neutral_prob": 0.1496,
-        "title_sentiment_score": 0.3208,
-        "body_positive_prob": 0.165,
-        "body_negative_prob": 0.5142,
-        "body_neutral_prob": 0.1558
+        "news_count": 1.5094,
+        "category_FOMC": 0.1347,
+        "category_UCSB": 0.586,
+        "title_positive_prob": 0.1199,
+        "title_negative_prob": 0.1914,
+        "title_neutral_prob": 0.6886,
+        "title_sentiment_score": -0.0715,
+        "body_positive_prob": 0.2013,
+        "body_negative_prob": 0.1612,
+        "body_neutral_prob": 0.6375
       }
     },
     {
       "label": "fall_strong",
-      "count": 302,
+      "count": 323,
       "date_range": {
-        "first": "2019-07-23",
-        "last": "2025-12-09"
+        "first": "2018-01-18",
+        "last": "2026-03-10"
       },
       "centroid_feature_means": {
-        "news_count": 1.5258,
-        "category_FOMC": 0.0785,
-        "category_UCSB": 0.6328,
-        "title_positive_prob": 0.2009,
-        "title_negative_prob": 0.4912,
-        "title_neutral_prob": 0.1069,
-        "title_sentiment_score": 0.3306,
-        "body_positive_prob": 0.1541,
-        "body_negative_prob": 0.5154,
-        "body_neutral_prob": 0.1765
+        "news_count": 1.6223,
+        "category_FOMC": 0.1323,
+        "category_UCSB": 0.5833,
+        "title_positive_prob": 0.1343,
+        "title_negative_prob": 0.1775,
+        "title_neutral_prob": 0.6881,
+        "title_sentiment_score": -0.0432,
+        "body_positive_prob": 0.2136,
+        "body_negative_prob": 0.1567,
+        "body_neutral_prob": 0.6297
       }
     }
   ]

@@ -69,8 +69,8 @@ class MarketNewsTrainingConfig:
     """
     target_ticker: str = "QQQ"
     macro_tickers: tuple[str, ...] = ("SPY", "^VIX", "TLT", "HYG", "UUP")
-    start_date: str = "2019-01-01"
-    end_date: str = "2026-01-01"
+    start_date: str = "2017-01-12"
+    end_date: str = "2026-05-02"
     news_input_path: Path = field(
         default_factory=lambda: crawler_data_path("features", "merged_finbert.csv")
     )
@@ -167,15 +167,16 @@ class MarketNewsTrainingConfig:
             "qqq_cluster_visualization.png",
         )
     )
-    cluster_horizon: int = 7
-    cluster_window_days: int = 7
+    cluster_horizon: int = 15
+    cluster_window_days: int = 15
     horizon_candidates: tuple[int, ...] = (5, 7, 10, 15)
     top_feature_count: int = 25
-    optuna_trials: int = 50
+    optuna_trials: int = 200
     train_ratio: float = 0.8
     random_seed: int = 42
     aligned_comparison_start_date: str | None = None
-    regression_style_fixed_horizon: int = 7
+    regression_style_fixed_horizon: int = 5
+    market_news_only: bool = False
 
 
 @dataclass(frozen=True)
@@ -188,8 +189,8 @@ class VolatilityClusterConfig:
     """
     target_ticker: str = "QQQ"
     macro_tickers: tuple[str, ...] = ("SPY", "^VIX", "TLT", "HYG", "UUP")
-    start_date: str = "2019-01-01"
-    end_date: str = "2026-01-01"
+    start_date: str = "2017-01-12"
+    end_date: str = "2026-05-02"
     daily_news_features_input_path: Path = field(
         default_factory=lambda: crawler_data_path("features", "daily_news_features.csv")
     )
@@ -211,5 +212,5 @@ class VolatilityClusterConfig:
             "qqq_cluster_visualization.png",
         )
     )
-    cluster_horizon: int = 7
-    cluster_window_days: int = 7
+    cluster_horizon: int = 15
+    cluster_window_days: int = 15
