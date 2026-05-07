@@ -56,7 +56,7 @@ class DailyNewsFeatureRow(TypedDict, total=False):
     news_body_sentiment_max: float
     fomc_news_count: int
     bis_news_count: int
-    white_house_news_count: int
+    ucsb_news_count: int
 
 
 @dataclass(frozen=True)
@@ -69,8 +69,8 @@ class MarketNewsTrainingConfig:
     """
     target_ticker: str = "QQQ"
     macro_tickers: tuple[str, ...] = ("SPY", "^VIX", "TLT", "HYG", "UUP")
-    start_date: str = "2015-01-01"
-    end_date: str = "2026-01-01"
+    start_date: str = "2017-01-12"
+    end_date: str = "2026-05-02"
     news_input_path: Path = field(
         default_factory=lambda: crawler_data_path("features", "merged_finbert.csv")
     )
@@ -149,10 +149,68 @@ class MarketNewsTrainingConfig:
             "qqq_market_model_comparison_aligned.json",
         )
     )
-    horizon_candidates: tuple[int, ...] = (5, 10, 15, 20)
+    cluster_model_output_path: Path = field(
+        default_factory=lambda: training_data_path(
+            "comparison",
+            "qqq_volatility_cluster_model.json",
+        )
+    )
+    cluster_report_output_path: Path = field(
+        default_factory=lambda: training_data_path(
+            "comparison",
+            "qqq_volatility_cluster_report.json",
+        )
+    )
+    cluster_visualization_output_path: Path = field(
+        default_factory=lambda: training_data_path(
+            "comparison",
+            "qqq_cluster_visualization.png",
+        )
+    )
+    cluster_horizon: int = 15
+    cluster_window_days: int = 15
+    horizon_candidates: tuple[int, ...] = (5, 7, 10, 15)
     top_feature_count: int = 25
-    optuna_trials: int = 50
+    optuna_trials: int = 200
     train_ratio: float = 0.8
     random_seed: int = 42
     aligned_comparison_start_date: str | None = None
-    regression_style_fixed_horizon: int = 15
+    regression_style_fixed_horizon: int = 5
+    market_news_only: bool = False
+
+
+@dataclass(frozen=True)
+class VolatilityClusterConfig:
+    """
+    뉴스 클러스터 모델 학습 설정.
+
+    XGBoost 비교 실험과 독립적으로 실행할 수 있도록
+    클러스터 파이프라인에 필요한 설정만 한곳에 모아둔다.
+    """
+    target_ticker: str = "QQQ"
+    macro_tickers: tuple[str, ...] = ("SPY", "^VIX", "TLT", "HYG", "UUP")
+    start_date: str = "2017-01-12"
+    end_date: str = "2026-05-02"
+    daily_news_features_input_path: Path = field(
+        default_factory=lambda: crawler_data_path("features", "daily_news_features.csv")
+    )
+    cluster_model_output_path: Path = field(
+        default_factory=lambda: training_data_path(
+            "comparison",
+            "qqq_volatility_cluster_model.json",
+        )
+    )
+    cluster_report_output_path: Path = field(
+        default_factory=lambda: training_data_path(
+            "comparison",
+            "qqq_volatility_cluster_report.json",
+        )
+    )
+    cluster_visualization_output_path: Path = field(
+        default_factory=lambda: training_data_path(
+            "comparison",
+            "qqq_cluster_visualization.png",
+        )
+    )
+    cluster_horizon: int = 15
+    cluster_window_days: int = 15

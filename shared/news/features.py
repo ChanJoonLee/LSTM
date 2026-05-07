@@ -9,7 +9,8 @@ import pandas as pd
 CATEGORY_TO_PREFIX = {
     "FOMC": "fomc",
     "BIS": "bis",
-    "White House": "white_house",
+    "UCSB": "ucsb",
+    "UCSB Presidency Project": "ucsb",
 }
 
 DOC_TYPE_TO_FEATURE = {
@@ -17,9 +18,9 @@ DOC_TYPE_TO_FEATURE = {
     "minutes": "fomc_minutes_count",
     "implementation_note": "fomc_implementation_note_count",
     "press_release": "bis_press_release_count",
-    "presidential_actions": "white_house_presidential_actions_count",
-    "briefings_statements": "white_house_briefings_statements_count",
-    "executive_orders": "white_house_executive_orders_count",
+    "presidential_actions": "ucsb_presidential_actions_count",
+    "briefings_statements": "ucsb_briefings_statements_count",
+    "executive_orders": "ucsb_executive_orders_count",
 }
 
 
@@ -35,6 +36,21 @@ def _validate_required_columns(
             f"{source_name} is missing required columns: {missing_columns}. "
             f"Available columns: {list(df.columns)}"
         )
+
+
+def _normalize_category(raw_value: object) -> str:
+    text = "" if pd.isna(raw_value) else str(raw_value).strip()
+    if not text:
+        return "Unknown"
+
+    upper_text = text.upper()
+    if upper_text == "FOMC":
+        return "FOMC"
+    if upper_text == "BIS":
+        return "BIS"
+    if "UCSB" in upper_text or "PRESIDENCY PROJECT" in upper_text:
+        return "UCSB"
+    return text
 
 
 def _normalize_doc_type(raw_value: object) -> str:
@@ -105,7 +121,7 @@ def load_news_source_table(input_path) -> pd.DataFrame:
     prepared["date"] = pd.to_datetime(prepared["date"], errors="coerce")
     prepared = prepared.dropna(subset=["date"]).copy()
 
-    prepared["category"] = prepared["category"].fillna("Unknown").astype(str)
+    prepared["category"] = prepared["category"].map(_normalize_category)
     prepared["doc_type"] = prepared["doc_type"].fillna("unknown").astype(str)
     prepared["title"] = prepared["title"].fillna("").astype(str)
     prepared["body"] = prepared["body"].fillna("").astype(str)
@@ -154,8 +170,8 @@ def build_daily_news_feature_table(news_df: pd.DataFrame) -> pd.DataFrame:
         prepared["category_BIS"] = prepared["category"].eq("BIS").astype(int)
     if "category_FOMC" not in prepared.columns:
         prepared["category_FOMC"] = prepared["category"].eq("FOMC").astype(int)
-    if "category_White House" not in prepared.columns:
-        prepared["category_White House"] = prepared["category"].eq("White House").astype(int)
+    if "category_UCSB" not in prepared.columns:
+        prepared["category_UCSB"] = prepared["category"].eq("UCSB").astype(int)
 
     probability_defaults = {
         "title_positive_prob": 0.0,
@@ -200,7 +216,7 @@ def build_daily_news_feature_table(news_df: pd.DataFrame) -> pd.DataFrame:
     regression_daily_columns = [
         "category_BIS",
         "category_FOMC",
-        "category_White House",
+        "category_UCSB",
         "day_of_week_sin",
         "day_of_week_cos",
         "month_sin",

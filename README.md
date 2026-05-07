@@ -188,7 +188,11 @@ pip install torch --index-url https://download.pytorch.org/whl/cpu
 `data/crawler/features/merged_finbert.csv`가 이미 준비되어 있다면 아래 한 줄로 메인 학습 파이프라인 실행 가능.
 
 ```bash
+# market_only + market_news + aligned comparison 전체 실행
 python shared/run_market_news_training.py
+
+# market_news만 실행 (빠른 반복 실험용, 실행 시간 약 1/3)
+python shared/run_market_news_training.py --market-news-only
 ```
 
 실행이 끝나면 기본적으로 아래 산출물들이 생성됨.(현재 data 폴더안에 생성되어있음)
@@ -287,6 +291,8 @@ python shared/run_market_news_training.py \
   하이퍼파라미터 탐색 횟수
 - `--top-feature-count`
   최종 후보로 남길 상위 중요 피처 개수
+- `--market-news-only`
+  `market_only` 학습과 aligned comparison을 건너뛰고 `market_news`만 실행. 실험 중 빠른 반복이 필요할 때 사용
 
 ## 추천 읽기 순서
 
@@ -326,12 +332,12 @@ python shared/run_market_news_training.py \
 - `market_news`
   위 시장 정예 피처 + 뉴스 감성 정예 피처만 사용
 - 기본 horizon
-  `15일` 고정
+  `5일` 고정
 
 
 참고:
 
-- 이 고정 horizon 값은 `shared/config/schema.py`의 `regression_style_fixed_horizon = 15`
+- 이 고정 horizon 값은 `shared/config/schema.py`의 `regression_style_fixed_horizon = 5`
 - CLI에서는 `--regression-style-fixed-horizon`으로 바꿀 수 있음
 
 ### 2. 시장 피처는 `train_regression.py`의 정예 피처 기준으로 맞춤
@@ -340,32 +346,25 @@ python shared/run_market_news_training.py \
 
 현재 메인 학습에 쓰는 시장 피처:
 
-- `ret_5`
-- `ret_accel`
-- `dist_to_ma5`
-- `bb_pos`
-- `rsi_14`
-- `vol_shock`
-- `vix_z_score_5`
-- `drawdown`
-- `vol_ratio`
+- `ret_3`, `ret_5`, `ret_accel`
+- `price_to_ma_5`, `slope_5`
+- `bb_pos_5`, `bb_width_5`
+- `macd_hist`, `rsi_14`
+- `vol_5`, `vol_shock`
+- `vix_z_score_5`, `drawdown`, `vol_ratio_5`
 - `rel_strength_5`
-- `uup_shock_5`
-- `tlt_shock_5`
-- `hyg_ret`
-- `target_spy_rel_ret`
+- `uup_ret_5`, `tlt_shock_5`, `hyg_ret_5`
+- `target_spy_rel_ret_5`, `target_tlt_rel_ret_5`
 
 특히 아래 계산식은 원본에 맞춰 반영함.
 
-- `ret_accel = ret_1 - ret_5`
+- `ret_accel = (ret_1 / 1.0) - (ret_3 / 3.0)`
 - `vol_shock = vol_5 / (vol_20 + 1e-9)`
-- `dist_to_ma5 = price / MA(5) - 1`
 - `rel_strength_5 = QQQ 5일 수익률 - SPY 5일 수익률`
-- `uup_shock_5 = UUP 5일 변화율`
-- `tlt_shock_5 = TLT 5일 변화율`
-- `vix_z_score_5 = 5일 기준 VIX z-score`
+- `tlt_shock_5 = TLT 5일 수익률`
+- `vix_z_score_5 = (VIX - VIX.rolling(5).mean()) / VIX.rolling(5).std()`
 
-즉 `shared` 안에 다른 피처가 더 남아 있더라도, 메인 실험이 실제로 보는 핵심 시장 피처는 `train_regression.py`와 거의 같은 세트라고 보면 됨.
+즉 `shared` 안에 다른 피처가 더 남아 있더라도, 메인 실험이 실제로 보는 핵심 시장 피처는 `train_regression.py`와 동일한 세트임.
 
 ### 3. 뉴스 일자 집계도 `train_regression.py` 흐름으로 맞춤
 
@@ -384,7 +383,7 @@ python shared/run_market_news_training.py \
 - 주요 입력 컬럼은 아래와 같은 `train_regression.py` 스타일 컬럼
   - `category_BIS`
   - `category_FOMC`
-  - `category_White House`
+  - `category_UCSB`
   - `day_of_week_sin`, `day_of_week_cos`
   - `month_sin`, `month_cos`
   - `is_weekend`
@@ -398,36 +397,46 @@ python shared/run_market_news_training.py \
 
 ### 4. 뉴스 병합과 결측 처리 순서도 최대한 그대로 맞춤
 
-`shared/news/merge.py`는 지금 `train_regression.py`의 병합 흐름을 거의 그대로 따름.
+`shared/news/merge.py`는 `train_regression.py`의 병합 흐름을 따름.
 
 현재 순서:
 
 1. 시장 데이터와 뉴스 일자 테이블을 날짜 기준 `left join`
-2. `title_neutral_prob`, `body_neutral_prob`는 기본값 `1.0`
-3. 주요 뉴스/감성 컬럼은 `ffill()` 후 `0.0`
-4. 그 다음 전체 프레임도 다시 `ffill()` 후 `0.0`
+2. `title_neutral_prob`, `body_neutral_prob`는 기본값 `1.0`으로 채움
+3. 주요 뉴스/감성 컬럼은 **`ffill` 없이 `0.0`으로 채움** (뉴스 없는 날 = 무신호)
+4. `days_since_news` 계산: 마지막 뉴스 이후 경과 거래일 수 (최대 30일)
+5. 나머지 전체 결측은 `0.0`으로 채움 (`train_regression.py`와 동일)
 
-이건 사실상 `train_regression.py`의 아래 의도를 그대로 가져온 것임.
+`ffill`을 쓰지 않는 이유:
 
-- 뉴스가 없는 날은 중립값으로 둠
-- 뉴스 관련 값은 직전 값 흐름을 어느 정도 이어받게 함
-- 그래도 처음 구간은 `0`으로 마감
+- `ffill`을 쓰면 며칠 전 뉴스 감성이 아무 뉴스도 없는 날까지 그대로 전파됨
+- "뉴스 없음(0)"과 "예전 뉴스의 잔존 영향"이 섞여 신호가 왜곡될 수 있음
+- 대신 `days_since_news`와 `body_sentiment_decay_3d`를 통해 오래된 뉴스의 감쇠된 영향을 모델이 별도로 학습하게 함
 
-### 5. 뉴스 파생 피처도 원본 스크립트의 핵심 4개를 그대로 씀
+### 5. 뉴스 파생 피처는 원본 스크립트 기준 12개
 
-현재 메인 `market_news` 실험에서 쓰는 뉴스 피처는 아래 4개임.
+현재 메인 `market_news` 실험에서 쓰는 뉴스 피처는 아래 12개임.
 
-- `sentiment_gap`
-- `body_sentiment_gap`
-- `sentiment_shock`
-- `body_sentiment_score`
+| 피처 | 설명 |
+| --- | --- |
+| `news_count_5d` | 최근 5일 뉴스 건수 합산 |
+| `days_since_news` | 마지막 뉴스 이후 경과 거래일 수 (최대 30) |
+| `sentiment_gap` | 제목 긍정 확률 - 부정 확률 |
+| `body_sentiment_gap` | 본문 긍정 확률 - 부정 확률 |
+| `sentiment_shock` | `sentiment_gap`의 최근 5일 평균 대비 변화량 |
+| `body_sentiment_5d_mean` | 본문 감성 점수 5일 이동평균 |
+| `title_sentiment_5d_mean` | 제목 감성 점수 5일 이동평균 |
+| `negative_news_spike_5d` | 본문 부정 확률 / 최근 5일 평균 부정 확률 |
+| `body_sentiment_decay_3d` | `body_sentiment_score × 0.5^(days_since_news / 3)` — 반감기 3일 감쇠 |
+| `fomc_sentiment` | `body_sentiment_score × category_FOMC` |
+| `fomc_recent_5d` | 최근 5일 내 FOMC 문서 존재 여부 (rolling max) |
+| `sentiment_divergence` | `|title_sentiment_score - body_sentiment_score|` |
 
-즉 원본의 아래 아이디어를 그대로 따라간 것.
+`days_since_news`와 `body_sentiment_decay_3d`를 추가한 이유:
 
-- 제목 긍정/부정 차이
-- 본문 긍정/부정 차이
-- 최근 평균 대비 감성 충격
-- 본문 감성 점수 자체
+- 뉴스가 없는 날 감성값을 `0`으로 채우면 "오늘 뉴스가 있어서 0점"과 "뉴스 자체가 없어서 0점"을 구분 못 함
+- `days_since_news`로 경과 일수를 직접 제공하면 모델이 "최근 뉴스"와 "며칠 지난 뉴스"를 구분해서 학습 가능
+- `body_sentiment_decay_3d`는 같은 감성 점수라도 오래된 뉴스일수록 영향력이 작아지도록 반감기 감쇠를 적용한 것
 
 추가로 `shared`에서는 aligned comparison 시작일 계산을 위해 `news_count_lag1` 보조 컬럼도 남겨 둠.
 이 컬럼은 메인 뉴스 피처라기보다 비교 구간을 자르는 데 쓰는 운영용 컬럼이라고 보면 됨.
@@ -449,7 +458,7 @@ python shared/run_market_news_training.py \
 
 즉 지금 `shared`의 메인 학습은 모델 튜닝 관점에서도 `train_regression.py`와 거의 같은 기준으로 움직임.
 
-### 7. 아직 `shared/`에만 남겨둔 구조적 차이
+### 7. `shared/`에만 남겨둔 구조적 차이
 
 완전히 똑같이 복붙한 것은 아님.
 차이는 "실험 구조" 쪽에만 남겨 둔 상태.
@@ -457,6 +466,14 @@ python shared/run_market_news_training.py \
 - `shared`는 `market_only`와 `market_news`를 같은 실행에서 같이 돌림
 - 결과를 `data/training/market_only/`, `market_news/`, `comparison/`에 나눠 저장
 - aligned comparison을 따로 만들어 공정 비교를 계속 볼 수 있게 함
+
+`--market-news-only` 플래그를 쓰면 `market_only` 학습과 aligned comparison을 건너뛰고 `market_news` 학습만 돌릴 수 있음.
+
+```bash
+python shared/run_market_news_training.py --market-news-only
+```
+
+이 모드에서는 실행 시간이 기존의 약 1/3 수준으로 줄어듦.
 
 중요한 점:
 
@@ -468,13 +485,46 @@ python shared/run_market_news_training.py \
 - 메인 모델 학습 로직은 `train_regression.py`를 거의 그대로 따르고
 - shared는 그 위에 비교 실험과 저장 구조만 얹어 둔 상태라고 보면 됨.
 
-### 8. 아직 옮기지 않은 부분
+### 8. 평가 지표 — 고확신 구간 분석 (`evaluate_model`에 추가됨)
+
+`train_regression.py`의 고확신 구간 분석이 `shared/training/xgboost_pipeline.py`의 `evaluate_model` 함수에 이식됨.
+
+**로직:**
+
+1. 테스트셋에서 `|Pred_LogRet|` 기준 상위 30% (70th percentile 이상) 샘플만 추출
+2. 상승 예측(Long)과 하락 예측(Short)을 분리해 각각 정확도 계산
+
+```
+conf_cutoff = np.quantile(|predicted_logret|, 0.7)
+long  → predicted > 0 이고 |predicted| >= conf_cutoff 인 샘플
+short → predicted < 0 이고 |predicted| >= conf_cutoff 인 샘플
+```
+
+**metrics 딕셔너리에 추가된 키:**
+
+| 키 | 설명 |
+| --- | --- |
+| `high_conf_threshold` | 70th percentile 기준값 |
+| `high_conf_long_accuracy` | Long 예측 정확도 |
+| `high_conf_long_count` | Long 샘플 수 |
+| `high_conf_short_accuracy` | Short 예측 정확도 |
+| `high_conf_short_count` | Short 샘플 수 |
+
+**출력 예시:**
+
+```
+Direction accuracy: 56.10%
+  [고확신 상위 30%] 기준 문턱값(LogRet 절대값): 0.4505
+  상승(Long) 확신 시 정확도: 59.26%  (n=135)
+  하락(Short) 확신 시 정확도: 40.00%  (n=5)
+```
+
+### 9. 아직 옮기지 않은 부분
 
 아래 요소들은 아직 `shared` 메인 파이프라인에는 넣지 않음.
 
 - importance plot 시각화
 - threshold별 전략 곡선
-- 고확신 구간 상승/하락 정밀 분석
 - 산점도, 누적수익률, 에러 분포 시각화
 
 즉 "모델을 학습하고 비교하는 코어 로직"은 대부분 옮겼고,

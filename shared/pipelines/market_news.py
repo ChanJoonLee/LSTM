@@ -23,6 +23,15 @@ from shared.config.schema import MarketNewsTrainingConfig
 from shared.market.data import build_market_feature_frame, download_market_data
 from shared.news.features import build_daily_news_feature_table, load_news_source_table
 from shared.news.merge import merge_news_features_into_market_frame
+from shared.cluster import (
+    CLUSTER_FEATURE_COLS,
+    FIXED_THRESHOLDS,
+    VOLATILITY_LABELS,
+    build_cluster_summary,
+    build_event_dataset,
+    fit_news_centroids,
+    save_cluster_visualization,
+)
 from shared.training.xgboost_pipeline import (
     build_comparison_artifacts,
     run_aligned_horizon_comparison_suite,
@@ -45,27 +54,41 @@ __all__ = [
 
 
 REGRESSION_STYLE_MARKET_FEATURE_COLUMNS = [
+    "ret_3",
     "ret_5",
     "ret_accel",
-    "dist_to_ma5",
-    "bb_pos",
+    "price_to_ma_5",
+    "slope_5",
+    "bb_pos_5",
+    "bb_width_5",
+    "macd_hist",
     "rsi_14",
+    "vol_5",
     "vol_shock",
     "vix_z_score_5",
     "drawdown",
-    "vol_ratio",
+    "vol_ratio_5",
     "rel_strength_5",
-    "uup_shock_5",
+    "uup_ret_5",
     "tlt_shock_5",
-    "hyg_ret",
-    "target_spy_rel_ret",
+    "hyg_ret_5",
+    "target_spy_rel_ret_5",
+    "target_tlt_rel_ret_5",
 ]
 
 REGRESSION_STYLE_NEWS_FEATURE_COLUMNS = [
+    "news_count_5d",
+    "days_since_news",
     "sentiment_gap",
     "body_sentiment_gap",
     "sentiment_shock",
-    "body_sentiment_score",
+    "body_sentiment_5d_mean",
+    "title_sentiment_5d_mean",
+    "negative_news_spike_5d",
+    "body_sentiment_decay_3d",
+    "fomc_sentiment",
+    "fomc_recent_5d",
+    "sentiment_divergence",
 ]
 
 
@@ -160,18 +183,19 @@ def run_market_news_training_pipeline(
     )
 
     # 3) team regression script와 같은 고정 horizon/고정 피처로 baseline 실험을 수행한다.
-    market_only_result = run_training_experiment(
-        experiment_name="market_only",
-        feature_df=market_feature_df,
-        candidate_feature_columns=regression_market_feature_columns,
-        training_frame_output_path=config.market_only_training_frame_output_path,
-        predictions_output_path=config.market_only_predictions_output_path,
-        model_output_path=config.market_only_model_output_path,
-        metadata_output_path=config.market_only_metadata_output_path,
-        config=config,
-        forced_horizon=config.regression_style_fixed_horizon,
-        forced_selected_features=regression_market_feature_columns,
-    )
+    if not config.market_news_only:
+        market_only_result = run_training_experiment(
+            experiment_name="market_only",
+            feature_df=market_feature_df,
+            candidate_feature_columns=regression_market_feature_columns,
+            training_frame_output_path=config.market_only_training_frame_output_path,
+            predictions_output_path=config.market_only_predictions_output_path,
+            model_output_path=config.market_only_model_output_path,
+            metadata_output_path=config.market_only_metadata_output_path,
+            config=config,
+            forced_horizon=config.regression_style_fixed_horizon,
+            forced_selected_features=regression_market_feature_columns,
+        )
 
     # 4) team regression script 방식으로 뉴스 피처를 병합하고, 같은 horizon/피처 구조로 재학습한다.
     merged_feature_df, _news_feature_columns = merge_news_features_into_market_frame(
@@ -200,38 +224,79 @@ def run_market_news_training_pipeline(
         ),
     )
 
-    # 5) 뉴스 커버리지가 실제로 존재하는 기간 + 동일 horizon 기준의 공정 비교 결과를 만든다.
-    aligned_comparison_start_date = _resolve_aligned_comparison_start_date(
-        merged_feature_df,
-        config,
-    )
-    aligned_comparison_df, aligned_comparison_payload = run_aligned_horizon_comparison_suite(
-        market_only_feature_df=market_feature_df,
-        market_news_feature_df=merged_feature_df,
-        market_only_feature_columns=regression_market_feature_columns,
-        market_news_feature_columns=(
-            regression_market_feature_columns + regression_news_feature_columns
-        ),
-        aligned_start_date=aligned_comparison_start_date,
-        config=config,
-        forced_market_only_features=regression_market_feature_columns,
-        forced_market_news_features=(
-            regression_market_feature_columns + regression_news_feature_columns
-        ),
-    )
-    aligned_comparison_df.to_csv(
-        config.aligned_comparison_output_path,
-        index=False,
-        encoding="utf-8-sig",
-    )
-    write_json(aligned_comparison_payload, config.aligned_comparison_metadata_output_path)
+    if config.market_news_only:
+        comparison_payload: dict = {"market_news": market_news_result}
+    else:
+        # 5) 뉴스 커버리지가 실제로 존재하는 기간 + 동일 horizon 기준의 공정 비교 결과를 만든다.
+        aligned_comparison_start_date = _resolve_aligned_comparison_start_date(
+            merged_feature_df,
+            config,
+        )
+        aligned_comparison_df, aligned_comparison_payload = run_aligned_horizon_comparison_suite(
+            market_only_feature_df=market_feature_df,
+            market_news_feature_df=merged_feature_df,
+            market_only_feature_columns=regression_market_feature_columns,
+            market_news_feature_columns=(
+                regression_market_feature_columns + regression_news_feature_columns
+            ),
+            aligned_start_date=aligned_comparison_start_date,
+            config=config,
+            forced_market_only_features=regression_market_feature_columns,
+            forced_market_news_features=(
+                regression_market_feature_columns + regression_news_feature_columns
+            ),
+        )
+        aligned_comparison_df.to_csv(
+            config.aligned_comparison_output_path,
+            index=False,
+            encoding="utf-8-sig",
+        )
+        write_json(aligned_comparison_payload, config.aligned_comparison_metadata_output_path)
 
-    # 6) 기존 best-horizon 결과도 그대로 비교표 형태로 저장한다.
-    comparison_df, comparison_payload = build_comparison_artifacts(
-        market_only_result,
-        market_news_result,
+        # 6) 기존 best-horizon 결과도 그대로 비교표 형태로 저장한다.
+        comparison_df, comparison_payload = build_comparison_artifacts(
+            market_only_result,
+            market_news_result,
+        )
+        comparison_df.to_csv(config.comparison_output_path, index=False, encoding="utf-8-sig")
+        comparison_payload["aligned_shared_period_comparison"] = aligned_comparison_payload
+
+    # 7) 뉴스 클러스터 모델을 학습하고 저장한다.
+    vectors, labels, cluster_dates = build_event_dataset(
+        market_feature_df,
+        daily_news_features,
+        horizon=config.cluster_horizon,
+        window_days=config.cluster_window_days,
     )
-    comparison_df.to_csv(config.comparison_output_path, index=False, encoding="utf-8-sig")
-    comparison_payload["aligned_shared_period_comparison"] = aligned_comparison_payload
+    centroids, counts, scaler = fit_news_centroids(vectors, labels)
+    cluster_summary = build_cluster_summary(labels, cluster_dates, centroids, counts, scaler)
+
+    cluster_model_payload: dict = {
+        "centroids": centroids.tolist(),
+        "scaler_mean": scaler.mean_.tolist(),
+        "scaler_scale": scaler.scale_.tolist(),
+        "feature_columns": CLUSTER_FEATURE_COLS,
+        "labels": VOLATILITY_LABELS,
+        "fixed_thresholds": list(FIXED_THRESHOLDS),
+        "horizon": config.cluster_horizon,
+        "window_days": config.cluster_window_days,
+    }
+    write_json(cluster_model_payload, config.cluster_model_output_path)
+
+    cluster_report_payload: dict = {"clusters": cluster_summary}
+    write_json(cluster_report_payload, config.cluster_report_output_path)
+    comparison_payload["volatility_cluster_report"] = cluster_report_payload
+
+    save_cluster_visualization(
+        vectors=vectors,
+        labels=labels,
+        counts=counts,
+        centroids=centroids,
+        scaler=scaler,
+        output_path=config.cluster_visualization_output_path,
+        horizon=config.cluster_horizon,
+        window_days=config.cluster_window_days,
+    )
+
     write_json(comparison_payload, config.comparison_metadata_output_path)
     return comparison_payload

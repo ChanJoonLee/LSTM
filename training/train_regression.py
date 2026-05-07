@@ -25,6 +25,19 @@ from optuna.samplers import TPESampler
 
 import random
 import os
+import sys
+
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+    sys.stderr.reconfigure(encoding="utf-8")
+
+YFINANCE_CACHE_DIR = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)),
+    "train_regression",
+    ".yfinance_cache",
+)
+os.makedirs(YFINANCE_CACHE_DIR, exist_ok=True)
+yf.set_tz_cache_location(YFINANCE_CACHE_DIR)
 
 def seed_everything(seed=42):
     random.seed(seed)
@@ -43,11 +56,14 @@ tickers = [target, "SPY", "^VIX", "TLT", "HYG", "UUP"]
 
 raw = yf.download(
     tickers=tickers,
-    start="2015-01-01",
-    end="2026-03-01",
+    start="2017-01-12",
+    end="2026-05-02",
     auto_adjust=True, #주가 조정 (배당금, 액면분할 등) 반영된 가격 사용/ if, False면 조정 안된 가격 사용
-    progress=False
+    progress=False,
+    threads=False,
 )
+if raw.empty:
+    raise RuntimeError("yfinance returned no rows. Check network access and ticker/date settings.")
 #여러 자산의 가격을 하나의 테이블로 다운로드. 멀티인덱스 형태로 (필드, 티커) 구조로 저장됨.
 
 def get_series(data: pd.DataFrame, field: str, ticker: str) -> pd.Series:
@@ -98,6 +114,8 @@ high_price = df["target_high"]
 low_price = df["target_low"]
 volume = df["target_volume"]
 
+FEATURE_WINDOW = 5
+
 # =========================================================
 # 3. 기본 수익률 / 변동성
 # =========================================================
@@ -121,12 +139,12 @@ df["vol_20"] = daily_ret.rolling(20).std()
 # =========================================================
 # 4. 장기 추세 feature (평평해지는 문제 해결 핵심)
 # =========================================================
-for w in [5, 10, 20, 60, 120, 200]:
+for w in [5, 10, 15, 20, 60, 120, 200]:
     ma = price.rolling(w).mean()
     df[f"price_to_ma_{w}"] = price / ma - 1.0
 #price_to_ma_20는 현재 가격이 20일 이동평균보다 몇 % 높은지 나타냄. 이동평균과의 비율은 장기 추세를 반영하는 중요한 feature가 될 수 있음.
 
-for w in [20, 60, 120, 200]:
+for w in [5, 15, 20, 60, 120, 200]:
     df[f"slope_{w}"] = np.log(price / price.shift(w)) / w
 #slope_20은 20일 전 가격과 비교한 로그 수익률을 20으로 나눈 값. 장기 추세의 기울기를 나타냄. 평평해지는 문제를 해결하는 데 중요한 역할을 할 수 있음.
 
@@ -168,6 +186,13 @@ bb_lower = bb_mid - 2 * bb_std
 
 df["bb_width"] = (bb_upper - bb_lower) / bb_mid
 df["bb_pos"] = (price - bb_lower) / (bb_upper - bb_lower)
+
+bb_mid_5 = price.rolling(FEATURE_WINDOW).mean()
+bb_std_5 = price.rolling(FEATURE_WINDOW).std()
+bb_upper_5 = bb_mid_5 + 2 * bb_std_5
+bb_lower_5 = bb_mid_5 - 2 * bb_std_5
+df["bb_width_5"] = (bb_upper_5 - bb_lower_5) / bb_mid_5
+df["bb_pos_5"] = (price - bb_lower_5) / (bb_upper_5 - bb_lower_5)
 # 가격의 “정상 범위”
 
 # =========================================================
@@ -195,14 +220,14 @@ df["target_spy_ratio_20"] = df["target_spy_ratio"] / df["target_spy_ratio"].roll
 df["target_tlt_ratio"] = price / tlt
 df["target_tlt_ratio_20"] = df["target_tlt_ratio"] / df["target_tlt_ratio"].rolling(20).mean() - 1.0
 
-df["hyg_ret"] = hyg.pct_change(10)
-df["uup_ret"] = uup.pct_change(10)
+df["hyg_ret_5"] = hyg.pct_change(FEATURE_WINDOW)
+df["uup_ret_5"] = uup.pct_change(FEATURE_WINDOW)
 
 rolling_max = price.rolling(window=252, min_periods=1).max()
 df["drawdown"] = (price - rolling_max) / rolling_max
 
-df["target_spy_rel_ret"] = (df["target_price"] / df["SPY_price"]).pct_change(10)
-df["target_tlt_rel_ret"] = (df["target_price"] / df["TLT_price"]).pct_change(10)
+df["target_spy_rel_ret_5"] = (df["target_price"] / df["SPY_price"]).pct_change(FEATURE_WINDOW)
+df["target_tlt_rel_ret_5"] = (df["target_price"] / df["TLT_price"]).pct_change(FEATURE_WINDOW)
 
 def get_z_score(series, window=20):
     return (series - series.rolling(window).mean()) / series.rolling(window).std()
@@ -210,13 +235,15 @@ def get_z_score(series, window=20):
 df["hyg_z_score"] = get_z_score(df["HYG_price"], 20)
 df["uup_z_score"] = get_z_score(df["UUP_price"], 20)
 df["vix_z_score"] = get_z_score(df["VIX_price"], 20)
+df["vix_z_score_5"] = get_z_score(df["VIX_price"], FEATURE_WINDOW)
 
 # 3. 변동성의 역전 현상 (target 변동성 / SPY 변동성)
 # 나스닥이 지수보다 유난히 요동치면 위험 신호입니다.
 df["vol_ratio"] = df["target_price"].pct_change().rolling(10).std() / \
                   (df["SPY_price"].pct_change().rolling(10).std() + 1e-9)
+df["vol_ratio_5"] = df["target_price"].pct_change().rolling(FEATURE_WINDOW).std() / \
+                    (df["SPY_price"].pct_change().rolling(FEATURE_WINDOW).std() + 1e-9)
 
-df["ret_accel"] = df["ret_5"].diff()
 df["vix_speed"] = df["VIX_price"].pct_change(3)
 df["dist_10"] = price / price.rolling(10).mean() - 1.0
 # 최근 5일간의 변동성 대비 오늘 움직임의 강도
@@ -234,15 +261,17 @@ print("뉴스 데이터(merged_finbert.csv) 로드 및 병합 중...")
 
 # 현재 파일(train_regression.py) 위치 기준으로 상위 폴더의 data/merged_finbert.csv 경로 찾기
 current_dir = os.path.dirname(os.path.abspath(__file__))
-csv_path = os.path.join(current_dir, "..", "data", "merged_finbert.csv")
+csv_path = os.path.join("C:\\Users\\admin\\data-ml\\data\\crawler\\features\\merged_finbert.csv")
 
 # 1. 뉴스 데이터 불러오기
 news_df = pd.read_csv(csv_path)
 news_df['date'] = pd.to_datetime(news_df['date']).dt.tz_localize(None)
+if 'category_UCSB Presidency Project' in news_df.columns:
+    news_df = news_df.rename(columns={'category_UCSB Presidency Project': 'category_UCSB'})
 
 # 2. 사용할 Feature 컬럼만 선택
 news_cols =[
-    'date', 'category_BIS', 'category_FOMC', 'category_White House',
+    'date', 'category_BIS', 'category_FOMC', 'category_UCSB',
     'day_of_week_sin', 'day_of_week_cos', 'month_sin', 'month_cos', 'is_weekend',
     'title_positive_prob', 'title_negative_prob', 'title_neutral_prob', 'title_sentiment_score',
     'body_positive_prob', 'body_negative_prob', 'body_neutral_prob', 'body_sentiment_score',
@@ -259,6 +288,10 @@ news_df['date'] = news_df['date'] + pd.to_timedelta(
 
 # 4. 같은 날짜(하루)에 나온 뉴스들을 평균내기 (하루 1개의 행으로 압축)
 daily_news = news_df.groupby('date').mean().reset_index()
+# 같은 날짜에 뉴스가 여러 건 있을 수 있으므로, 평균 감성값 외에도
+# "그날 뉴스가 몇 건 있었는지"를 별도 feature로 남긴다.
+# 뉴스 개수는 이벤트 강도나 시장 관심도를 보여줄 수 있다.
+daily_news["news_count"] = news_df.groupby("date").size().to_numpy()
 
 # 5. 기존 주가 DataFrame(df)과 병합하기
 # yfinance에서 받아온 Date 컬럼의 타임존(timezone)을 제거해야 병합 시 에러가 나지 않습니다.
@@ -267,18 +300,43 @@ df = pd.merge(df, daily_news, left_on='Date', right_on='date', how='left')
 
 # 6. 뉴스가 없는 날(NaN) 결측치 처리
 # 뉴스가 없는 날은 중립(neutral) 1.0, 긍정/부정 및 점수는 0으로 세팅
+# 여기서는 뉴스가 없는 날의 결측치를 ffill 하지 않는다.
+# 이유는 이전 뉴스 감성을 오늘까지 그대로 끌고 오면
+# "뉴스 없음"과 "예전 뉴스의 잔존 영향"이 섞여 왜곡될 수 있기 때문이다.
+# 따라서 뉴스가 없으면 기본적으로 중립(1.0)과 무신호(0.0)로 해석한다.
 df['title_neutral_prob'] = df['title_neutral_prob'].fillna(1.0)
 df['body_neutral_prob'] = df['body_neutral_prob'].fillna(1.0)
 
 sentiment_fill_zero_cols =[
+    'news_count',
     'title_positive_prob', 'title_negative_prob', 'title_sentiment_score',
     'body_positive_prob', 'body_negative_prob', 'body_sentiment_score',
-    'category_BIS', 'category_FOMC', 'category_White House', 'body_n_chunks'
+    'category_BIS', 'category_FOMC', 'category_UCSB', 'body_n_chunks'
 ]
-df[sentiment_fill_zero_cols] = df[sentiment_fill_zero_cols].fillna(method='ffill').fillna(0.0)
+df[sentiment_fill_zero_cols] = df[sentiment_fill_zero_cols].fillna(0.0)
 
 # 7. 요일/월 변환 등 나머지 변수들은 이전 영업일 값을 가져오거나 0으로 채움
-df.fillna(method='ffill', inplace=True) 
+# 달력 계열 변수는 뉴스 원본 컬럼을 그대로 믿지 않고,
+# 실제 시장 거래 날짜(Date)로부터 다시 계산한다.
+# 이렇게 해야 뉴스가 없는 날에도 요일/월 정보가 정확하게 유지된다.
+df['day_of_week_sin'] = np.sin(2 * np.pi * df['Date'].dt.dayofweek / 7)
+df['day_of_week_cos'] = np.cos(2 * np.pi * df['Date'].dt.dayofweek / 7)
+df['month_sin'] = np.sin(2 * np.pi * df['Date'].dt.month / 12)
+df['month_cos'] = np.cos(2 * np.pi * df['Date'].dt.month / 12)
+df['is_weekend'] = df['Date'].dt.dayofweek.isin([5, 6]).astype(float)
+
+# 뉴스의 지속효과는 이전 감성값을 그대로 전파하는 대신,
+# 마지막 뉴스 이후 경과 일수로 분리해서 전달한다.
+# 모델이 최근 뉴스와 오래된 뉴스를 구분해서 학습하도록 돕기 위한 장치다.
+last_news_date = df['Date'].where(df['news_count'] > 0).ffill()
+df['days_since_news'] = (
+    (df['Date'] - last_news_date).dt.days.clip(upper=30).fillna(30).astype(float)
+)
+# has_news는 당일 뉴스 존재 여부, news_count_lag1은 전 영업일 뉴스량이다.
+# 감성의 방향뿐 아니라 뉴스 이벤트의 빈도와 리듬도 같이 학습시키려는 목적이다.
+df['has_news'] = (df['news_count'] > 0).astype(float)
+df['news_count_lag1'] = df['news_count'].shift(1).fillna(0.0)
+
 df.fillna(0, inplace=True)
 
 # =========================================================
@@ -286,8 +344,10 @@ df.fillna(0, inplace=True)
 # =========================================================
 # 1. 최근 3일, 5일간의 평균 감성 점수 (누적된 분위기)
 df['body_sentiment_3d_mean'] = df['body_sentiment_score'].rolling(3).mean()
-df['body_sentiment_5d_mean'] = df['body_sentiment_score'].rolling(5).mean()
+df['body_sentiment_5d_mean'] = df['body_sentiment_score'].rolling(FEATURE_WINDOW).mean()
 df['title_sentiment_3d_mean'] = df['title_sentiment_score'].rolling(3).mean()
+df['title_sentiment_5d_mean'] = df['title_sentiment_score'].rolling(FEATURE_WINDOW).mean()
+df['news_count_5d'] = df['news_count'].rolling(FEATURE_WINDOW).sum()
 
 # 2. 감성 점수의 변화량 (뉴스가 어제보다 긍정적으로 변했는가?)
 df['body_sentiment_trend'] = df['body_sentiment_score'] - df['body_sentiment_score'].shift(3)
@@ -295,6 +355,9 @@ df['title_sentiment_trend'] = df['title_sentiment_score'] - df['title_sentiment_
 
 # 3. 부정적 뉴스의 급증 여부 (악재 터짐 감지)
 df['negative_news_spike'] = df['body_negative_prob'] / (df['body_negative_prob'].rolling(10).mean() + 1e-9)
+df['negative_news_spike_5d'] = (
+    df['body_negative_prob'] / (df['body_negative_prob'].rolling(FEATURE_WINDOW).mean() + 1e-9)
+)
 
 df.fillna(0, inplace=True) # 새로 생긴 결측치 제거
 
@@ -302,46 +365,53 @@ df.fillna(0, inplace=True) # 새로 생긴 결측치 제거
 # 단순 확률 대신 '긍정-부정 격차'와 '갑작스러운 뉴스 변화(Shock)'에 집중
 df['sentiment_gap'] = df['title_positive_prob'] - df['title_negative_prob']
 df['body_sentiment_gap'] = df['body_positive_prob'] - df['body_negative_prob']
-df['sentiment_shock'] = df['sentiment_gap'] - df['sentiment_gap'].rolling(5).mean()
+df['sentiment_shock'] = df['sentiment_gap'] - df['sentiment_gap'].rolling(FEATURE_WINDOW).mean()
+# 3-day half-life: FOMC/뉴스 영향이 5일 예측에서 3일 안에 대부분 소멸
+df['body_sentiment_decay_3d'] = df['body_sentiment_score'] * (0.5 ** (df['days_since_news'] / 3.0))
 
-# --- [정예 피처 2: 가격 가속도 및 변동성 폭발] ---
-# 단순 수익률 대신 상승세가 붙었는지(가속도), 변동성이 갑자기 터졌는지 확인
-df['ret_accel'] = df['ret_1'] - df['ret_5']  # 최근 1일 수익률이 5일 평균보다 강한가?
-df['vol_shock'] = df['vol_5'] / (df['vol_20'] + 1e-9) # 평소보다 변동성이 꿈동거리는가?
-df['dist_to_ma5'] = price / price.rolling(5).mean() - 1.0 # 5일선 대비 과이격 여부
+# --- [정예 피처 2: 가격 가속도 및 변동성] ---
+# 1일 vs 3일 수익률 차이 → 단기 가속/감속 신호
+df['ret_accel'] = (df['ret_1'] / 1.0) - (df['ret_3'] / 3.0)
+df['vol_shock'] = df['vol_5'] / (df['vol_20'] + 1e-9)
 
 # --- [정예 피처 3: 시장 상대 강도 (Alpha)] ---
-# 나스닥이 시장(SPY)보다 유난히 강한가, 약한가? (5일 기준)
-df['rel_strength_5'] = price.pct_change(5) - spy.pct_change(5)
+df['rel_strength_5'] = df['ret_5'] - df['spy_ret_5']
 
 # --- [정예 피처 4: 거시경제 압박 (Macro Shock)] ---
-# 5일 뒤를 예측하므로 거시 지표도 5일치 변화량을 사용
-df['uup_shock_5'] = uup.pct_change(5) # 달러가 5일간 급등했는가? (나스닥에 악재)
-df['tlt_shock_5'] = tlt.pct_change(5) # 국채가격이 5일간 급락(금리급등)했는가?
-df['vix_z_score_5'] = (vix - vix.rolling(5).mean()) / (vix.rolling(5).std() + 1e-9)
+df['tlt_shock_5'] = df['tlt_ret_5']
+
+# --- [정예 피처 5: FOMC 전용 감성] ---
+# FOMC 발표는 다른 뉴스와 섞이면 희석됨 → 별도 분리
+df['fomc_sentiment'] = df['body_sentiment_score'] * df['category_FOMC']
+df['fomc_recent_5d'] = df['category_FOMC'].rolling(FEATURE_WINDOW).max()
+
+# --- [정예 피처 6: Title vs Body 불일치] ---
+# 제목과 본문 방향이 엇갈리면 시장 혼란 → 변동성 확대 신호
+df['sentiment_divergence'] = (df['title_sentiment_score'] - df['body_sentiment_score']).abs()
 
 # =========================================================
 # 9. feature 선택
 # =========================================================
 feature_cols = [
-    #다른 feature 따로 저장
+    # News sentiment aligned to the 5-day target.
+    "news_count_5d", "days_since_news", "sentiment_gap", "body_sentiment_gap",
+    "sentiment_shock", "body_sentiment_5d_mean", "title_sentiment_5d_mean",
+    "negative_news_spike_5d", "body_sentiment_decay_3d",
+    "fomc_sentiment", "fomc_recent_5d", "sentiment_divergence",
 
-    # 핵심 감성 (Shock 위주)
-    "sentiment_gap", "body_sentiment_gap", "sentiment_shock", "body_sentiment_score",
-    
-    # 가격 동력 (Momentum & Accel)
-    "ret_5", "ret_accel", "dist_to_ma5", "bb_pos", "rsi_14",
-    
-    # 변동성 및 위험 (Risk)
-    "vol_shock", "vix_z_score_5", "drawdown", "vol_ratio",
-    
-    # 거시 및 상대강도 (Macro & Alpha)
-    "rel_strength_5", "uup_shock_5", "tlt_shock_5", "hyg_ret", "target_spy_rel_ret"
+    # Price momentum and trend aligned to 5 trading days.
+    "ret_3", "ret_5", "ret_accel", "price_to_ma_5", "slope_5",
+    "bb_pos_5", "bb_width_5", "macd_hist", "rsi_14",
 
-    
+    # Risk and volatility aligned to 5 trading days.
+    "vol_5", "vol_shock", "vix_z_score_5", "drawdown", "vol_ratio_5",
+
+    # Macro and relative-strength context aligned to 5 trading days.
+    "rel_strength_5", "uup_ret_5", "tlt_shock_5", "hyg_ret_5",
+    "target_spy_rel_ret_5", "target_tlt_rel_ret_5",
 ]
 
-horizon = 15                      # 예측 기간 고정 (5일)
+horizon = FEATURE_WINDOW         # 예측 기간 고정 (5일)
 best_horizon = horizon
 best_features = feature_cols     # feature_cols 그대로 사용
  
@@ -378,6 +448,7 @@ test_current_date = pd.to_datetime(df.iloc[split:]["Date"].values)
 # =========================================================
 print(f"\n[Optuna] 최적화 시작... (데이터 크기: {len(X_train)})")
 optuna.logging.set_verbosity(optuna.logging.WARNING)
+optuna_trials = int(os.getenv("REGRESSION_OPTUNA_TRIALS", "200"))
 
 def objective(trial):
     param = {
@@ -446,7 +517,7 @@ study = optuna.create_study(
     direction="maximize",
     sampler=sampler
 )
-study.optimize(objective, n_trials=200)
+study.optimize(objective, n_trials=optuna_trials)
 
 print(f"Best Params: {study.best_params}")
 
@@ -511,8 +582,22 @@ result_df = pd.DataFrame({
     "Pred_LogRet": pred_logret,
 })
 
+# Prediction Sample로 화면에 보여주는 예측 결과를 CSV로도 저장한다.
+# 실험 스크립트 결과물이므로 shared 파이프라인 산출물과 섞이지 않게
+# train_regression 전용 폴더에 따로 모아둔다.
+prediction_output_dir = os.path.abspath(
+    os.path.join(current_dir, "..", "training", "train_regression")
+)
+os.makedirs(prediction_output_dir, exist_ok=True)
+
+prediction_output_path = os.path.join(
+    prediction_output_dir,
+    f"{target.lower()}_train_regression_predictions.csv"
+)
+result_df.to_csv(prediction_output_path, index=False, encoding="utf-8-sig")
+
 print("\nPrediction Sample:")
-print(result_df.head(15))
+print(f"Prediction CSV saved to: {prediction_output_path}")
 
 # --- [하락/상승 예측 정밀 검증 로직] ---
 
@@ -675,7 +760,7 @@ print("\n✅ 모델과 메타데이터가 저장되었습니다. (qqq_xgboost_mo
 # 🎯 베이스라인 정확도 테스트 (Baseline Accuracy)
 # =========================================================
 # 예측할 기간(일수)을 여기에 하드코딩 하세요 (예: 1, 3, 5, 15)
-baseline_horizon = 5
+baseline_horizon = FEATURE_WINDOW
 
 print(f"\n=== 📊 베이스라인 정확도 계산 (Horizon: {baseline_horizon}일) ===")
 

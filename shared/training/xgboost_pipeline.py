@@ -9,6 +9,7 @@ from pathlib import Path
 import numpy as np
 import optuna
 import pandas as pd
+from sklearn.base import is_classifier, is_regressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.model_selection import TimeSeriesSplit
 from xgboost import XGBRegressor
@@ -331,6 +332,22 @@ def evaluate_model(
         np.mean(np.abs((future_price - baseline_future_price) / future_price)) * 100
     )
 
+    conf_cutoff = float(np.quantile(np.abs(predicted_logret), 0.7))
+    high_conf_mask = np.abs(predicted_logret) >= conf_cutoff
+    long_mask = high_conf_mask & (predicted_logret > 0)
+    short_mask = high_conf_mask & (predicted_logret < 0)
+
+    long_count = int(long_mask.sum())
+    short_count = int(short_mask.sum())
+    high_conf_long_accuracy: float | None = (
+        float((future_price[long_mask] > current_price[long_mask]).mean())
+        if long_count > 0 else None
+    )
+    high_conf_short_accuracy: float | None = (
+        float((future_price[short_mask] < current_price[short_mask]).mean())
+        if short_count > 0 else None
+    )
+
     metrics = {
         "mae": mae,
         "rmse": rmse,
@@ -340,6 +357,11 @@ def evaluate_model(
         "baseline_mae": baseline_mae,
         "baseline_rmse": baseline_rmse,
         "baseline_mape": baseline_mape,
+        "high_conf_threshold": conf_cutoff,
+        "high_conf_long_accuracy": high_conf_long_accuracy,
+        "high_conf_long_count": long_count,
+        "high_conf_short_accuracy": high_conf_short_accuracy,
+        "high_conf_short_count": short_count,
     }
 
     predictions = pd.DataFrame(
@@ -405,6 +427,25 @@ def _to_serializable_config(config: MarketNewsTrainingConfig) -> dict:
         key: str(value) if isinstance(value, Path) else value
         for key, value in raw_config.items()
     }
+
+
+def _save_xgboost_model_with_estimator_type(
+    model: XGBRegressor,
+    output_path: Path,
+) -> None:
+    """
+    Save XGBoost sklearn wrappers with a compatibility fallback for recent
+    sklearn/xgboost combinations that omit `_estimator_type` on the instance.
+    """
+    if not hasattr(model, "_estimator_type"):
+        if is_regressor(model):
+            model._estimator_type = "regressor"
+        elif is_classifier(model):
+            model._estimator_type = "classifier"
+        else:
+            raise TypeError("Could not determine estimator type before saving XGBoost model.")
+
+    model.save_model(str(output_path))
 
 
 def _fit_and_evaluate_supervised_experiment(
@@ -553,7 +594,7 @@ def run_training_experiment(
         if predictions_output_path is not None:
             predictions.to_csv(predictions_output_path, index=False, encoding="utf-8-sig")
         if model_output_path is not None:
-            final_model.save_model(str(model_output_path))
+            _save_xgboost_model_with_estimator_type(final_model, model_output_path)
         if metadata_output_path is not None:
             write_json(metadata, metadata_output_path)
 
