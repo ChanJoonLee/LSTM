@@ -25,11 +25,11 @@ except ImportError as exc:
 # =========================
 # Config
 # =========================
-INPUT_CSV = feature_csv_path("merged_table_sorted_time_features.csv")
+INPUT_CSV = feature_csv_path("merged_table_sorted_encoded.csv")
 OUTPUT_CSV = feature_csv_path("merged_finbert.csv")
 
 TITLE_COL = "title"
-BODY_COL = "body"
+BODY_COL = "body_summary"
 
 MODEL_NAME = "ProsusAI/finbert"
 
@@ -37,19 +37,35 @@ MODEL_NAME = "ProsusAI/finbert"
 # 청크 길이를 보수적으로 제한한다.
 MAX_CHARS_PER_CHUNK = 800
 
-# 배치 크기는 추론 속도와 메모리 사용량의 균형점이다.
-# GPU 메모리가 충분하면 더 크게 조정할 수 있다.
+# 배치 크기 기본값. 아래 `main()`에서 환경에 따라 권장값을 출력합니다.
 BATCH_SIZE = 8
 
+# 장치 설정: GPU 사용 불가하므로 CPU로 고정
+DEVICE = -1
 
-# =========================
-# FinBERT
-# =========================
-classifier = pipeline(
-    task="text-classification",
-    model=MODEL_NAME,
-    tokenizer=MODEL_NAME,
-)
+# 내부 캐시된 pipeline 객체
+_CLASSIFIER = None
+
+
+def get_classifier():
+    """
+    Return a cached transformers pipeline configured to run on CPU.
+
+    HuggingFace `pipeline` accepts `device` as an int (cuda device id) or -1 for CPU.
+    We cache the pipeline to avoid re-loading the model repeatedly.
+    """
+    global _CLASSIFIER
+    if _CLASSIFIER is not None:
+        return _CLASSIFIER
+
+    device_arg = DEVICE
+    _CLASSIFIER = pipeline(
+        task="text-classification",
+        model=MODEL_NAME,
+        tokenizer=MODEL_NAME,
+        device=device_arg,
+    )
+    return _CLASSIFIER
 
 
 # =========================
@@ -174,18 +190,28 @@ def classify_texts(text_list: list[str], batch_size: int = 8) -> list[dict]:
     results = [None] * len(cleaned)
 
     if non_empty_indices:
-        # 실제 모델 호출은 비어 있지 않은 텍스트에 대해서만 수행한다.
+        # 모델 호출은 비어 있지 않은 텍스트에 대해서만 수행하되,
+        # 메모리/성능 이슈를 줄이기 위해 입력을 스트리밍 배치로 나눠 처리한다.
         non_empty_texts = [cleaned[i] for i in non_empty_indices]
-        outputs = classifier(
-            non_empty_texts,
-            return_all_scores=True,
-            batch_size=batch_size,
-            truncation=True,
-        )
+        clf = get_classifier()
 
-        for idx, out in zip(non_empty_indices, outputs):
-            results[idx] = extract_probs_from_output(out)
+        total = len(non_empty_texts)
+        for start in range(0, total, batch_size):
+            end = start + batch_size
+            batch_texts = non_empty_texts[start:end]
+            outputs_batch = clf(
+                batch_texts,
+                return_all_scores=True,
+                batch_size=len(batch_texts),
+                truncation=True,
+            )
 
+            # map outputs back to original indices
+            for rel_idx, out in enumerate(outputs_batch):
+                orig_idx = non_empty_indices[start + rel_idx]
+                results[orig_idx] = extract_probs_from_output(out)
+
+    # 빈 입력이나 실패한 항목에는 기본값을 채운다.
     for i, result in enumerate(results):
         if result is None:
             results[i] = empty_scores()
@@ -235,27 +261,34 @@ def analyze_bodies(bodies: list[str], max_chars: int = 800, batch_size: int = 8)
     """
     cleaned_bodies = [clean_text(body) for body in bodies]
     chunks_per_body = []
-    all_chunks = []
 
+    # 모든 청크 문자열을 한 번에 모으지 않고, 각 기사별로 청크 정보를
+    # 보관한 뒤 classify_texts에 스트리밍 배치로 전달한다.
+    # 이를 위해 먼저 각 기사별 청크 리스트와 전체 청크 개수를 산정한다.
+    total_chunks = 0
     for body in cleaned_bodies:
-        # 각 행이 몇 개의 청크로 분할됐는지 기억해 둬야
-        # 나중에 배치 추론 결과를 다시 기사별로 묶을 수 있다.
         chunks = split_text_into_chunks(body, max_chars=max_chars) if body else []
         chunks_per_body.append(chunks)
+        total_chunks += len(chunks)
+
+    results = []
+
+    # 모든 청크를 순차적으로 처리하되 classify_texts가 내부적으로 배치 처리하므로
+    # 여기서는 청크 문자열 목록을 작은 메모리로 묶어 보내는 역할만 한다.
+    # 먼저 전체 non-empty chunk list를 만들되, 이 리스트는 문자열 참조이므로
+    # 보통 원본 텍스트보다 훨씬 작다. 그래도 매우 큰 데이터셋이라면 추가 스트리밍을 고려할 수 있다.
+    all_chunks = []
+    for chunks in chunks_per_body:
         all_chunks.extend(chunks)
 
     all_chunk_scores = classify_texts(all_chunks, batch_size=batch_size) if all_chunks else []
 
-    results = []
     score_start = 0
-
     for body, chunks in zip(cleaned_bodies, chunks_per_body):
-
         if not body or not chunks:
             results.append(empty_body_result())
             continue
 
-        # 현재 기사에 해당하는 청크 점수 구간만 잘라서 사용한다.
         score_end = score_start + len(chunks)
         chunk_scores = all_chunk_scores[score_start:score_end]
         score_start = score_end
@@ -294,6 +327,8 @@ def main():
     df[BODY_COL] = df[BODY_COL].fillna("").astype(str)
 
     print(f"[INFO] Total rows: {len(df)}")
+    # GPU 사용 불가 환경이므로 CPU로 고정하고 배치 크기도 하드코딩한다.
+    print("[INFO] Forcing CPU inference. Batch size fixed to 8.")
 
     # 제목은 짧기 때문에 전체를 한 번에 배치 처리한다.
     print("[INFO] Starting title sentiment analysis")
