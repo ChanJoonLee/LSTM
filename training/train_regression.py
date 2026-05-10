@@ -1,7 +1,7 @@
 """
 1. threshold 추가
 2. 거시경제 HYG, UUP 추가
-3. 뉴스 감성 데이터 추가 (merged_finbert.csv)
+3. 뉴스 감성 데이터 추가 (merged_finbert_with_embeddings.csv)
 
 전체적인 흐름을 보고 급변하는 시기를 맞춰서 기간을 정해야함.
 2000 ~ 2020 주가가 많이 오르지 않았기 때문에 2020~ 2025 퀀텀점프 예측은 힘들다
@@ -253,15 +253,22 @@ df["vol_breakout"] = df["ret_1"] / (df["vol_5"] + 1e-9)
 df["bb_high_dist"] = (df["target_high"] - bb_upper) / (bb_upper + 1e-9)
 
 # =========================================================
-# 8. FinBERT 뉴스 감성 데이터 추가 (merged_finbert.csv)
+# 8. FinBERT 뉴스 감성 데이터 추가 (merged_finbert_with_embeddings.csv)
 # =========================================================
 import os
+import ast
 
-print("뉴스 데이터(merged_finbert.csv) 로드 및 병합 중...")
+print("뉴스 데이터(merged_finbert_with_embeddings.csv) 로드 및 병합 중...")
 
-# 현재 파일(train_regression.py) 위치 기준으로 상위 폴더의 data/merged_finbert.csv 경로 찾기
 current_dir = os.path.dirname(os.path.abspath(__file__))
-csv_path = os.path.join("C:\\Users\\admin\\data-ml\\data\\crawler\\features\\merged_finbert.csv")
+repo_root = os.path.abspath(os.path.join(current_dir, ".."))
+csv_path = os.path.join(
+    repo_root,
+    "data",
+    "crawler",
+    "features",
+    "merged_finbert_with_embeddings.csv",
+)
 
 # 1. 뉴스 데이터 불러오기
 news_df = pd.read_csv(csv_path)
@@ -269,13 +276,70 @@ news_df['date'] = pd.to_datetime(news_df['date']).dt.tz_localize(None)
 if 'category_UCSB Presidency Project' in news_df.columns:
     news_df = news_df.rename(columns={'category_UCSB Presidency Project': 'category_UCSB'})
 
+# body_summary_embedding 파싱 및 개별 컬럼 확장
+if "body_summary_embedding" in news_df.columns:
+    def _parse_emb(x):
+        if x is None:
+            return None
+        try:
+            if bool(pd.isna(x)):
+                return None
+        except (TypeError, ValueError):
+            pass
+        if isinstance(x, str) and not x.strip():
+            return None
+        try:
+            parsed = ast.literal_eval(str(x))
+            if not isinstance(parsed, (list, tuple)):
+                return None
+            return [float(v) for v in parsed]
+        except (TypeError, ValueError, SyntaxError):
+            return None
+    emb_lists = news_df["body_summary_embedding"].map(_parse_emb)
+
+    invalid_emb_rows = emb_lists[emb_lists.map(lambda value: value is None)].index.tolist()
+    if invalid_emb_rows:
+        raise ValueError(
+            "Invalid or missing body_summary_embedding values. "
+            f"Example row indices: {invalid_emb_rows[:5]}"
+        )
+
+    emb_lengths = emb_lists.map(len)
+    empty_emb_rows = emb_lengths[emb_lengths <= 0].index.tolist()
+    if empty_emb_rows:
+        raise ValueError(
+            "Empty body_summary_embedding vectors. "
+            f"Example row indices: {empty_emb_rows[:5]}"
+        )
+
+    emb_dimension_counts = emb_lengths.value_counts().sort_index()
+    if len(emb_dimension_counts) != 1:
+        expected_emb_dim = int(emb_dimension_counts.idxmax())
+        mismatched_emb_rows = emb_lengths[emb_lengths != expected_emb_dim].index.tolist()
+        raise ValueError(
+            "Inconsistent body_summary_embedding dimensions: "
+            f"{emb_dimension_counts.to_dict()}. "
+            f"Expected the most common dimension {expected_emb_dim}; "
+            f"example mismatched row indices: {mismatched_emb_rows[:5]}"
+        )
+
+    emb_dim = int(emb_lengths.iloc[0])
+    emb_col_names = [f"body_emb_{i}" for i in range(emb_dim)]
+    emb_df = pd.DataFrame(
+        emb_lists.tolist(),
+        index=news_df.index,
+        columns=emb_col_names,
+    )
+    news_df = pd.concat([news_df, emb_df], axis=1)
+else:
+    emb_col_names = []
+
 # 2. 사용할 Feature 컬럼만 선택
-news_cols =[
+news_cols = [
     'date', 'category_BIS', 'category_FOMC', 'category_UCSB',
-    'day_of_week_sin', 'day_of_week_cos', 'month_sin', 'month_cos', 'is_weekend',
     'title_positive_prob', 'title_negative_prob', 'title_neutral_prob', 'title_sentiment_score',
     'body_positive_prob', 'body_negative_prob', 'body_neutral_prob', 'body_sentiment_score',
-    'body_n_chunks'
+    *emb_col_names,
 ]
 news_df = news_df[news_cols]
 
@@ -307,23 +371,14 @@ df = pd.merge(df, daily_news, left_on='Date', right_on='date', how='left')
 df['title_neutral_prob'] = df['title_neutral_prob'].fillna(1.0)
 df['body_neutral_prob'] = df['body_neutral_prob'].fillna(1.0)
 
-sentiment_fill_zero_cols =[
+sentiment_fill_zero_cols = [
     'news_count',
     'title_positive_prob', 'title_negative_prob', 'title_sentiment_score',
     'body_positive_prob', 'body_negative_prob', 'body_sentiment_score',
-    'category_BIS', 'category_FOMC', 'category_UCSB', 'body_n_chunks'
+    'category_BIS', 'category_FOMC', 'category_UCSB',
+    *emb_col_names,
 ]
 df[sentiment_fill_zero_cols] = df[sentiment_fill_zero_cols].fillna(0.0)
-
-# 7. 요일/월 변환 등 나머지 변수들은 이전 영업일 값을 가져오거나 0으로 채움
-# 달력 계열 변수는 뉴스 원본 컬럼을 그대로 믿지 않고,
-# 실제 시장 거래 날짜(Date)로부터 다시 계산한다.
-# 이렇게 해야 뉴스가 없는 날에도 요일/월 정보가 정확하게 유지된다.
-df['day_of_week_sin'] = np.sin(2 * np.pi * df['Date'].dt.dayofweek / 7)
-df['day_of_week_cos'] = np.cos(2 * np.pi * df['Date'].dt.dayofweek / 7)
-df['month_sin'] = np.sin(2 * np.pi * df['Date'].dt.month / 12)
-df['month_cos'] = np.cos(2 * np.pi * df['Date'].dt.month / 12)
-df['is_weekend'] = df['Date'].dt.dayofweek.isin([5, 6]).astype(float)
 
 # 뉴스의 지속효과는 이전 감성값을 그대로 전파하는 대신,
 # 마지막 뉴스 이후 경과 일수로 분리해서 전달한다.
@@ -334,6 +389,9 @@ df['days_since_news'] = (
 )
 # has_news는 당일 뉴스 존재 여부, news_count_lag1은 전 영업일 뉴스량이다.
 # 감성의 방향뿐 아니라 뉴스 이벤트의 빈도와 리듬도 같이 학습시키려는 목적이다.
+last_body_sentiment = (
+    df['body_sentiment_score'].where(df['news_count'] > 0).ffill().fillna(0.0)
+)
 df['has_news'] = (df['news_count'] > 0).astype(float)
 df['news_count_lag1'] = df['news_count'].shift(1).fillna(0.0)
 
@@ -367,7 +425,7 @@ df['sentiment_gap'] = df['title_positive_prob'] - df['title_negative_prob']
 df['body_sentiment_gap'] = df['body_positive_prob'] - df['body_negative_prob']
 df['sentiment_shock'] = df['sentiment_gap'] - df['sentiment_gap'].rolling(FEATURE_WINDOW).mean()
 # 3-day half-life: FOMC/뉴스 영향이 5일 예측에서 3일 안에 대부분 소멸
-df['body_sentiment_decay_3d'] = df['body_sentiment_score'] * (0.5 ** (df['days_since_news'] / 3.0))
+df['body_sentiment_decay_3d'] = last_body_sentiment * (0.5 ** (df['days_since_news'] / 3.0))
 
 # --- [정예 피처 2: 가격 가속도 및 변동성] ---
 # 1일 vs 3일 수익률 차이 → 단기 가속/감속 신호
@@ -398,6 +456,9 @@ feature_cols = [
     "sentiment_shock", "body_sentiment_5d_mean", "title_sentiment_5d_mean",
     "negative_news_spike_5d", "body_sentiment_decay_3d",
     "fomc_sentiment", "fomc_recent_5d", "sentiment_divergence",
+
+    # Article embedding (body_summary averaged per day).
+    *emb_col_names,
 
     # Price momentum and trend aligned to 5 trading days.
     "ret_3", "ret_5", "ret_accel", "price_to_ma_5", "slope_5",

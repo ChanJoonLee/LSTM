@@ -1,8 +1,8 @@
 {
   "experiment_name": "market_news",
   "best_horizon": 5,
-  "best_horizon_direction_score": null,
-  "selected_feature_count": 32,
+  "best_horizon_direction_score": 0.5293276108726752,
+  "selected_feature_count": 37,
   "selected_features": [
     "ret_3",
     "ret_5",
@@ -35,7 +35,12 @@
     "body_sentiment_decay_3d",
     "fomc_sentiment",
     "fomc_recent_5d",
-    "sentiment_divergence"
+    "sentiment_divergence",
+    "body_emb_12",
+    "body_emb_15",
+    "body_emb_29",
+    "body_emb_20",
+    "body_emb_19"
   ],
   "feature_frame_start_date": "2017-01-12",
   "feature_frame_end_date": "2026-04-24",
@@ -46,19 +51,19 @@
   "test_start_date": "2024-06-13",
   "test_end_date": "2026-04-24",
   "metrics": {
-    "mae": 11.243807597416158,
-    "rmse": 14.594111313685394,
-    "r2_score": 0.941145121142821,
-    "direction_accuracy": 0.563169164882227,
-    "mape": 2.140754253838045,
-    "baseline_mae": 11.43949991426325,
-    "baseline_rmse": 14.596431348878365,
-    "baseline_mape": 2.169073793098224,
-    "high_conf_threshold": 0.4376614987850189,
-    "high_conf_long_accuracy": 0.6029411764705882,
-    "high_conf_long_count": 136,
-    "high_conf_short_accuracy": 0.5,
-    "high_conf_short_count": 4
+    "mae": 11.200225899542852,
+    "rmse": 14.54049922266515,
+    "r2_score": 0.9415767377329022,
+    "direction_accuracy": 0.5952890792291221,
+    "mape": 2.1315760725366975,
+    "baseline_mae": 11.439497627078593,
+    "baseline_rmse": 14.59642918031895,
+    "baseline_mape": 2.169073329320448,
+    "high_conf_threshold": 0.4095713198184967,
+    "high_conf_long_accuracy": 0.6296296296296297,
+    "high_conf_long_count": 135,
+    "high_conf_short_accuracy": 1.0,
+    "high_conf_short_count": 5
   },
   "config": {
     "target_ticker": "QQQ",
@@ -71,7 +76,7 @@
     ],
     "start_date": "2017-01-12",
     "end_date": "2026-05-02",
-    "news_input_path": "C:\\Users\\admin\\data-ml\\data\\crawler\\features\\merged_finbert.csv",
+    "news_input_path": "C:\\Users\\admin\\data-ml\\data\\crawler\\features\\merged_finbert_with_embeddings.csv",
     "market_only_training_frame_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\market_only\\qqq_market_only_training_frame.csv",
     "market_only_predictions_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\market_only\\qqq_market_only_predictions.csv",
     "market_only_model_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\market_only\\qqq_market_only_xgboost_model.json",
@@ -96,15 +101,26 @@
       10,
       15
     ],
-    "top_feature_count": 25,
+    "top_feature_count": 30,
+    "embedding_top_feature_count": 5,
     "optuna_trials": 200,
     "train_ratio": 0.8,
     "random_seed": 42,
     "aligned_comparison_start_date": null,
     "regression_style_fixed_horizon": 5,
-    "market_news_only": true
+    "market_news_only": false
   },
   "comparison_min_date": null,
   "horizon_selection_mode": "fixed",
-  "feature_selection_mode": "fixed_regression_style"
+  "feature_selection_mode": "fixed_plus_top_selectable",
+  "fixed_feature_count": 32,
+  "selectable_feature_count": 30,
+  "selectable_top_feature_count": 5,
+  "selected_selectable_features": [
+    "body_emb_12",
+    "body_emb_15",
+    "body_emb_29",
+    "body_emb_20",
+    "body_emb_19"
+  ]
 }

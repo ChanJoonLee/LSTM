@@ -15,9 +15,9 @@
         "title_negative_prob": 0.1549,
         "title_neutral_prob": 0.7202,
         "title_sentiment_score": -0.03,
-        "body_positive_prob": 0.225,
-        "body_negative_prob": 0.14,
-        "body_neutral_prob": 0.6349
+        "body_positive_prob": 0.2581,
+        "body_negative_prob": 0.1648,
+        "body_neutral_prob": 0.577
       }
     },
     {
@@ -35,9 +35,9 @@
         "title_negative_prob": 0.1564,
         "title_neutral_prob": 0.7128,
         "title_sentiment_score": -0.0257,
-        "body_positive_prob": 0.2152,
-        "body_negative_prob": 0.1538,
-        "body_neutral_prob": 0.631
+        "body_positive_prob": 0.2545,
+        "body_negative_prob": 0.1793,
+        "body_neutral_prob": 0.5662
       }
     },
     {
@@ -55,9 +55,9 @@
         "title_negative_prob": 0.1507,
         "title_neutral_prob": 0.7142,
         "title_sentiment_score": -0.0156,
-        "body_positive_prob": 0.1965,
-        "body_negative_prob": 0.1581,
-        "body_neutral_prob": 0.6454
+        "body_positive_prob": 0.2476,
+        "body_negative_prob": 0.1724,
+        "body_neutral_prob": 0.58
       }
     },
     {
@@ -75,9 +75,9 @@
         "title_negative_prob": 0.1684,
         "title_neutral_prob": 0.6955,
         "title_sentiment_score": -0.0324,
-        "body_positive_prob": 0.1994,
-        "body_negative_prob": 0.1586,
-        "body_neutral_prob": 0.642
+        "body_positive_prob": 0.2597,
+        "body_negative_prob": 0.1682,
+        "body_neutral_prob": 0.5721
       }
     },
     {
@@ -95,9 +95,9 @@
         "title_negative_prob": 0.1914,
         "title_neutral_prob": 0.6886,
         "title_sentiment_score": -0.0715,
-        "body_positive_prob": 0.2013,
-        "body_negative_prob": 0.1612,
-        "body_neutral_prob": 0.6375
+        "body_positive_prob": 0.2588,
+        "body_negative_prob": 0.1768,
+        "body_neutral_prob": 0.5644
       }
     },
     {
@@ -115,9 +115,9 @@
         "title_negative_prob": 0.1775,
         "title_neutral_prob": 0.6881,
         "title_sentiment_score": -0.0432,
-        "body_positive_prob": 0.2136,
-        "body_negative_prob": 0.1567,
-        "body_neutral_prob": 0.6297
+        "body_positive_prob": 0.2619,
+        "body_negative_prob": 0.1809,
+        "body_neutral_prob": 0.5571
       }
     }
   ]

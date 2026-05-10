@@ -90,6 +90,12 @@ def parse_args() -> argparse.Namespace:
         ),
     )
     parser.add_argument("--top-feature-count", type=int, default=default_config.top_feature_count)
+    parser.add_argument(
+        "--embedding-top-feature-count",
+        type=int,
+        default=default_config.embedding_top_feature_count,
+        help="Number of body_emb_* columns selected on top of fixed market/scalar-news features.",
+    )
     parser.add_argument("--optuna-trials", type=int, default=default_config.optuna_trials)
     parser.add_argument("--train-ratio", type=float, default=default_config.train_ratio)
     parser.add_argument("--random-seed", type=int, default=default_config.random_seed)
@@ -143,6 +149,7 @@ def main() -> None:
         aligned_comparison_metadata_output_path=Path(args.aligned_comparison_metadata_output),
         horizon_candidates=_parse_horizon_candidates(args.horizons),
         top_feature_count=args.top_feature_count,
+        embedding_top_feature_count=args.embedding_top_feature_count,
         optuna_trials=args.optuna_trials,
         train_ratio=args.train_ratio,
         random_seed=args.random_seed,

@@ -76,21 +76,6 @@ REGRESSION_STYLE_MARKET_FEATURE_COLUMNS = [
     "target_tlt_rel_ret_5",
 ]
 
-REGRESSION_STYLE_NEWS_FEATURE_COLUMNS = [
-    "news_count_5d",
-    "days_since_news",
-    "sentiment_gap",
-    "body_sentiment_gap",
-    "sentiment_shock",
-    "body_sentiment_5d_mean",
-    "title_sentiment_5d_mean",
-    "negative_news_spike_5d",
-    "body_sentiment_decay_3d",
-    "fomc_sentiment",
-    "fomc_recent_5d",
-    "sentiment_divergence",
-]
-
 
 def _require_feature_columns(
     feature_df: pd.DataFrame,
@@ -204,8 +189,19 @@ def run_market_news_training_pipeline(
     )
     regression_news_feature_columns = _require_feature_columns(
         merged_feature_df,
-        REGRESSION_STYLE_NEWS_FEATURE_COLUMNS,
+        _news_feature_columns,
         "market+news feature frame",
+    )
+    embedding_news_feature_columns = [
+        column for column in regression_news_feature_columns if column.startswith("body_emb_")
+    ]
+    scalar_news_feature_columns = [
+        column
+        for column in regression_news_feature_columns
+        if not column.startswith("body_emb_")
+    ]
+    fixed_market_news_feature_columns = (
+        regression_market_feature_columns + scalar_news_feature_columns
     )
     market_news_result = run_training_experiment(
         experiment_name="market_news",
@@ -219,9 +215,9 @@ def run_market_news_training_pipeline(
         metadata_output_path=config.metadata_output_path,
         config=config,
         forced_horizon=config.regression_style_fixed_horizon,
-        forced_selected_features=(
-            regression_market_feature_columns + regression_news_feature_columns
-        ),
+        fixed_selected_features=fixed_market_news_feature_columns,
+        selectable_feature_columns=embedding_news_feature_columns,
+        selectable_top_feature_count=config.embedding_top_feature_count,
     )
 
     if config.market_news_only:
@@ -242,9 +238,9 @@ def run_market_news_training_pipeline(
             aligned_start_date=aligned_comparison_start_date,
             config=config,
             forced_market_only_features=regression_market_feature_columns,
-            forced_market_news_features=(
-                regression_market_feature_columns + regression_news_feature_columns
-            ),
+            fixed_market_news_features=fixed_market_news_feature_columns,
+            selectable_market_news_features=embedding_news_feature_columns,
+            selectable_market_news_top_feature_count=config.embedding_top_feature_count,
         )
         aligned_comparison_df.to_csv(
             config.aligned_comparison_output_path,

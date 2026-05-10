@@ -72,7 +72,7 @@ class MarketNewsTrainingConfig:
     start_date: str = "2017-01-12"
     end_date: str = "2026-05-02"
     news_input_path: Path = field(
-        default_factory=lambda: crawler_data_path("features", "merged_finbert.csv")
+        default_factory=lambda: crawler_data_path("features", "merged_finbert_with_embeddings.csv")
     )
     market_only_training_frame_output_path: Path = field(
         default_factory=lambda: training_data_path(
@@ -170,7 +170,8 @@ class MarketNewsTrainingConfig:
     cluster_horizon: int = 15
     cluster_window_days: int = 15
     horizon_candidates: tuple[int, ...] = (5, 7, 10, 15)
-    top_feature_count: int = 25
+    top_feature_count: int = 30
+    embedding_top_feature_count: int = 5
     optuna_trials: int = 200
     train_ratio: float = 0.8
     random_seed: int = 42

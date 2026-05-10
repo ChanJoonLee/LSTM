@@ -144,6 +144,41 @@ def _compute_direction_accuracy(
     return float((predicted_direction == actual_direction).mean())
 
 
+def _score_selected_features_with_time_series_cv(
+    X_train_full: pd.DataFrame,
+    y_train_full: pd.Series,
+    selected_features: list[str],
+    horizon: int,
+    config: MarketNewsTrainingConfig,
+) -> float:
+    tscv = TimeSeriesSplit(n_splits=3)
+    cv_scores = []
+
+    for train_index, valid_index in tscv.split(X_train_full):
+        purged_train_index = _purge_overlapping_train_rows(train_index, horizon)
+        if len(purged_train_index) == 0:
+            continue
+
+        X_tr = X_train_full[selected_features].iloc[purged_train_index]
+        X_va = X_train_full[selected_features].iloc[valid_index]
+        y_tr = y_train_full.iloc[purged_train_index]
+        y_va = y_train_full.iloc[valid_index]
+
+        model = _build_feature_selector_model(config)
+        model.fit(X_tr, y_tr)
+
+        direction_accuracy = _compute_direction_accuracy(
+            model.predict(X_va),
+            y_va.to_numpy(),
+        )
+        cv_scores.append(direction_accuracy)
+
+    if not cv_scores:
+        raise ValueError(f"Could not compute CV score for horizon={horizon}.")
+
+    return float(np.mean(cv_scores))
+
+
 def select_features_for_horizon(
     feature_df: pd.DataFrame,
     candidate_feature_columns: list[str],
@@ -178,32 +213,64 @@ def select_features_for_horizon(
         .tolist()
     )
 
-    tscv = TimeSeriesSplit(n_splits=3)
-    cv_scores = []
+    return current_top_features, _score_selected_features_with_time_series_cv(
+        X_train_full,
+        y_train_full,
+        current_top_features,
+        horizon,
+        config,
+    )
 
-    for train_index, valid_index in tscv.split(X_train_full):
-        purged_train_index = _purge_overlapping_train_rows(train_index, horizon)
-        if len(purged_train_index) == 0:
-            continue
 
-        X_tr = X_train_full[current_top_features].iloc[purged_train_index]
-        X_va = X_train_full[current_top_features].iloc[valid_index]
-        y_tr = y_train_full.iloc[purged_train_index]
-        y_va = y_train_full.iloc[valid_index]
+def select_fixed_plus_top_features_for_horizon(
+    feature_df: pd.DataFrame,
+    fixed_feature_columns: list[str],
+    selectable_feature_columns: list[str],
+    selectable_top_feature_count: int,
+    horizon: int,
+    config: MarketNewsTrainingConfig,
+) -> tuple[list[str], list[str], float]:
+    candidate_feature_columns = list(
+        dict.fromkeys(fixed_feature_columns + selectable_feature_columns)
+    )
+    supervised = build_supervised_frame(feature_df, candidate_feature_columns, horizon)
+    if len(supervised) < 200:
+        raise ValueError(f"Not enough rows to evaluate horizon={horizon}.")
 
-        model = _build_feature_selector_model(config)
-        model.fit(X_tr, y_tr)
+    split_index = int(len(supervised) * config.train_ratio)
+    X_train_full = supervised[candidate_feature_columns].iloc[:split_index]
+    y_train_full = supervised["target_logret"].iloc[:split_index]
 
-        direction_accuracy = _compute_direction_accuracy(
-            model.predict(X_va),
-            y_va.to_numpy(),
+    if X_train_full.empty or y_train_full.empty:
+        raise ValueError(f"Empty training split for horizon={horizon}.")
+
+    if selectable_top_feature_count <= 0 or not selectable_feature_columns:
+        top_selectable_features = []
+    else:
+        selector = _build_feature_selector_model(config)
+        selector.fit(X_train_full, y_train_full)
+
+        importances = pd.Series(selector.feature_importances_, index=candidate_feature_columns)
+        top_selectable_features = (
+            importances.loc[selectable_feature_columns]
+            .sort_values(ascending=False)
+            .head(selectable_top_feature_count)
+            .index
+            .tolist()
         )
-        cv_scores.append(direction_accuracy)
+    selected_features = list(dict.fromkeys(fixed_feature_columns + top_selectable_features))
 
-    if not cv_scores:
-        raise ValueError(f"Could not compute CV score for horizon={horizon}.")
-
-    return current_top_features, float(np.mean(cv_scores))
+    return (
+        selected_features,
+        top_selectable_features,
+        _score_selected_features_with_time_series_cv(
+            X_train_full,
+            y_train_full,
+            selected_features,
+            horizon,
+            config,
+        ),
+    )
 
 
 def select_best_horizon_and_features(
@@ -519,6 +586,9 @@ def run_training_experiment(
     config: MarketNewsTrainingConfig,
     forced_horizon: int | None = None,
     forced_selected_features: list[str] | None = None,
+    fixed_selected_features: list[str] | None = None,
+    selectable_feature_columns: list[str] | None = None,
+    selectable_top_feature_count: int | None = None,
     min_date: str | pd.Timestamp | None = None,
     persist_artifacts: bool = True,
 ) -> dict:
@@ -533,6 +603,32 @@ def run_training_experiment(
 
     if forced_selected_features is not None and forced_horizon is None:
         raise ValueError("forced_selected_features can only be used together with forced_horizon.")
+    has_fixed_plus_top_selection = any(
+        value is not None
+        for value in (
+            fixed_selected_features,
+            selectable_feature_columns,
+            selectable_top_feature_count,
+        )
+    )
+    if forced_selected_features is not None and has_fixed_plus_top_selection:
+        raise ValueError(
+            "forced_selected_features cannot be combined with fixed plus top feature selection."
+        )
+    if has_fixed_plus_top_selection:
+        if (
+            fixed_selected_features is None
+            or selectable_feature_columns is None
+            or selectable_top_feature_count is None
+        ):
+            raise ValueError(
+                "fixed_selected_features, selectable_feature_columns, and "
+                "selectable_top_feature_count must be provided together."
+            )
+        if forced_horizon is None:
+            raise ValueError(
+                "fixed plus top feature selection can only be used together with forced_horizon."
+            )
 
     if forced_selected_features is not None:
         best_horizon = int(forced_horizon)
@@ -547,6 +643,28 @@ def run_training_experiment(
         horizon_score = None
         horizon_selection_mode = "fixed"
         feature_selection_mode = "fixed_regression_style"
+        selected_selectable_features: list[str] = []
+    elif has_fixed_plus_top_selection:
+        best_horizon = int(forced_horizon)
+        best_features, selected_selectable_features, horizon_score = (
+            select_fixed_plus_top_features_for_horizon(
+                filtered_feature_df,
+                list(fixed_selected_features),
+                list(selectable_feature_columns),
+                int(selectable_top_feature_count),
+                best_horizon,
+                config,
+            )
+        )
+        missing_columns = [
+            column for column in best_features if column not in filtered_feature_df.columns
+        ]
+        if missing_columns:
+            raise ValueError(
+                f"Selected feature columns are missing from {experiment_name}: {missing_columns}"
+            )
+        horizon_selection_mode = "fixed"
+        feature_selection_mode = "fixed_plus_top_selectable"
     elif forced_horizon is None:
         best_horizon, best_features, horizon_score = select_best_horizon_and_features(
             filtered_feature_df,
@@ -555,6 +673,7 @@ def run_training_experiment(
         )
         horizon_selection_mode = "best_of_candidates"
         feature_selection_mode = "model_importance_top_k"
+        selected_selectable_features = []
     else:
         best_horizon = int(forced_horizon)
         best_features, horizon_score = select_features_for_horizon(
@@ -565,6 +684,7 @@ def run_training_experiment(
         )
         horizon_selection_mode = "fixed"
         feature_selection_mode = "model_importance_top_k"
+        selected_selectable_features = []
 
     supervised_frame = build_supervised_frame(
         filtered_feature_df,
@@ -583,6 +703,11 @@ def run_training_experiment(
     metadata["comparison_min_date"] = _serialize_timestamp(min_date)
     metadata["horizon_selection_mode"] = horizon_selection_mode
     metadata["feature_selection_mode"] = feature_selection_mode
+    if has_fixed_plus_top_selection:
+        metadata["fixed_feature_count"] = len(fixed_selected_features)
+        metadata["selectable_feature_count"] = len(selectable_feature_columns)
+        metadata["selectable_top_feature_count"] = int(selectable_top_feature_count)
+        metadata["selected_selectable_features"] = selected_selectable_features
 
     if persist_artifacts:
         if training_frame_output_path is not None:
@@ -711,6 +836,9 @@ def run_aligned_horizon_comparison_suite(
     config: MarketNewsTrainingConfig,
     forced_market_only_features: list[str] | None = None,
     forced_market_news_features: list[str] | None = None,
+    fixed_market_news_features: list[str] | None = None,
+    selectable_market_news_features: list[str] | None = None,
+    selectable_market_news_top_feature_count: int | None = None,
 ) -> tuple[pd.DataFrame, dict]:
     """
     뉴스 커버리지가 실제로 존재하는 기간만 남기고,
@@ -750,15 +878,35 @@ def run_aligned_horizon_comparison_suite(
                 market_only_score = None
 
             if forced_market_news_features is None:
-                market_news_features, market_news_score = select_features_for_horizon(
-                    filtered_market_news_df,
-                    market_news_feature_columns,
-                    horizon,
-                    config,
-                )
+                if (
+                    fixed_market_news_features is not None
+                    and selectable_market_news_features is not None
+                    and selectable_market_news_top_feature_count is not None
+                ):
+                    (
+                        market_news_features,
+                        selected_market_news_selectable_features,
+                        market_news_score,
+                    ) = select_fixed_plus_top_features_for_horizon(
+                        filtered_market_news_df,
+                        fixed_market_news_features,
+                        selectable_market_news_features,
+                        selectable_market_news_top_feature_count,
+                        horizon,
+                        config,
+                    )
+                else:
+                    market_news_features, market_news_score = select_features_for_horizon(
+                        filtered_market_news_df,
+                        market_news_feature_columns,
+                        horizon,
+                        config,
+                    )
+                    selected_market_news_selectable_features = []
             else:
                 market_news_features = list(forced_market_news_features)
                 market_news_score = None
+                selected_market_news_selectable_features = []
 
             market_only_supervised = build_supervised_frame(
                 filtered_market_only_df,
@@ -808,8 +956,24 @@ def run_aligned_horizon_comparison_suite(
         market_news_result["horizon_selection_mode"] = "shared_fixed"
         if forced_market_only_features is not None:
             market_only_result["feature_selection_mode"] = "fixed_regression_style"
+        else:
+            market_only_result["feature_selection_mode"] = "model_importance_top_k"
         if forced_market_news_features is not None:
             market_news_result["feature_selection_mode"] = "fixed_regression_style"
+        elif fixed_market_news_features is not None:
+            market_news_result["feature_selection_mode"] = "fixed_plus_top_selectable"
+            market_news_result["fixed_feature_count"] = len(fixed_market_news_features)
+            market_news_result["selectable_feature_count"] = len(
+                selectable_market_news_features or []
+            )
+            market_news_result["selectable_top_feature_count"] = (
+                selectable_market_news_top_feature_count
+            )
+            market_news_result["selected_selectable_features"] = (
+                selected_market_news_selectable_features
+            )
+        else:
+            market_news_result["feature_selection_mode"] = "model_importance_top_k"
 
         pair_df, pair_payload = build_comparison_artifacts(
             market_only_result,
