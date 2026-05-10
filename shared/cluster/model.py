@@ -19,16 +19,16 @@ from sklearn.preprocessing import StandardScaler
 
 
 CLUSTER_FEATURE_COLS: list[str] = [
-    "news_count",
-    "category_FOMC",
-    "category_UCSB",
-    "title_positive_prob",
-    "title_negative_prob",
-    "title_neutral_prob",
-    "title_sentiment_score",
-    "body_positive_prob",
-    "body_negative_prob",
-    "body_neutral_prob",
+    "news_count_5d",
+    "days_since_news",
+    "sentiment_gap",
+    "sentiment_shock",
+    "negative_news_spike_5d",
+    "fomc_recent_5d",
+    "body_emb_12",
+    "body_emb_15",
+    "body_emb_20",
+    "body_emb_29",
 ]
 
 VOLATILITY_LABELS: list[str] = [
@@ -40,20 +40,20 @@ VOLATILITY_LABELS: list[str] = [
     "fall_strong",
 ]
 
-# 고정 수익률 경계: -4%, -2%, +2%, +4%, +6%
-FIXED_THRESHOLDS: tuple[float, ...] = (-0.04, -0.02, 0.02, 0.04, 0.06)
+# 5-trading-day fixed return thresholds: -2.0%, -0.8%, +0.8%, +2.0%, +3.5%
+FIXED_THRESHOLDS: tuple[float, ...] = (-0.02, -0.008, 0.008, 0.02, 0.035)
 
 
 def _assign_label_fixed(ret: float) -> str:
-    if ret >= 0.06:
+    if ret >= 0.035:
         return "rise_strong"
-    if ret >= 0.04:
-        return "rise_mid"
     if ret >= 0.02:
+        return "rise_mid"
+    if ret >= 0.008:
         return "rise"
-    if ret >= -0.02:
+    if ret >= -0.008:
         return "neutral"
-    if ret >= -0.04:
+    if ret >= -0.02:
         return "fall"
     return "fall_strong"
 
@@ -66,6 +66,7 @@ def _aggregate_news_window(
     anchor_date: pd.Timestamp,
     news_indexed: pd.DataFrame,
     window_days: int,
+    feature_columns: list[str],
 ) -> np.ndarray | None:
     """anchor_date 직전 window_days 달력일의 뉴스 피처를 평균 벡터로 집계한다.
 
@@ -74,7 +75,7 @@ def _aggregate_news_window(
     cutoff = anchor_date - pd.Timedelta(days=window_days)
     upper = anchor_date - pd.Timedelta(days=1)
     try:
-        window = news_indexed.loc[cutoff:upper, CLUSTER_FEATURE_COLS]
+        window = news_indexed.loc[cutoff:upper, feature_columns]
     except KeyError:
         return None
     if window.empty:
@@ -87,6 +88,7 @@ def build_event_dataset(
     daily_news_df: pd.DataFrame,
     horizon: int = 15,
     window_days: int = 15,
+    feature_columns: list[str] | None = None,
 ) -> tuple[np.ndarray, list[str], list[pd.Timestamp]]:
     """각 거래일의 horizon-일 선행 수익률로 레이블을 붙이고 뉴스 창 벡터를 반환한다.
 
@@ -111,8 +113,10 @@ def build_event_dataset(
     df["ret_fwd"] = df["target_price"].pct_change(horizon).shift(-horizon)
 
     news = daily_news_df.copy()
-    news["date"] = pd.to_datetime(news["date"], errors="coerce").dt.tz_localize(None)
-    news_indexed = news.sort_values("date").set_index("date").sort_index()
+    resolved_feature_columns = CLUSTER_FEATURE_COLS if feature_columns is None else feature_columns
+    date_column = "date" if "date" in news.columns else "Date"
+    news[date_column] = pd.to_datetime(news[date_column], errors="coerce").dt.tz_localize(None)
+    news_indexed = news.sort_values(date_column).set_index(date_column).sort_index()
 
     vectors: list[np.ndarray] = []
     labels: list[str] = []
@@ -122,7 +126,12 @@ def build_event_dataset(
         ret = row.ret_fwd
         if pd.isna(ret):
             continue
-        vec = _aggregate_news_window(row.Date, news_indexed, window_days)
+        vec = _aggregate_news_window(
+            row.Date,
+            news_indexed,
+            window_days,
+            resolved_feature_columns,
+        )
         if vec is None:
             continue
         vectors.append(vec)
@@ -190,9 +199,11 @@ def build_cluster_summary(
     centroids: np.ndarray,
     counts: np.ndarray,
     scaler: StandardScaler,
+    feature_columns: list[str] | None = None,
 ) -> list[dict]:
     """각 클러스터(레이블)의 샘플 수, 날짜 범위, 중심점 피처 평균을 반환한다."""
     summary = []
+    resolved_feature_columns = CLUSTER_FEATURE_COLS if feature_columns is None else feature_columns
     for i, label in enumerate(VOLATILITY_LABELS):
         idx = _label_indices(labels, label)
         if idx:
@@ -212,7 +223,7 @@ def build_cluster_summary(
                 "date_range": date_range,
                 "centroid_feature_means": {
                     col: round(float(centroid_original[j]), 4)
-                    for j, col in enumerate(CLUSTER_FEATURE_COLS)
+                    for j, col in enumerate(resolved_feature_columns)
                 },
             }
         )

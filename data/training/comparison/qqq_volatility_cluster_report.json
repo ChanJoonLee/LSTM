@@ -2,122 +2,122 @@
   "clusters": [
     {
       "label": "rise_strong",
-      "count": 253,
+      "count": 245,
       "date_range": {
-        "first": "2017-07-03",
-        "last": "2026-04-10"
+        "first": "2017-12-29",
+        "last": "2026-04-13"
       },
       "centroid_feature_means": {
-        "news_count": 1.5548,
-        "category_FOMC": 0.1482,
-        "category_UCSB": 0.6472,
-        "title_positive_prob": 0.1249,
-        "title_negative_prob": 0.1549,
-        "title_neutral_prob": 0.7202,
-        "title_sentiment_score": -0.03,
-        "body_positive_prob": 0.2581,
-        "body_negative_prob": 0.1648,
-        "body_neutral_prob": 0.577
+        "news_count_5d": 3.4173,
+        "days_since_news": 2.2442,
+        "sentiment_gap": -0.0254,
+        "sentiment_shock": -0.0152,
+        "negative_news_spike_5d": 0.9596,
+        "fomc_recent_5d": 0.2083,
+        "body_emb_12": -0.0043,
+        "body_emb_15": -0.0083,
+        "body_emb_20": 0.0059,
+        "body_emb_29": -0.0054
       }
     },
     {
       "label": "rise_mid",
-      "count": 361,
+      "count": 358,
       "date_range": {
-        "first": "2017-01-30",
-        "last": "2025-12-17"
+        "first": "2017-01-19",
+        "last": "2026-04-23"
       },
       "centroid_feature_means": {
-        "news_count": 1.4696,
-        "category_FOMC": 0.1703,
-        "category_UCSB": 0.641,
-        "title_positive_prob": 0.1308,
-        "title_negative_prob": 0.1564,
-        "title_neutral_prob": 0.7128,
-        "title_sentiment_score": -0.0257,
-        "body_positive_prob": 0.2545,
-        "body_negative_prob": 0.1793,
-        "body_neutral_prob": 0.5662
+        "news_count_5d": 3.2027,
+        "days_since_news": 2.3089,
+        "sentiment_gap": -0.0187,
+        "sentiment_shock": -0.009,
+        "negative_news_spike_5d": 0.9125,
+        "fomc_recent_5d": 0.2854,
+        "body_emb_12": -0.0066,
+        "body_emb_15": -0.0028,
+        "body_emb_20": -0.0027,
+        "body_emb_29": 0.0001
       }
     },
     {
       "label": "rise",
-      "count": 511,
+      "count": 499,
       "date_range": {
-        "first": "2017-01-13",
-        "last": "2026-03-19"
+        "first": "2017-01-17",
+        "last": "2026-04-24"
       },
       "centroid_feature_means": {
-        "news_count": 1.4756,
-        "category_FOMC": 0.1711,
-        "category_UCSB": 0.6229,
-        "title_positive_prob": 0.1351,
-        "title_negative_prob": 0.1507,
-        "title_neutral_prob": 0.7142,
-        "title_sentiment_score": -0.0156,
-        "body_positive_prob": 0.2476,
-        "body_negative_prob": 0.1724,
-        "body_neutral_prob": 0.58
+        "news_count_5d": 3.2084,
+        "days_since_news": 2.1082,
+        "sentiment_gap": -0.0182,
+        "sentiment_shock": -0.0035,
+        "negative_news_spike_5d": 0.8847,
+        "fomc_recent_5d": 0.2949,
+        "body_emb_12": 0.002,
+        "body_emb_15": -0.0014,
+        "body_emb_20": -0.0079,
+        "body_emb_29": 0.0009
       }
     },
     {
       "label": "neutral",
-      "count": 711,
+      "count": 558,
       "date_range": {
-        "first": "2017-02-13",
-        "last": "2026-03-17"
+        "first": "2017-01-13",
+        "last": "2026-03-25"
       },
       "centroid_feature_means": {
-        "news_count": 1.5031,
-        "category_FOMC": 0.1654,
-        "category_UCSB": 0.6228,
-        "title_positive_prob": 0.136,
-        "title_negative_prob": 0.1684,
-        "title_neutral_prob": 0.6955,
-        "title_sentiment_score": -0.0324,
-        "body_positive_prob": 0.2597,
-        "body_negative_prob": 0.1682,
-        "body_neutral_prob": 0.5721
+        "news_count_5d": 3.0578,
+        "days_since_news": 2.3026,
+        "sentiment_gap": -0.0081,
+        "sentiment_shock": 0.0052,
+        "negative_news_spike_5d": 0.9362,
+        "fomc_recent_5d": 0.3066,
+        "body_emb_12": 0.0033,
+        "body_emb_15": 0.0022,
+        "body_emb_20": -0.0021,
+        "body_emb_29": -0.0025
       }
     },
     {
       "label": "fall",
-      "count": 156,
+      "count": 273,
       "date_range": {
-        "first": "2017-06-06",
-        "last": "2026-03-11"
+        "first": "2017-03-14",
+        "last": "2026-03-24"
       },
       "centroid_feature_means": {
-        "news_count": 1.5094,
-        "category_FOMC": 0.1347,
-        "category_UCSB": 0.586,
-        "title_positive_prob": 0.1199,
-        "title_negative_prob": 0.1914,
-        "title_neutral_prob": 0.6886,
-        "title_sentiment_score": -0.0715,
-        "body_positive_prob": 0.2588,
-        "body_negative_prob": 0.1768,
-        "body_neutral_prob": 0.5644
+        "news_count_5d": 3.0888,
+        "days_since_news": 2.4054,
+        "sentiment_gap": 0.0026,
+        "sentiment_shock": 0.012,
+        "negative_news_spike_5d": 0.9691,
+        "fomc_recent_5d": 0.2963,
+        "body_emb_12": 0.0041,
+        "body_emb_15": 0.0091,
+        "body_emb_20": -0.001,
+        "body_emb_29": -0.0025
       }
     },
     {
       "label": "fall_strong",
-      "count": 323,
+      "count": 399,
       "date_range": {
-        "first": "2018-01-18",
-        "last": "2026-03-10"
+        "first": "2017-06-02",
+        "last": "2026-03-23"
       },
       "centroid_feature_means": {
-        "news_count": 1.6223,
-        "category_FOMC": 0.1323,
-        "category_UCSB": 0.5833,
-        "title_positive_prob": 0.1343,
-        "title_negative_prob": 0.1775,
-        "title_neutral_prob": 0.6881,
-        "title_sentiment_score": -0.0432,
-        "body_positive_prob": 0.2619,
-        "body_negative_prob": 0.1809,
-        "body_neutral_prob": 0.5571
+        "news_count_5d": 3.5161,
+        "days_since_news": 1.9041,
+        "sentiment_gap": -0.0096,
+        "sentiment_shock": 0.0089,
+        "negative_news_spike_5d": 0.8754,
+        "fomc_recent_5d": 0.2677,
+        "body_emb_12": 0.0042,
+        "body_emb_15": -0.0024,
+        "body_emb_20": -0.0039,
+        "body_emb_29": 0.0013
       }
     }
   ]

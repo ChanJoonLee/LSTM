@@ -112,6 +112,7 @@ def _plot_heatmap(
     centroids_scaled: np.ndarray,
     counts: np.ndarray,
     scaler: StandardScaler,
+    feature_columns: list[str],
 ) -> None:
     centroid_orig = scaler.inverse_transform(centroids_scaled)
     col_min = centroid_orig.min(axis=0)
@@ -120,15 +121,15 @@ def _plot_heatmap(
 
     im = ax.imshow(centroid_norm, aspect="auto", cmap="RdYlGn", vmin=0, vmax=1)
 
-    ax.set_xticks(range(len(CLUSTER_FEATURE_COLS)))
-    ax.set_xticklabels(CLUSTER_FEATURE_COLS, rotation=48, ha="right", fontsize=7)
+    ax.set_xticks(range(len(feature_columns)))
+    ax.set_xticklabels(feature_columns, rotation=48, ha="right", fontsize=7)
 
     y_labels = [f"{lbl}  (n={cnt})" for lbl, cnt in zip(VOLATILITY_LABELS, counts)]
     ax.set_yticks(range(len(VOLATILITY_LABELS)))
     ax.set_yticklabels(y_labels, fontsize=8.5)
 
     for r in range(len(VOLATILITY_LABELS)):
-        for c in range(len(CLUSTER_FEATURE_COLS)):
+        for c in range(len(feature_columns)):
             ax.text(
                 c, r,
                 f"{centroid_orig[r, c]:.2f}",
@@ -150,9 +151,11 @@ def save_cluster_visualization(
     output_path: Path,
     horizon: int = 15,
     window_days: int = 15,
+    feature_columns: list[str] | None = None,
 ) -> None:
     """학습에 사용한 뉴스 창 벡터와 5개 중심점을 PCA 2D로 투영해 PNG로 저장한다."""
     vectors_scaled = scaler.transform(vectors)
+    resolved_feature_columns = CLUSTER_FEATURE_COLS if feature_columns is None else feature_columns
 
     pca = PCA(n_components=2, random_state=42)
     pca.fit(np.vstack([vectors_scaled, centroids]))
@@ -171,7 +174,7 @@ def save_cluster_visualization(
 
     gs = fig.add_gridspec(1, 2, width_ratios=[3, 2], wspace=0.38)
     _plot_scatter(fig.add_subplot(gs[0]), pts_2d, labels, cen_2d, pca)
-    _plot_heatmap(fig.add_subplot(gs[1]), centroids, counts, scaler)
+    _plot_heatmap(fig.add_subplot(gs[1]), centroids, counts, scaler, resolved_feature_columns)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(output_path, dpi=150, bbox_inches="tight")
@@ -181,19 +184,20 @@ def save_cluster_visualization(
 
 def main() -> None:
     """단독 실행 모드 — cluster_model.json 과 daily_news_features.csv 로 시각화를 재생성한다."""
-    from shared.common.utils import crawler_data_path, training_data_path
+    from shared.common.utils import training_data_path
 
     model_path = training_data_path("comparison", "qqq_volatility_cluster_model.json")
-    news_path = crawler_data_path("features", "daily_news_features.csv")
+    news_path = training_data_path("market_news", "qqq_market_news_training_frame.csv")
     out_path = training_data_path("comparison", "qqq_cluster_visualization.png")
 
     with open(model_path, encoding="utf-8") as f:
         model_dict = json.load(f)
 
     centroids, scaler = load_cluster_model(model_dict)
+    feature_columns = model_dict.get("feature_columns", CLUSTER_FEATURE_COLS)
 
     news_df = pd.read_csv(news_path, encoding="utf-8-sig")
-    X_raw = news_df[CLUSTER_FEATURE_COLS].dropna().to_numpy(dtype=float)
+    X_raw = news_df[feature_columns].dropna().to_numpy(dtype=float)
     X_scaled = scaler.transform(X_raw)
 
     point_labels = _assign_nearest_labels(X_scaled, centroids)
@@ -211,6 +215,7 @@ def main() -> None:
         output_path=out_path,
         horizon=model_dict.get("horizon", 15),
         window_days=model_dict.get("window_days", 15),
+        feature_columns=feature_columns,
     )
 
 

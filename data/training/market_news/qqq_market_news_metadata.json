@@ -1,8 +1,8 @@
 {
   "experiment_name": "market_news",
   "best_horizon": 5,
-  "best_horizon_direction_score": 0.5293276108726752,
-  "selected_feature_count": 37,
+  "best_horizon_direction_score": 0.5386266094420601,
+  "selected_feature_count": 39,
   "selected_features": [
     "ret_3",
     "ret_5",
@@ -37,10 +37,12 @@
     "fomc_recent_5d",
     "sentiment_divergence",
     "body_emb_12",
-    "body_emb_15",
     "body_emb_29",
+    "body_emb_15",
+    "body_emb_19",
     "body_emb_20",
-    "body_emb_19"
+    "body_emb_4",
+    "body_emb_26"
   ],
   "feature_frame_start_date": "2017-01-12",
   "feature_frame_end_date": "2026-04-24",
@@ -51,19 +53,19 @@
   "test_start_date": "2024-06-13",
   "test_end_date": "2026-04-24",
   "metrics": {
-    "mae": 11.200225899542852,
-    "rmse": 14.54049922266515,
-    "r2_score": 0.9415767377329022,
-    "direction_accuracy": 0.5952890792291221,
-    "mape": 2.1315760725366975,
-    "baseline_mae": 11.439497627078593,
-    "baseline_rmse": 14.59642918031895,
-    "baseline_mape": 2.169073329320448,
-    "high_conf_threshold": 0.4095713198184967,
-    "high_conf_long_accuracy": 0.6296296296296297,
-    "high_conf_long_count": 135,
-    "high_conf_short_accuracy": 1.0,
-    "high_conf_short_count": 5
+    "mae": 11.244997463298263,
+    "rmse": 14.586380552875635,
+    "r2_score": 0.9412074534098965,
+    "direction_accuracy": 0.5674518201284796,
+    "mape": 2.1410067828205195,
+    "baseline_mae": 11.439497692426727,
+    "baseline_rmse": 14.59642899949806,
+    "baseline_mape": 2.16907331358834,
+    "high_conf_threshold": 0.43278515338897705,
+    "high_conf_long_accuracy": 0.6165413533834586,
+    "high_conf_long_count": 133,
+    "high_conf_short_accuracy": 0.7142857142857143,
+    "high_conf_short_count": 7
   },
   "config": {
     "target_ticker": "QQQ",
@@ -93,8 +95,8 @@
     "cluster_model_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\comparison\\qqq_volatility_cluster_model.json",
     "cluster_report_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\comparison\\qqq_volatility_cluster_report.json",
     "cluster_visualization_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\comparison\\qqq_cluster_visualization.png",
-    "cluster_horizon": 15,
-    "cluster_window_days": 15,
+    "cluster_horizon": 5,
+    "cluster_window_days": 5,
     "horizon_candidates": [
       5,
       7,
@@ -102,25 +104,27 @@
       15
     ],
     "top_feature_count": 30,
-    "embedding_top_feature_count": 5,
+    "embedding_top_feature_count": 7,
     "optuna_trials": 200,
     "train_ratio": 0.8,
     "random_seed": 42,
     "aligned_comparison_start_date": null,
     "regression_style_fixed_horizon": 5,
-    "market_news_only": false
+    "market_news_only": true
   },
   "comparison_min_date": null,
   "horizon_selection_mode": "fixed",
   "feature_selection_mode": "fixed_plus_top_selectable",
   "fixed_feature_count": 32,
   "selectable_feature_count": 30,
-  "selectable_top_feature_count": 5,
+  "selectable_top_feature_count": 7,
   "selected_selectable_features": [
     "body_emb_12",
-    "body_emb_15",
     "body_emb_29",
+    "body_emb_15",
+    "body_emb_19",
     "body_emb_20",
-    "body_emb_19"
+    "body_emb_4",
+    "body_emb_26"
   ]
 }

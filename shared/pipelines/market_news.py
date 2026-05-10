@@ -258,20 +258,33 @@ def run_market_news_training_pipeline(
         comparison_payload["aligned_shared_period_comparison"] = aligned_comparison_payload
 
     # 7) 뉴스 클러스터 모델을 학습하고 저장한다.
+    cluster_feature_columns = _require_feature_columns(
+        merged_feature_df,
+        CLUSTER_FEATURE_COLS,
+        "cluster feature frame",
+    )
     vectors, labels, cluster_dates = build_event_dataset(
         market_feature_df,
-        daily_news_features,
+        merged_feature_df,
         horizon=config.cluster_horizon,
         window_days=config.cluster_window_days,
+        feature_columns=cluster_feature_columns,
     )
     centroids, counts, scaler = fit_news_centroids(vectors, labels)
-    cluster_summary = build_cluster_summary(labels, cluster_dates, centroids, counts, scaler)
+    cluster_summary = build_cluster_summary(
+        labels,
+        cluster_dates,
+        centroids,
+        counts,
+        scaler,
+        feature_columns=cluster_feature_columns,
+    )
 
     cluster_model_payload: dict = {
         "centroids": centroids.tolist(),
         "scaler_mean": scaler.mean_.tolist(),
         "scaler_scale": scaler.scale_.tolist(),
-        "feature_columns": CLUSTER_FEATURE_COLS,
+        "feature_columns": cluster_feature_columns,
         "labels": VOLATILITY_LABELS,
         "fixed_thresholds": list(FIXED_THRESHOLDS),
         "horizon": config.cluster_horizon,
@@ -292,6 +305,7 @@ def run_market_news_training_pipeline(
         output_path=config.cluster_visualization_output_path,
         horizon=config.cluster_horizon,
         window_days=config.cluster_window_days,
+        feature_columns=cluster_feature_columns,
     )
 
     write_json(comparison_payload, config.comparison_metadata_output_path)
