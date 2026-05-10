@@ -25,9 +25,10 @@ if PROJECT_ROOT_STR not in sys.path:
 from crawler.support_legacy.data_paths import collected_csv_path, summarized_csv_path
 
 
-INPUT_CSV = collected_csv_path("fed_fomc_links.csv")
-OUTPUT_CSV = summarized_csv_path("fed_fomc_links_summarized.csv")
+INPUT_CSV = collected_csv_path("ucsb_presidential_documents.csv")
+OUTPUT_CSV = summarized_csv_path("ucsb_presidential_documents_summarized.csv")
 BODY_COL = "body"
+SUMMARY_COL = "body_summary"
 ORIGINAL_LENGTH_COL = "body_original_length"
 MAX_CHARS = 10_000
 SLEEP_BETWEEN_CALLS_SEC = 0.5
@@ -320,6 +321,7 @@ def main() -> None:
     df[BODY_COL] = df[BODY_COL].fillna("").astype(str)
     lengths = df[BODY_COL].str.len()
     df[ORIGINAL_LENGTH_COL] = lengths
+    df[SUMMARY_COL] = df[BODY_COL]
     need_summary_mask = lengths >= MAX_CHARS
 
     indices = df.index[need_summary_mask].tolist()
@@ -335,7 +337,7 @@ def main() -> None:
             print(f"[WARN] summarize failed row={idx}: {e} -> truncating to {MAX_CHARS} chars")
             summary = text[:MAX_CHARS].rstrip()
 
-        df.at[idx, BODY_COL] = summary
+        df.at[idx, SUMMARY_COL] = summary
 
         if i < len(indices):
             time.sleep(SLEEP_BETWEEN_CALLS_SEC)

@@ -1,46 +1,67 @@
 {
-  "group_a_direct_qqq_index": [
-    "QQQ",
-    "Invesco QQQ",
+  "qqq_proxy": [
     "Nasdaq-100",
     "Nasdaq 100",
-    "NDX"
+    "NDX",
+    "technology sector",
+    "large-cap technology",
+    "mega-cap technology"
   ],
-  "group_b_big_tech_holdings": [
-    "Apple",
-    "Microsoft",
-    "Nvidia",
-    "Amazon",
-    "Meta",
-    "Alphabet",
-    "Tesla",
-    "Broadcom"
+
+  "industries": [
+    "semiconductors",
+    "advanced semiconductors",
+    "microelectronics",
+    "artificial intelligence",
+    "advanced computing",
+    "high-performance computing",
+    "critical technologies",
+    "emerging technologies",
+    "data centers",
+    "cloud computing",
+    "supply chain"
   ],
-  "group_c_core_industries": [
-    "semiconductor",
-    "chip",
-    "cloud",
-    "software",
-    "datacenter",
-    "advanced computing"
-  ],
-  "group_d_macro_variables": [
-    "inflation",
-    "interest rates",
-    "labor market",
-    "liquidity",
-    "financial conditions",
-    "yields",
-    "recession",
-    "growth outlook"
-  ],
-  "group_e_policy_regulation": [
+
+  "policy_regulation": [
     "export controls",
+    "export restrictions",
+    "entity list",
+    "blacklist",
     "sanctions",
-    "antitrust",
-    "tax credits",
+    "trade restrictions",
+    "investment restrictions",
+    "outbound investment",
+    "licensing requirement",
+    "licensing restrictions",
     "industrial policy",
-    "regulation",
-    "restrictions"
+    "subsidies",
+    "tax credits",
+    "national security",
+    "foreign adversary"
+  ],
+
+  "policy_actions": [
+    "restrict",
+    "restriction",
+    "limit",
+    "limitation",
+    "prohibit",
+    "ban",
+    "block",
+    "control",
+    "regulate",
+    "tighten",
+    "strengthen",
+    "expand",
+    "ease",
+    "enhance",
+    "impose"
+  ],
+  
+  "macro": [
+    "economic growth",
+    "global economy",
+    "inflation",
+    "financial stability"
   ]
 }

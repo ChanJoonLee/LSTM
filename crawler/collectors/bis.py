@@ -176,7 +176,7 @@ def extract_body_text(container) -> str:
         if text:
             body_parts.append(text)
 
-    return "\n".join(body_parts)
+    return " ".join(body_parts)
 
 
 def parse_bis_article_html(html: str, url: str) -> Optional[Dict]:
@@ -394,6 +394,11 @@ def crawl_bis_press_releases(
             print("  -> 본문 추출 실패")
             continue
 
+        # 본문 10자 이하인 기사는 제외
+        if len(article.get("body", "").strip()) <= 10:
+            print(f"  -> 제외: 본문 너무 짧음 ({len(article['body'])}자)")
+            continue
+
         results.append(article)
         print(f"  -> 저장: {article['title']}")
 
@@ -404,8 +409,8 @@ def crawl_bis_press_releases(
             "published_date",
             "category",
             "doc_type",
-            "title",
             "url",
+            "title",
             "body",
         ]
         df = df[keep_cols]
@@ -418,7 +423,7 @@ def crawl_bis_press_releases(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="BIS press release crawler")
-    parser.add_argument("--max-pages", type=int, default=9, help="목록 페이지 최대 탐색 수")
+    parser.add_argument("--max-pages", type=int, default=10, help="목록 페이지 최대 탐색 수")
     parser.add_argument("--sleep-sec", type=float, default=1.0, help="항목 간 대기(지터 포함)")
     parser.add_argument(
         "--output-csv",

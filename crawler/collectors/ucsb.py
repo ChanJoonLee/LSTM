@@ -23,12 +23,12 @@ if PROJECT_ROOT_STR not in sys.path:
 from crawler.support_legacy.data_paths import collected_csv_path
 
 BASE_URL = "https://www.presidency.ucsb.edu"
-DEFAULT_OUTPUT_CSV = collected_csv_path("ucsb_presidential_documents.csv")
+DEFAULT_OUTPUT_CSV = collected_csv_path("ucsb_presidential_documents2.csv")
 DEFAULT_KEYWORD_CONFIG_PATH = Path(__file__).with_name("ucsb_keywords.json")
 
 # 날짜 기반 수집의 기본 시작점.
 # 별도 인자를 주지 않으면 이 날짜 이후 문서만 모은다.
-DEFAULT_START_DATE = "2025-01-01"
+DEFAULT_START_DATE = "2017-01-01"
 
 # UCSB 목록 페이지에서 한 번에 노출할 문서 수.
 # 페이지 수를 기준으로 자르지는 않지만, 페이지 요청 URL을 만들 때는 필요하다.
@@ -50,8 +50,13 @@ DOC_TYPE_URLS = {
         f"{BASE_URL}/documents/app-categories/"
         "written-presidential-orders/presidential/executive-orders"
     ),
-    "Press Conferences": f"{BASE_URL}/documents/app-categories/presidential/news-conferences",
-    "Fact Sheets": f"{BASE_URL}/documents/app-attributes/fact-sheets",
+    "Proclamations": (
+        f"{BASE_URL}/documents/app-categories/"
+        "written-presidential-orders/presidential/proclamations"
+    ),
+    "Memoranda": f"{BASE_URL}/documents/app-categories/presidential/memoranda",
+    "Statements": f"{BASE_URL}/documents/app-categories/statements",
+    "News Conferences": f"{BASE_URL}/documents/app-categories/presidential/news-conferences",
 }
 
 # 본문 뒤쪽의 메타데이터/탐색 영역이 시작되는 제목들.
@@ -61,6 +66,18 @@ STOP_SECTION_TITLES = {
     "categories",
     "simple search of our archives",
 }
+
+GROUP_WEIGHTS = {
+    "policy_regulation": 1.0,
+    "policy_actions": 0.7,
+    "industries": 0.6,
+    "qqq_proxy": 0.3,
+    "macro": 0.2,
+}
+
+CORE_GROUPS = {"policy_regulation", "policy_actions", "industries", "qqq_proxy"}
+MIN_CORE_MATCHES = 1
+MIN_MATCH_SCORE = 1.5
 
 # UCSB 목록 페이지의 날짜 헤더 형식 예: "April 5, 2026"
 DATE_PATTERN = re.compile(r"^[A-Z][a-z]+ \d{1,2}, \d{4}$")
@@ -170,7 +187,7 @@ def build_listing_url(base_url: str, page_number: int) -> str:
     1페이지는 `items_per_page`만 붙이고,
     이후 페이지부터 `page=N`을 붙인다.
     """
-    if page_number <= 1:
+    if page_number < 1:
         return f"{base_url}?items_per_page={ITEMS_PER_PAGE}"
     return f"{base_url}?page={page_number}&items_per_page={ITEMS_PER_PAGE}"
 
@@ -219,11 +236,6 @@ def parse_listing_page(soup: BeautifulSoup, doc_type: str) -> list[dict[str, str
         if not href.startswith("/documents/"):
             continue
 
-        # 페이지네이션 UI 텍스트는 문자 인코딩에 따라 깨질 수 있으므로
-        # 완전일치 대신 대표 접두어(next/last) 기준으로 제외한다.
-        lowered_title = title.lower()
-        if lowered_title.startswith("next") or lowered_title.startswith("last"):
-            continue
 
         # 날짜 헤더 이전에 나온 링크는 게시일을 알 수 없으므로 버린다.
         # 이 크롤러는 published_date를 기준으로 시작 날짜 필터를 적용하므로,
@@ -268,14 +280,14 @@ def crawl_listing(
     - "YYYY-MM-DD 이후 문서"라는 기준이 훨씬 재현 가능하고 해석이 쉽다.
 
     동작 방식:
-    1. 1페이지부터 시작한다.
+    1. 0페이지부터 시작한다.
     2. 각 페이지에서 문서를 파싱한다.
     3. start_date 이상인 문서만 보관한다.
     4. start_date보다 오래된 문서가 보이기 시작하면 이후 페이지는 더 오래됐을 가능성이 높으므로 중단한다.
     """
     items: list[dict[str, str]] = []
     seen_urls: set[str] = set()
-    page_number = 1
+    page_number = 0
 
     while True:
         page_url = build_listing_url(base_url, page_number)
@@ -329,55 +341,18 @@ def crawl_listing(
 
 def extract_article_body(soup: BeautifulSoup) -> str:
     """
-    문서 상세 페이지에서 실제 본문 텍스트만 추출한다.
+    문서 상세 페이지에서 본문 텍스트를 추출한다.
 
-    예전처럼 제목(h1)의 형제 노드를 따라가면 body가 비는 페이지가 있어서,
-    현재는 실제 본문 래퍼인 `div.field-docs-content`를 직접 기준점으로 사용한다.
-
-    본문 수집 규칙:
-    - p, li, blockquote, h2/h3/h4만 수집한다.
-    - 메타데이터 섹션 제목이 나오면 중단한다.
-    - 날짜만 있는 줄은 제외한다.
-    - li는 접두사 "- "를 붙여 목록 구조를 보존한다.
+    div.field-docs-content는 본문 내용만 포함되도록 보장되므로,
+    해당 컨테이너의 모든 텍스트를 추출하면 된다.
     """
     content_container = soup.find("div", class_="field-docs-content")
     if content_container is None:
         return ""
+    
+    body = content_container.get_text("\n", strip=True)
+    return clean_text(body)
 
-    body_parts: list[str] = []
-
-    for node in content_container.find_all(["p", "li", "blockquote", "h2", "h3", "h4"]):
-        heading_text = clean_text(node.get_text(" ", strip=True)).lower()
-
-        # "Filed Under", "Categories" 같은 메타데이터 섹션이 시작되면 본문 수집 종료
-        if node.name in {"h2", "h3", "h4"} and heading_text.startswith(tuple(STOP_SECTION_TITLES)):
-            break
-
-        text = clean_text(node.get_text("\n", strip=True))
-        if not text:
-            continue
-
-        # 본문 위쪽에 날짜가 다시 찍히는 경우가 있어 이 줄은 제외한다.
-        if DATE_PATTERN.match(text):
-            continue
-
-        # 목록은 문단과 섞여도 구조를 잃지 않도록 접두사를 붙여 보존한다.
-        if node.name == "li":
-            text = f"- {text}"
-
-        body_parts.append(text)
-
-    # UCSB 본문은 마크업 영향으로 같은 문단이 반복 추출될 수 있어
-    # 본문 조각 수준에서 한 번 더 중복 제거한다.
-    deduped_parts: list[str] = []
-    seen_parts: set[str] = set()
-    for part in body_parts:
-        if part in seen_parts:
-            continue
-        seen_parts.add(part)
-        deduped_parts.append(part)
-
-    return "\n\n".join(deduped_parts).strip()
 
 
 def match_keywords(
@@ -404,6 +379,17 @@ def match_keywords(
     return matches
 
 
+def score_keyword_matches(matched_groups: Sequence[str]) -> tuple[float, int]:
+    """
+    매칭된 키워드 그룹에 가중치를 적용해 점수를 계산한다.
+
+    gate는 core 그룹 매치 수로 계산하고, threshold는 총점을 기준으로 판단한다.
+    """
+    core_matches = sum(1 for group_name in matched_groups if group_name in CORE_GROUPS)
+    score = sum(GROUP_WEIGHTS.get(group_name, 0.0) for group_name in matched_groups)
+    return score, core_matches
+
+
 def parse_article(
     metadata: Mapping[str, str],
     keyword_dictionary: Mapping[str, Sequence[str]],
@@ -416,7 +402,7 @@ def parse_article(
     2. 제목 추출
     3. 본문 추출
     4. 제목+본문 기준 키워드 매칭
-    5. 매치된 문서만 표준 레코드로 반환
+    5. 가중치 점수와 gate를 통과한 문서만 표준 레코드로 반환
 
     키워드가 하나도 매치되지 않으면 None을 반환해서 최종 결과에서 제외한다.
     """
@@ -446,15 +432,23 @@ def parse_article(
         key=str.lower,
     )
     matched_groups = sorted(matches.keys(), key=str.lower)
+    score, core_matches = score_keyword_matches(matched_groups)
 
-    print(f"  -> kept: {', '.join(matched_groups)}")
+    if core_matches < MIN_CORE_MATCHES:
+        print("  -> skipped: no core keyword match")
+        return None
+
+    if score < MIN_MATCH_SCORE:
+        print(f"  -> skipped: score {score:.1f} below threshold {MIN_MATCH_SCORE:.1f}")
+        return None
+
+    print(f"  -> kept: {', '.join(matched_groups)} (score={score:.1f})")
     return {
         **metadata,
         "title": title,
         "body": body,
         "matched_keyword_groups": ", ".join(matched_groups),
         "matched_keywords": ", ".join(matched_keywords),
-        "keyword_matches_json": json.dumps(matches, ensure_ascii=False),
     }
 
 
@@ -513,7 +507,6 @@ def crawl_ucsb_documents(
                 "url",
                 "matched_keyword_groups",
                 "matched_keywords",
-                "keyword_matches_json",
                 "body",
             ]
         ].sort_values(by=["published_date", "doc_type"], ascending=[False, True])
