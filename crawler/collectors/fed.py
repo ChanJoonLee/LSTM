@@ -56,23 +56,17 @@ def crawl_implementation_note(url: str) -> dict:
     contents = []
 
     if article:
-        # 문단, 목록, 인용문만 모아 본문으로 정리한다.
-        for tag in article.find_all(["p", "li", "blockquote"]):
-            text = tag.get_text(" ", strip=True)
-            if not text:
+        # 컨테이너 전체를 한 번에 텍스트로 뽑아 라인 단위로 처리한다.
+        raw = article.get_text("\n", strip=True)
+        for line in (ln.strip() for ln in raw.splitlines()):
+            if not line:
                 continue
+            contents.append(line)
 
-            # 목록 항목은 본문 안에서도 구분되도록 접두사를 붙인다.
-            if tag.name == "li":
-                text = f"- {text}"
-
-            contents.append(text)
-
-    body_text = "\n".join(contents)
+    body_text = " ".join(contents)
 
     return {
         "release_date": release_date,
-        "release_time": None,
         "title": title,
         "body": body_text
     }
@@ -81,7 +75,7 @@ def crawl_implementation_note(url: str) -> dict:
 def crawl_fomc_statement(url: str) -> dict:
     """
     FOMC statement 상세 페이지에서
-    공개일, 배포 시각, 제목, 본문 텍스트를 추출한다.
+    공개일, 제목, 본문 텍스트를 추출한다.
     """
     response = requests.get(url, headers=HEADERS, timeout=20)
     response.raise_for_status()
@@ -95,14 +89,6 @@ def crawl_fomc_statement(url: str) -> dict:
     # statement 제목
     title_tag = soup.find("h3")
     title = title_tag.get_text(" ", strip=True) if title_tag else ""
-
-    # 제목 바로 아래 p 태그에 배포 시각이 붙는 경우가 많다.
-    release_time = ""
-    if title_tag:
-        next_p = title_tag.find_next("p")
-        if next_p:
-            release_time_text = next_p.get_text(" ", strip=True)
-            release_time = release_time_text.split(" Share", 1)[0].strip()
 
     # statement 본문은 보통 col-sm-8 폭의 본문 영역에 들어 있다.
     divs = soup.find_all("div", class_="col-sm-8")
@@ -118,28 +104,22 @@ def crawl_fomc_statement(url: str) -> dict:
     stop_texts = ("for media inquiries", "implementation note issued")
 
     if article:
-        # 본문 뒤쪽의 연락처/관련 안내 구간이 나오기 전까지만 수집한다.
-        for tag in article.find_all(["p", "li", "blockquote"]):
-            text = tag.get_text(" ", strip=True)
-            if not text:
+        # 본문 전체를 한 번에 가져와 라인 단위로 스톱 구간 전까지만 수집한다.
+        raw = article.get_text("\n", strip=True)
+        for line in (ln.strip() for ln in raw.splitlines()):
+            if not line:
                 continue
 
-            if tag.name == "li":
-                text = f"- {text}"
-
-            if text == release_time:
-                continue
-
-            if text.lower().startswith(stop_texts):
+            lowered = line.lower()
+            if lowered.startswith(stop_texts):
                 break
 
-            contents.append(text)
+            contents.append(line)
 
-    body_text = "\n".join(contents)
+    body_text = " ".join(contents)
 
     return {
         "release_date": release_date,
-        "release_time": release_time,
         "title": title,
         "body": body_text
     }
@@ -168,35 +148,18 @@ def crawl_minutes(url: str) -> dict:
     contents = []
 
     if article:
-        # minutes는 뒤쪽에 Notation Vote, Attendance 같은 부록 구간이 붙기 때문에
-        # 핵심 본문으로 볼 수 있는 문단과 목록까지만 수집한다.
-        for tag in article.find_all(["p", "li"]):
-            text = tag.get_text(" ", strip=True)
-
-            if not text:
+        # 전체 텍스트를 라인 단위로 읽어 숫자 줄 제거, 'notation vote' 이전까지만 수집한다.
+        raw = article.get_text("\n", strip=True)
+        for line in (ln.strip() for ln in raw.splitlines()):
+            if not line:
                 continue
 
-            # 숫자만 있는 줄은 각주 번호일 가능성이 높아서 제외한다.
-            if text.isdigit():
-                continue
+            contents.append(line)
 
-            # 본문 이후의 부록/참석자 구간이 시작되면 수집을 멈춘다.
-            lowered = text.lower()
-            if lowered.startswith("notation vote"):
-                break
-            if lowered.startswith("attendance"):
-                break
-
-            if tag.name == "li":
-                text = f"- {text}"
-
-            contents.append(text)
-
-    body_text = "\n".join(contents)
+    body_text = " ".join(contents)
 
     return {
         "release_date": None,
-        "release_time": None,
         "title": title,
         "body": body_text
     }
@@ -229,12 +192,6 @@ def main() -> None:
         meetings = section.find_all("div", class_="fomc-meeting")
 
         for meeting in meetings:
-            date_tag = meeting.find("strong", class_="fomc-meeting__date")
-            date = date_tag.get_text(" ", strip=True) if date_tag else ""
-
-            # 날짜 문자열에 별표가 붙은 경우 SEP 회의로 간주한다.
-            is_sep = "*" in date
-
             # 회의 블록 안의 문서 링크를 순회한다.
             for link in meeting.find_all("a", href=True):
                 label = link.get_text(" ", strip=True).lower()
@@ -279,8 +236,6 @@ def main() -> None:
                 if doc_type and article:
                     results.append({
                         "release_date": article["release_date"],
-                        "release_time": article["release_time"],
-                        "is_sep": is_sep,
                         "category": "FOMC",
                         "doc_type": doc_type,
                         "url": url,
