@@ -8,8 +8,15 @@ NEUTRAL_FILL_DEFAULTS = {
     "body_neutral_prob": 1.0,
 }
 
+EMBEDDING_DECAY_MAX_DAYS = 5
+EMBEDDING_DECAY_HALF_LIFE_DAYS = 3.0
+
 SENTIMENT_FILL_ZERO_COLUMNS = [
     "news_count",
+    "negative_news_count",
+    "positive_news_count",
+    "negative_news_ratio",
+    "positive_news_ratio",
     "title_positive_prob",
     "title_negative_prob",
     "title_sentiment_score",
@@ -19,7 +26,6 @@ SENTIMENT_FILL_ZERO_COLUMNS = [
     "category_BIS",
     "category_FOMC",
     "category_UCSB",
-    "body_n_chunks",
 ]
 
 REGRESSION_STYLE_NEWS_FEATURE_COLUMNS = [
@@ -36,6 +42,14 @@ REGRESSION_STYLE_NEWS_FEATURE_COLUMNS = [
     "fomc_recent_5d",
     "sentiment_divergence",
 ]
+
+
+def _rolling_zscore(series: pd.Series, window: int, min_periods: int = 5) -> pd.Series:
+    rolling = series.rolling(window, min_periods=min_periods)
+    mean = rolling.mean()
+    std = rolling.std(ddof=0)
+    zscore = (series - mean) / (std + 1e-9)
+    return zscore.where(std > 0, 0.0).fillna(0.0)
 
 
 def _merge_daily_news_table(
@@ -64,17 +78,31 @@ def _merge_daily_news_table(
         if column not in merged.columns:
             merged[column] = 0.0
 
-    # ffill 대신 0으로 채워 뉴스 없는 날은 무신호(0)로 처리한다.
+    # 스칼라 감성/카테고리: ffill 대신 0으로 채워 뉴스 없는 날은 무신호(0)로 처리한다.
     # ffill을 쓰면 며칠 전 뉴스 감성이 아무 뉴스 없는 날까지 그대로 전파돼
     # "뉴스 없음"과 "예전 뉴스 잔존 영향"이 섞여 왜곡될 수 있다.
     merged[SENTIMENT_FILL_ZERO_COLUMNS] = merged[SENTIMENT_FILL_ZERO_COLUMNS].fillna(0.0)
 
+    # 임베딩은 마지막 뉴스 벡터를 최대 5일까지만 지수 감쇠해서 이어간다.
+    # 5일 이후에는 오래된 문맥을 무신호(0)로 끊어 노이즈 누적을 줄인다.
     # 마지막 뉴스 이후 경과 일수 계산 (train_regression.py와 동일)
     # 모델이 "오늘 뉴스"와 "며칠 전 뉴스"를 구분해서 학습할 수 있도록 돕는다.
     last_news_date = merged["Date"].where(merged["news_count"] > 0).ffill()
     merged["days_since_news"] = (
         (merged["Date"] - last_news_date).dt.days.clip(upper=30).fillna(30).astype(float)
     )
+
+    emb_cols = [c for c in merged.columns if c.startswith("body_emb_")]
+    if emb_cols:
+        last_embedding_values = merged[emb_cols].ffill().fillna(0.0)
+        embedding_decay = 0.5 ** (
+            merged["days_since_news"] / EMBEDDING_DECAY_HALF_LIFE_DAYS
+        )
+        embedding_decay = embedding_decay.where(
+            merged["days_since_news"] <= EMBEDDING_DECAY_MAX_DAYS,
+            0.0,
+        )
+        merged[emb_cols] = last_embedding_values.mul(embedding_decay, axis=0)
 
     merged = merged.fillna(0.0)
     merged["news_count_lag1"] = merged["news_count"].shift(1).fillna(0.0)
@@ -85,6 +113,10 @@ def _build_regression_style_news_features(merged: pd.DataFrame) -> list[str]:
     """
     팀원 스크립트의 감성 파생 피처를 그대로 만든다.
     """
+    last_body_sentiment = (
+        merged["body_sentiment_score"].where(merged["news_count"] > 0).ffill().fillna(0.0)
+    )
+
     merged["body_sentiment_3d_mean"] = merged["body_sentiment_score"].rolling(3).mean()
     merged["body_sentiment_5d_mean"] = merged["body_sentiment_score"].rolling(5).mean()
     merged["title_sentiment_3d_mean"] = merged["title_sentiment_score"].rolling(3).mean()
@@ -104,6 +136,11 @@ def _build_regression_style_news_features(merged: pd.DataFrame) -> list[str]:
         / (merged["body_negative_prob"].rolling(5).mean() + 1e-9)
     )
     merged["news_count_5d"] = merged["news_count"].rolling(5).sum()
+    merged["news_count_zscore_20d"] = _rolling_zscore(merged["news_count"], 20)
+    merged["negative_count_ratio_5d"] = (
+        merged["negative_news_count"].rolling(5).sum()
+        / (merged["news_count_5d"] + 1e-9)
+    )
     merged["sentiment_gap"] = merged["title_positive_prob"] - merged["title_negative_prob"]
     merged["body_sentiment_gap"] = (
         merged["body_positive_prob"] - merged["body_negative_prob"]
@@ -111,18 +148,26 @@ def _build_regression_style_news_features(merged: pd.DataFrame) -> list[str]:
     merged["sentiment_shock"] = (
         merged["sentiment_gap"] - merged["sentiment_gap"].rolling(5).mean()
     )
+    merged["sentiment_shock_zscore_20d"] = _rolling_zscore(
+        merged["sentiment_shock"],
+        20,
+    )
     merged["fomc_sentiment"] = merged["body_sentiment_score"] * merged["category_FOMC"]
+    merged["fomc_sentiment_shock"] = (
+        merged["fomc_sentiment"] - merged["fomc_sentiment"].rolling(20).mean()
+    )
     merged["fomc_recent_5d"] = merged["category_FOMC"].rolling(5).max()
     merged["sentiment_divergence"] = (
         merged["title_sentiment_score"] - merged["body_sentiment_score"]
     ).abs()
     # 반감기 3/7/15일 감쇠 — days_since_news 는 항상 현재 날짜 이전 뉴스 기준이므로 lookahead 없음
-    for half_life in (3, 7, 15):
-        merged[f"body_sentiment_decay_{half_life}d"] = merged["body_sentiment_score"] * (
+    for half_life in (3, 5, 7, 15):
+        merged[f"body_sentiment_decay_{half_life}d"] = last_body_sentiment * (
             0.5 ** (merged["days_since_news"] / half_life)
         )
     merged.fillna(0.0, inplace=True)
-    return REGRESSION_STYLE_NEWS_FEATURE_COLUMNS.copy()
+    emb_cols = [c for c in merged.columns if c.startswith("body_emb_")]
+    return REGRESSION_STYLE_NEWS_FEATURE_COLUMNS + emb_cols
 
 
 def merge_news_features_into_market_frame(

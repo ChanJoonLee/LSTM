@@ -6,6 +6,60 @@ import numpy as np
 import pandas as pd
 
 
+def _parse_embedding_string(x: object) -> "list[float] | None":
+    if x is None:
+        return None
+    try:
+        if bool(pd.isna(x)):
+            return None
+    except (TypeError, ValueError):
+        pass
+    if isinstance(x, str) and not x.strip():
+        return None
+    import ast
+    try:
+        parsed = ast.literal_eval(str(x))
+        if not isinstance(parsed, (list, tuple)):
+            return None
+        return [float(v) for v in parsed]
+    except (TypeError, ValueError, SyntaxError):
+        return None
+
+
+def _validate_embedding_lists(
+    emb_lists: pd.Series,
+    source_name: str,
+    column_name: str,
+) -> int:
+    invalid_rows = emb_lists[emb_lists.map(lambda value: value is None)].index.tolist()
+    if invalid_rows:
+        raise ValueError(
+            f"{source_name} has invalid or missing {column_name} values. "
+            f"Example row indices: {invalid_rows[:5]}"
+        )
+
+    lengths = emb_lists.map(len)
+    empty_rows = lengths[lengths <= 0].index.tolist()
+    if empty_rows:
+        raise ValueError(
+            f"{source_name} has empty {column_name} vectors. "
+            f"Example row indices: {empty_rows[:5]}"
+        )
+
+    dimension_counts = lengths.value_counts().sort_index()
+    if len(dimension_counts) != 1:
+        expected_dim = int(dimension_counts.idxmax())
+        mismatched_rows = lengths[lengths != expected_dim].index.tolist()
+        raise ValueError(
+            f"{source_name} has inconsistent {column_name} dimensions: "
+            f"{dimension_counts.to_dict()}. "
+            f"Expected the most common dimension {expected_dim}; "
+            f"example mismatched row indices: {mismatched_rows[:5]}"
+        )
+
+    return int(lengths.iloc[0])
+
+
 CATEGORY_TO_PREFIX = {
     "FOMC": "fomc",
     "BIS": "bis",
@@ -101,7 +155,7 @@ def _count_matched_keywords(raw_value: object) -> int:
 
 def load_news_source_table(input_path) -> pd.DataFrame:
     """
-    crawler 후처리 결과인 merged_finbert.csv를 읽어 표준 형태로 정리한다.
+    crawler 후처리 결과인 merged_finbert_with_embeddings.csv를 읽어 표준 형태로 정리한다.
 
     여기서 한 번 컬럼을 정리해 두면, 아래 단계는 크롤러 출처에 상관없이
     동일한 규칙으로 일자별 피처를 만들 수 있다.
@@ -142,6 +196,18 @@ def load_news_source_table(input_path) -> pd.DataFrame:
     prepared["body_sentiment_score"] = prepared["body_sentiment_score"].fillna(0.0)
     prepared["body_n_chunks"] = prepared["body_n_chunks"].fillna(0).astype(int)
     prepared["body_original_length"] = prepared["body_original_length"].fillna(0).astype(int)
+
+    if "body_summary_embedding" in prepared.columns:
+        embedding_column = "body_summary_embedding"
+        emb_lists = prepared["body_summary_embedding"].map(_parse_embedding_string)
+        emb_dim = _validate_embedding_lists(emb_lists, str(input_path), embedding_column)
+        emb_df = pd.DataFrame(
+            emb_lists.tolist(),
+            index=prepared.index,
+            columns=[f"body_emb_{i}" for i in range(emb_dim)],
+        )
+        prepared = pd.concat([prepared, emb_df], axis=1)
+
     prepared["doc_type_key"] = prepared["doc_type"].map(_normalize_doc_type)
 
     if "matched_keywords" in prepared.columns:
@@ -182,46 +248,30 @@ def build_daily_news_feature_table(news_df: pd.DataFrame) -> pd.DataFrame:
         "body_neutral_prob": 1.0,
         "title_sentiment_score": 0.0,
         "body_sentiment_score": 0.0,
-        "body_n_chunks": 0.0,
     }
     for column, default_value in probability_defaults.items():
         if column not in prepared.columns:
             prepared[column] = default_value
         prepared[column] = prepared[column].fillna(default_value)
 
+    if "is_negative_news" not in prepared.columns:
+        prepared["is_negative_news"] = (prepared["body_sentiment_score"] <= -0.15).astype(int)
+    if "is_positive_news" not in prepared.columns:
+        prepared["is_positive_news"] = (prepared["body_sentiment_score"] >= 0.15).astype(int)
+
     day_of_week = prepared["date"].dt.dayofweek
-    if "is_weekend" not in prepared.columns:
-        prepared["is_weekend"] = day_of_week.isin([5, 6]).astype(int)
-    if "day_of_week_sin" not in prepared.columns:
-        prepared["day_of_week_sin"] = np.sin(2 * np.pi * day_of_week / 7)
-    if "day_of_week_cos" not in prepared.columns:
-        prepared["day_of_week_cos"] = np.cos(2 * np.pi * day_of_week / 7)
-
-    month = prepared["date"].dt.month
-    if "month_sin" not in prepared.columns:
-        prepared["month_sin"] = np.sin(2 * np.pi * month / 12)
-    if "month_cos" not in prepared.columns:
-        prepared["month_cos"] = np.cos(2 * np.pi * month / 12)
-
-    # 팀원 스크립트와 같은 방식으로 주말 뉴스는 다음 월요일에 반영한다.
     prepared["date"] = prepared["date"] + pd.to_timedelta(
-        np.where(
-            day_of_week == 5,
-            2,
-            np.where(day_of_week == 6, 1, 0),
-        ),
-        unit="D",
+        np.where(day_of_week == 5, 2, np.where(day_of_week == 6, 1, 0)), unit="D"
     )
+
+    emb_cols = [c for c in prepared.columns if c.startswith("body_emb_")]
+    for col in emb_cols:
+        prepared[col] = prepared[col].fillna(0.0)
 
     regression_daily_columns = [
         "category_BIS",
         "category_FOMC",
         "category_UCSB",
-        "day_of_week_sin",
-        "day_of_week_cos",
-        "month_sin",
-        "month_cos",
-        "is_weekend",
         "title_positive_prob",
         "title_negative_prob",
         "title_neutral_prob",
@@ -230,14 +280,30 @@ def build_daily_news_feature_table(news_df: pd.DataFrame) -> pd.DataFrame:
         "body_negative_prob",
         "body_neutral_prob",
         "body_sentiment_score",
-        "body_n_chunks",
+        *emb_cols,
     ]
 
     grouped = prepared.groupby("date", sort=True)
     daily = grouped[regression_daily_columns].mean(numeric_only=True).reset_index()
     daily["news_count"] = grouped.size().to_numpy()
+    daily["negative_news_count"] = grouped["is_negative_news"].sum().to_numpy(dtype=float)
+    daily["positive_news_count"] = grouped["is_positive_news"].sum().to_numpy(dtype=float)
+    daily["negative_news_ratio"] = daily["negative_news_count"] / (
+        daily["news_count"] + 1e-9
+    )
+    daily["positive_news_ratio"] = daily["positive_news_count"] / (
+        daily["news_count"] + 1e-9
+    )
 
-    ordered_columns = ["date", "news_count", *regression_daily_columns]
+    ordered_columns = [
+        "date",
+        "news_count",
+        "negative_news_count",
+        "positive_news_count",
+        "negative_news_ratio",
+        "positive_news_ratio",
+        *regression_daily_columns,
+    ]
     daily = daily[ordered_columns]
     daily = daily.sort_values("date").reset_index(drop=True)
     return daily

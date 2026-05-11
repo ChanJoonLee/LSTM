@@ -11,6 +11,19 @@
 - `market_only`와 `market_news` 두 실험을 같은 절차로 학습해 성능을 비교.
 - 여기에 `market_news`도 추가. (뉴스데이터와, 주가데이터 날짜 일치)
 
+## 현재 기본 설정 요약
+
+아래 내용은 현재 코드 기준의 기본 동작임.
+
+- 메인 뉴스 입력 파일은 `data/crawler/features/merged_finbert_with_embeddings.csv`.
+- 이 파일에는 FinBERT 감성 컬럼과 함께 `body_summary_embedding` 컬럼이 있어야 함.
+- `shared/news/features.py`는 `body_summary_embedding`을 파싱해 `body_emb_0`, `body_emb_1` 같은 숫자 피처로 펼치고, 행마다 임베딩 차원이 같은지 검증함.
+- `market_only`는 고정된 시장 피처 20개를 사용하고, `market_news`는 시장 피처 20개 + 스칼라 뉴스 피처 12개 + `body_emb_*` 중 상위 N개를 사용함.
+- `body_emb_*` 상위 N개는 train 구간에서 XGBoost importance로 고르며, 현재 기본값은 `embedding_top_feature_count = 7`.
+- 뉴스가 없는 날의 일반 뉴스/감성 값은 대부분 0으로 채우되, `body_sentiment_decay_3d`와 `body_emb_*`는 마지막 실제 뉴스의 잔존 효과를 감쇠해서 반영함.
+- 클러스터링은 비지도 KMeans가 아니라, 5거래일 선행 수익률을 6개 구간으로 나눈 뒤 각 구간의 클러스터 피처 중심점을 저장하는 방식임.
+- 클러스터링에서는 회귀용 raw `body_emb_*` 선택과 별도로, 5일 뉴스 윈도우 평균 임베딩 30차원을 `StandardScaler + PCA(5)`로 줄인 `body_emb_cluster_pc1~5`를 사용함.
+
 ## 프로젝트 개요(대략적인 프로젝트 파이프라인)
 
 1. Crawler/collectors/fed.py, crawler/collectors/whitehouse.py, crawler/collectors/bis.py 실행해서 원문 문서 모음
@@ -20,12 +33,12 @@
 2. 수집한 문서를 학습 가능한 형태로 정리하는 단계
     * crawler/postprocessing/text_summarizer.py -> 너무 긴 본문을 Ollama를 이용해서 요약해서 길이를 줄이는 역할
     * crawler/postprocessing/proprocessing.py -> 여러 수집 결과 CSV를 하나로 합치면서 날짜, 카테고리, 문서 타입, 본문 길이 같은 컬럼을 정리
-    * crawler/postprocessing/sentiment_score.py -> FinBERT를 사용해 제목과 본문에 감성 점수를 붙여 최종적으로 merged_finbert.csv 생성
+    * crawler/postprocessing/sentiment_score.py -> FinBERT를 사용해 제목과 본문에 감성 점수를 붙여 `merged_finbert.csv` 생성. 메인 학습은 여기에 본문 임베딩이 추가된 `merged_finbert_with_embeddings.csv`를 기본 입력으로 사용
 * 이 과정을 거쳐서 모델이 읽을 수 있는 수치화된 뉴스데이터로 변환
 
 
 3. 학습단계
-    * shared/run_market_news_training.py: merged_finbert.csv를 입력으로 받아 전체 파이프라인 실행
+    * shared/run_market_news_training.py: `merged_finbert_with_embeddings.csv`를 입력으로 받아 전체 파이프라인 실행
     * 맹점은 모델이 문서 한건한건을 직접 읽는 것이 아니라, 하루 단위로 압축된 뉴스 신호를 사용한다는 것.
         * 예를 들어
         * 어떤 날짜에는 뉴스가 몇 건 있었는지
@@ -185,7 +198,7 @@ pip install torch --index-url https://download.pytorch.org/whl/cpu
 
 ### A. 이미 뉴스 피처 CSV가 있을 때 학습만 바로 실행
 
-`data/crawler/features/merged_finbert.csv`가 이미 준비되어 있다면 아래 한 줄로 메인 학습 파이프라인 실행 가능.
+`data/crawler/features/merged_finbert_with_embeddings.csv`가 이미 준비되어 있다면 아래 한 줄로 메인 학습 파이프라인 실행 가능.
 
 ```bash
 # market_only + market_news + aligned comparison 전체 실행
@@ -203,6 +216,11 @@ python shared/run_market_news_training.py --market-news-only
 - `data/training/market_news/qqq_market_news_metadata.json`
 - `data/training/comparison/qqq_market_model_comparison.csv`
 - `data/training/comparison/qqq_market_model_comparison.json`
+- `data/training/comparison/qqq_market_model_comparison_aligned.csv`
+- `data/training/comparison/qqq_market_model_comparison_aligned.json`
+- `data/training/comparison/qqq_volatility_cluster_model.json`
+- `data/training/comparison/qqq_volatility_cluster_report.json`
+- `data/training/comparison/qqq_cluster_visualization.png`
 
 ### B. 뉴스 수집부터 학습까지 전체 파이프라인 실행
 
@@ -257,6 +275,12 @@ python crawler/postprocessing/sentiment_score.py
 
 - `data/crawler/features/merged_finbert.csv`
 
+주의:
+
+- 현재 메인 학습 기본 입력은 `data/crawler/features/merged_finbert_with_embeddings.csv`.
+- 이 파일은 `merged_finbert.csv`에 `body_summary_embedding` 컬럼이 추가된 버전이어야 함.
+- `body_summary_embedding` 값이 비어 있거나, 파싱되지 않거나, 행마다 차원이 다르면 `shared/news/features.py`에서 바로 오류를 냄.
+
 #### Step 5. 메인 학습 파이프라인 실행
 
 ```bash
@@ -274,7 +298,8 @@ python shared/run_market_news_training.py \
   --end-date 2026-01-01 \
   --horizons 5,10,15,20 \
   --optuna-trials 30 \
-  --top-feature-count 20
+  --top-feature-count 20 \
+  --embedding-top-feature-count 7
 ```
 
 주요 옵션:
@@ -290,7 +315,9 @@ python shared/run_market_news_training.py \
 - `--optuna-trials`
   하이퍼파라미터 탐색 횟수
 - `--top-feature-count`
-  최종 후보로 남길 상위 중요 피처 개수
+  일반 importance 기반 피처 선택 모드에서 남길 상위 피처 개수. 현재 메인 `market_news`의 임베딩 개수는 아래 옵션이 결정함
+- `--embedding-top-feature-count`
+  `market_news`에서 `body_emb_*` 후보 중 train 구간 importance 기준으로 사용할 상위 임베딩 피처 개수
 - `--market-news-only`
   `market_only` 학습과 aligned comparison을 건너뛰고 `market_news`만 실행. 실험 중 빠른 반복이 필요할 때 사용
 
@@ -366,56 +393,54 @@ python shared/run_market_news_training.py \
 
 즉 `shared` 안에 다른 피처가 더 남아 있더라도, 메인 실험이 실제로 보는 핵심 시장 피처는 `train_regression.py`와 동일한 세트임.
 
-### 3. 뉴스 일자 집계도 `train_regression.py` 흐름으로 맞춤
+### 3. 뉴스 일자 집계와 임베딩 파싱
 
-`train_regression.py`에서는 `merged_finbert.csv`를 읽은 뒤:
+`shared/news/features.py`는 `merged_finbert_with_embeddings.csv`를 읽은 뒤:
 
-1. 필요한 뉴스 컬럼만 선택
-2. 주말 뉴스를 다음 월요일로 이동
-3. 같은 날짜 뉴스는 평균을 내어 하루 1행으로 압축
+1. `body_summary_embedding`을 숫자 리스트로 파싱
+2. 모든 valid row의 임베딩 차원이 같은지 검증
+3. `body_emb_0`, `body_emb_1` 같은 컬럼으로 확장
+4. 주말 뉴스를 다음 월요일로 이동
+5. 같은 날짜 뉴스는 평균을 내어 하루 1행으로 압축
 
-현재 `shared/news/features.py`도 같은 생각으로 동작함.
+현재 일자별 뉴스 테이블에 남기는 주요 컬럼:
 
-반영된 규칙:
+- `news_count`
+- `negative_news_count`, `positive_news_count`
+- `negative_news_ratio`, `positive_news_ratio`
+- `category_BIS`, `category_FOMC`, `category_UCSB`
+- `title_positive_prob`, `title_negative_prob`, `title_neutral_prob`
+- `title_sentiment_score`
+- `body_positive_prob`, `body_negative_prob`, `body_neutral_prob`
+- `body_sentiment_score`
+- `body_emb_*`
 
-- 주말 뉴스는 다음 영업일(월요일)로 이동
-- 같은 날짜 뉴스는 평균값으로 압축
-- 주요 입력 컬럼은 아래와 같은 `train_regression.py` 스타일 컬럼
-  - `category_BIS`
-  - `category_FOMC`
-  - `category_UCSB`
-  - `day_of_week_sin`, `day_of_week_cos`
-  - `month_sin`, `month_cos`
-  - `is_weekend`
-  - `title_positive_prob`, `title_negative_prob`, `title_neutral_prob`
-  - `title_sentiment_score`
-  - `body_positive_prob`, `body_negative_prob`, `body_neutral_prob`
-  - `body_sentiment_score`
-  - `body_n_chunks`
-
-차이점이 있다면, `shared`는 이 작업을 `load_news_source_table()`과 `build_daily_news_feature_table()` 두 단계로 나눠둔 것뿐임.
+`day_of_week_*`, `month_*`, `is_weekend`, `body_n_chunks`는 현재 메인 회귀용 뉴스 피처에서는 제외되어 있음.
+임베딩 컬럼은 차원이 맞지 않거나 빈 값이 섞이면 조용히 넘어가지 않고 오류를 내도록 방어 코드를 둠.
 
 ### 4. 뉴스 병합과 결측 처리 순서도 최대한 그대로 맞춤
 
-`shared/news/merge.py`는 `train_regression.py`의 병합 흐름을 따름.
+`shared/news/merge.py`는 시장 피처와 일자별 뉴스 피처를 날짜 기준으로 합친 뒤 결측을 아래처럼 처리함.
 
 현재 순서:
 
 1. 시장 데이터와 뉴스 일자 테이블을 날짜 기준 `left join`
 2. `title_neutral_prob`, `body_neutral_prob`는 기본값 `1.0`으로 채움
-3. 주요 뉴스/감성 컬럼은 **`ffill` 없이 `0.0`으로 채움** (뉴스 없는 날 = 무신호)
+3. 일반 뉴스/감성 컬럼은 기본적으로 `0.0`으로 채움 (뉴스 없는 날 = 무신호)
 4. `days_since_news` 계산: 마지막 뉴스 이후 경과 거래일 수 (최대 30일)
-5. 나머지 전체 결측은 `0.0`으로 채움 (`train_regression.py`와 동일)
+5. `body_sentiment_decay_3d`, `body_sentiment_decay_5d`, `body_sentiment_decay_7d`, `body_sentiment_decay_15d`는 마지막 실제 뉴스의 `body_sentiment_score`를 가져와 반감기별로 감쇠
+6. `body_emb_*`는 마지막 실제 뉴스 임베딩을 가져와 같은 반감기 3일 방식으로 감쇠하되, 최대 5일까지만 반영하고 이후는 0으로 처리
+7. 나머지 전체 결측은 `0.0`으로 채움
 
-`ffill`을 쓰지 않는 이유:
+정리하면:
 
-- `ffill`을 쓰면 며칠 전 뉴스 감성이 아무 뉴스도 없는 날까지 그대로 전파됨
-- "뉴스 없음(0)"과 "예전 뉴스의 잔존 영향"이 섞여 신호가 왜곡될 수 있음
-- 대신 `days_since_news`와 `body_sentiment_decay_3d`를 통해 오래된 뉴스의 감쇠된 영향을 모델이 별도로 학습하게 함
+- 당일 뉴스 자체가 없는 값은 0으로 둠
+- 오래된 뉴스의 잔존 영향은 `days_since_news`, 반감기별 `body_sentiment_decay_*d`, 감쇠된 `body_emb_*`로 따로 표현함
+- 임베딩은 무한정 `ffill`하지 않고 5일까지만 감쇠 적용함
 
-### 5. 뉴스 파생 피처는 원본 스크립트 기준 12개
+### 5. 뉴스 파생 피처와 임베딩 선택
 
-현재 메인 `market_news` 실험에서 쓰는 뉴스 피처는 아래 12개임.
+현재 메인 `market_news` 실험에서 항상 쓰는 스칼라 뉴스 피처는 아래 12개임.
 
 | 피처 | 설명 |
 | --- | --- |
@@ -440,6 +465,20 @@ python shared/run_market_news_training.py \
 
 추가로 `shared`에서는 aligned comparison 시작일 계산을 위해 `news_count_lag1` 보조 컬럼도 남겨 둠.
 이 컬럼은 메인 뉴스 피처라기보다 비교 구간을 자르는 데 쓰는 운영용 컬럼이라고 보면 됨.
+
+임베딩은 모든 `body_emb_*`를 그대로 넣지 않음.
+
+- 고정 피처: 시장 피처 20개 + 위 스칼라 뉴스 피처 12개
+- 선택 피처: `body_emb_*` 전체 후보
+- 선택 방식: train 구간에서 XGBoost importance를 계산하고 `body_emb_*` 중 상위 N개만 추가
+- 현재 기본 N: `embedding_top_feature_count = 7`
+- 선택된 임베딩은 메타데이터의 `selected_selectable_features`와 `selected_features`에서 확인 가능
+
+이렇게 한 이유는 임베딩 차원이 늘어나면서 노이즈가 같이 들어올 수 있기 때문임.
+스칼라 뉴스 신호는 모두 유지하되, 임베딩은 train 기준으로 설명력이 큰 축만 제한적으로 붙이는 구조임.
+
+이 선택 규칙은 `market_news` 회귀 모델용임.
+클러스터링은 같은 raw `body_emb_*` 후보를 직접 고르지 않고, 별도의 클러스터 전용 PCA 압축 피처를 사용함.
 
 ### 6. 학습 타깃과 Optuna 목적함수도 `train_regression.py` 기준
 
@@ -477,15 +516,93 @@ python shared/run_market_news_training.py --market-news-only
 
 중요한 점:
 
-- 메인 두 실험은 `train_regression.py` 스타일 고정 horizon/고정 피처를 사용
-- 반면 aligned comparison은 `--horizons`에 들어온 후보 horizon들에 대해 같은 피처 세트로 다시 비교함
+- `market_only`는 고정 시장 피처 20개를 사용
+- `market_news`는 고정 시장 피처 + 스칼라 뉴스 피처 12개 + train 기준 상위 임베딩 피처를 사용
+- aligned comparison은 `--horizons`에 들어온 후보 horizon들에 대해 같은 선택 규칙으로 다시 비교함
 
 즉 현재 구조를 한 문장으로 정리하면:
 
-- 메인 모델 학습 로직은 `train_regression.py`를 거의 그대로 따르고
+- 기본 회귀 학습 로직은 `train_regression.py` 흐름을 따르고
 - shared는 그 위에 비교 실험과 저장 구조만 얹어 둔 상태라고 보면 됨.
 
-### 8. 평가 지표 — 고확신 구간 분석 (`evaluate_model`에 추가됨)
+### 8. 뉴스 클러스터링 기준
+
+클러스터링은 `shared/cluster/model.py`에서 처리함.
+현재 방식은 뉴스 피처끼리만 비지도 군집화하는 KMeans가 아니라, 미래 수익률 레이블을 먼저 정하고 그 레이블별 클러스터 피처 중심점을 저장하는 방식임.
+
+기본 설정:
+
+- 예측 기준 수익률: anchor 날짜 이후 5거래일 선행 수익률
+- 뉴스 집계 창: anchor 날짜 직전 5일(달력일)
+- 레이블 개수: 6개
+- 중심점 계산: 레이블별 표준화 클러스터 피처 평균 벡터
+
+6개 레이블 경계:
+
+| 레이블 | 5거래일 선행 수익률 |
+| --- | ---: |
+| `rise_strong` | `+3.5%` 이상 |
+| `rise_mid` | `+2.0%` 이상, `+3.5%` 미만 |
+| `rise` | `+0.8%` 이상, `+2.0%` 미만 |
+| `neutral` | `-0.8%` 이상, `+0.8%` 미만 |
+| `fall` | `-2.0%` 이상, `-0.8%` 미만 |
+| `fall_strong` | `-2.0%` 미만 |
+
+현재 클러스터 피처는 19개임.
+
+기본 시장/뉴스 피처 14개:
+
+- `ret_5`
+- `ret_accel`
+- `vol_5`
+- `vol_shock`
+- `vix_z_score_5`
+- `drawdown`
+- `vol_ratio_5`
+- `rel_strength_5`
+- `news_count_zscore_20d`
+- `negative_count_ratio_5d`
+- `sentiment_shock_zscore_20d`
+- `body_sentiment_decay_5d`
+- `fomc_recent_5d`
+- `fomc_sentiment_shock`
+
+임베딩 PCA 피처 5개:
+
+- `body_emb_cluster_pc1`
+- `body_emb_cluster_pc2`
+- `body_emb_cluster_pc3`
+- `body_emb_cluster_pc4`
+- `body_emb_cluster_pc5`
+
+임베딩 PCA 처리 방식:
+
+1. 클러스터 학습용 anchor 날짜마다 직전 5일 뉴스 윈도우의 `body_emb_0~29` 평균 벡터를 만듦
+2. 이 30차원 임베딩 윈도우 벡터에 `StandardScaler`를 fit해서 평균 0, 표준편차 1 스케일로 변환
+3. 표준화된 30차원 벡터에 `PCA(n_components=5)`를 fit해서 `body_emb_cluster_pc1~5`로 압축
+4. 위 14개 기본 피처와 5개 PCA 피처를 합친 19차원 벡터를 다시 클러스터용 `StandardScaler`로 표준화
+5. 레이블별 평균 벡터를 centroid로 저장
+
+새 뉴스가 들어왔을 때는 PCA를 다시 학습하지 않음.
+`qqq_volatility_cluster_model.json`에 저장된 `embedding_pca.scaler_mean`, `embedding_pca.scaler_scale`, `embedding_pca.pca_mean`, `embedding_pca.pca_components`를 복원해서 새 5일 뉴스 윈도우 임베딩을 같은 PCA 좌표계로 transform만 함.
+그다음 저장된 클러스터 scaler와 centroid를 사용해 6개 레이블과의 거리를 비교함.
+
+`qqq_volatility_cluster_model.json`에는 다음 정보가 함께 저장됨:
+
+- `feature_columns`: 최종 19개 클러스터 피처 목록
+- `base_feature_columns`: 임베딩 PCA를 제외한 기본 14개 피처 목록
+- `embedding_pca.source_columns`: PCA 입력으로 사용한 raw `body_emb_*` 컬럼 목록
+- `embedding_pca.feature_columns`: 생성된 `body_emb_cluster_pc*` 컬럼 목록
+- `embedding_pca.explained_variance_ratio`: 각 임베딩 PCA 축의 설명분산 비율
+- `centroids`, `scaler_mean`, `scaler_scale`: 최종 19차원 클러스터 공간의 centroid와 scaler
+
+출력 파일:
+
+- `data/training/comparison/qqq_volatility_cluster_model.json`
+- `data/training/comparison/qqq_volatility_cluster_report.json`
+- `data/training/comparison/qqq_cluster_visualization.png`
+
+### 9. 평가 지표 — 고확신 구간 분석 (`evaluate_model`에 추가됨)
 
 `train_regression.py`의 고확신 구간 분석이 `shared/training/xgboost_pipeline.py`의 `evaluate_model` 함수에 이식됨.
 
@@ -519,7 +636,7 @@ Direction accuracy: 56.10%
   하락(Short) 확신 시 정확도: 40.00%  (n=5)
 ```
 
-### 9. 아직 옮기지 않은 부분
+### 10. 아직 옮기지 않은 부분
 
 아래 요소들은 아직 `shared` 메인 파이프라인에는 넣지 않음.
 
@@ -538,9 +655,10 @@ Direction accuracy: 56.10%
 이렇게 역할을 나눠서 작업해보면 될듯.
 
 
-## 최신 실험 결과(2026.04.01)
+## 과거 실험 결과(2026.04.01 기준)
 
-아래 결과는 프로젝트 루트에서 다음 명령으로 실행한 최신 산출물 기준.
+아래 결과는 당시 프로젝트 루트에서 다음 명령으로 실행한 산출물 기준.
+현재는 임베딩 피처 선택과 클러스터링 기준이 바뀌었으므로, 최종 판단은 새로 생성된 `data/training/*/*metadata.json`과 comparison 산출물을 기준으로 보는 것이 좋음.
 
 ```bash
 ./venv/bin/python shared/run_market_news_training.py --horizons 10,20 --optuna-trials 10

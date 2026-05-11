@@ -24,12 +24,14 @@ from shared.market.data import build_market_feature_frame, download_market_data
 from shared.news.features import build_daily_news_feature_table, load_news_source_table
 from shared.news.merge import merge_news_features_into_market_frame
 from shared.cluster import (
-    CLUSTER_FEATURE_COLS,
+    CLUSTER_BASE_FEATURE_COLS,
+    CLUSTER_EMBEDDING_PCA_COMPONENTS,
     FIXED_THRESHOLDS,
     VOLATILITY_LABELS,
     build_cluster_summary,
-    build_event_dataset,
+    build_event_dataset_with_embedding_pca,
     fit_news_centroids,
+    infer_embedding_feature_columns,
     save_cluster_visualization,
 )
 from shared.training.xgboost_pipeline import (
@@ -74,21 +76,6 @@ REGRESSION_STYLE_MARKET_FEATURE_COLUMNS = [
     "hyg_ret_5",
     "target_spy_rel_ret_5",
     "target_tlt_rel_ret_5",
-]
-
-REGRESSION_STYLE_NEWS_FEATURE_COLUMNS = [
-    "news_count_5d",
-    "days_since_news",
-    "sentiment_gap",
-    "body_sentiment_gap",
-    "sentiment_shock",
-    "body_sentiment_5d_mean",
-    "title_sentiment_5d_mean",
-    "negative_news_spike_5d",
-    "body_sentiment_decay_3d",
-    "fomc_sentiment",
-    "fomc_recent_5d",
-    "sentiment_divergence",
 ]
 
 
@@ -204,8 +191,19 @@ def run_market_news_training_pipeline(
     )
     regression_news_feature_columns = _require_feature_columns(
         merged_feature_df,
-        REGRESSION_STYLE_NEWS_FEATURE_COLUMNS,
+        _news_feature_columns,
         "market+news feature frame",
+    )
+    embedding_news_feature_columns = [
+        column for column in regression_news_feature_columns if column.startswith("body_emb_")
+    ]
+    scalar_news_feature_columns = [
+        column
+        for column in regression_news_feature_columns
+        if not column.startswith("body_emb_")
+    ]
+    fixed_market_news_feature_columns = (
+        regression_market_feature_columns + scalar_news_feature_columns
     )
     market_news_result = run_training_experiment(
         experiment_name="market_news",
@@ -219,9 +217,9 @@ def run_market_news_training_pipeline(
         metadata_output_path=config.metadata_output_path,
         config=config,
         forced_horizon=config.regression_style_fixed_horizon,
-        forced_selected_features=(
-            regression_market_feature_columns + regression_news_feature_columns
-        ),
+        fixed_selected_features=fixed_market_news_feature_columns,
+        selectable_feature_columns=embedding_news_feature_columns,
+        selectable_top_feature_count=config.embedding_top_feature_count,
     )
 
     if config.market_news_only:
@@ -242,9 +240,9 @@ def run_market_news_training_pipeline(
             aligned_start_date=aligned_comparison_start_date,
             config=config,
             forced_market_only_features=regression_market_feature_columns,
-            forced_market_news_features=(
-                regression_market_feature_columns + regression_news_feature_columns
-            ),
+            fixed_market_news_features=fixed_market_news_feature_columns,
+            selectable_market_news_features=embedding_news_feature_columns,
+            selectable_market_news_top_feature_count=config.embedding_top_feature_count,
         )
         aligned_comparison_df.to_csv(
             config.aligned_comparison_output_path,
@@ -262,20 +260,44 @@ def run_market_news_training_pipeline(
         comparison_payload["aligned_shared_period_comparison"] = aligned_comparison_payload
 
     # 7) 뉴스 클러스터 모델을 학습하고 저장한다.
-    vectors, labels, cluster_dates = build_event_dataset(
-        market_feature_df,
-        daily_news_features,
-        horizon=config.cluster_horizon,
-        window_days=config.cluster_window_days,
+    cluster_base_feature_columns = _require_feature_columns(
+        merged_feature_df,
+        CLUSTER_BASE_FEATURE_COLS,
+        "cluster feature frame",
+    )
+    cluster_embedding_feature_columns = _require_feature_columns(
+        merged_feature_df,
+        infer_embedding_feature_columns(merged_feature_df),
+        "cluster embedding feature frame",
+    )
+    vectors, labels, cluster_dates, cluster_feature_columns, embedding_pca_payload = (
+        build_event_dataset_with_embedding_pca(
+            market_feature_df,
+            merged_feature_df,
+            horizon=config.cluster_horizon,
+            window_days=config.cluster_window_days,
+            base_feature_columns=cluster_base_feature_columns,
+            embedding_feature_columns=cluster_embedding_feature_columns,
+            n_components=CLUSTER_EMBEDDING_PCA_COMPONENTS,
+        )
     )
     centroids, counts, scaler = fit_news_centroids(vectors, labels)
-    cluster_summary = build_cluster_summary(labels, cluster_dates, centroids, counts, scaler)
+    cluster_summary = build_cluster_summary(
+        labels,
+        cluster_dates,
+        centroids,
+        counts,
+        scaler,
+        feature_columns=cluster_feature_columns,
+    )
 
     cluster_model_payload: dict = {
         "centroids": centroids.tolist(),
         "scaler_mean": scaler.mean_.tolist(),
         "scaler_scale": scaler.scale_.tolist(),
-        "feature_columns": CLUSTER_FEATURE_COLS,
+        "feature_columns": cluster_feature_columns,
+        "base_feature_columns": cluster_base_feature_columns,
+        "embedding_pca": embedding_pca_payload,
         "labels": VOLATILITY_LABELS,
         "fixed_thresholds": list(FIXED_THRESHOLDS),
         "horizon": config.cluster_horizon,
@@ -296,6 +318,7 @@ def run_market_news_training_pipeline(
         output_path=config.cluster_visualization_output_path,
         horizon=config.cluster_horizon,
         window_days=config.cluster_window_days,
+        feature_columns=cluster_feature_columns,
     )
 
     write_json(comparison_payload, config.comparison_metadata_output_path)
