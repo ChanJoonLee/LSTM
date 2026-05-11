@@ -254,6 +254,11 @@ def build_daily_news_feature_table(news_df: pd.DataFrame) -> pd.DataFrame:
             prepared[column] = default_value
         prepared[column] = prepared[column].fillna(default_value)
 
+    if "is_negative_news" not in prepared.columns:
+        prepared["is_negative_news"] = (prepared["body_sentiment_score"] <= -0.15).astype(int)
+    if "is_positive_news" not in prepared.columns:
+        prepared["is_positive_news"] = (prepared["body_sentiment_score"] >= 0.15).astype(int)
+
     day_of_week = prepared["date"].dt.dayofweek
     prepared["date"] = prepared["date"] + pd.to_timedelta(
         np.where(day_of_week == 5, 2, np.where(day_of_week == 6, 1, 0)), unit="D"
@@ -281,8 +286,24 @@ def build_daily_news_feature_table(news_df: pd.DataFrame) -> pd.DataFrame:
     grouped = prepared.groupby("date", sort=True)
     daily = grouped[regression_daily_columns].mean(numeric_only=True).reset_index()
     daily["news_count"] = grouped.size().to_numpy()
+    daily["negative_news_count"] = grouped["is_negative_news"].sum().to_numpy(dtype=float)
+    daily["positive_news_count"] = grouped["is_positive_news"].sum().to_numpy(dtype=float)
+    daily["negative_news_ratio"] = daily["negative_news_count"] / (
+        daily["news_count"] + 1e-9
+    )
+    daily["positive_news_ratio"] = daily["positive_news_count"] / (
+        daily["news_count"] + 1e-9
+    )
 
-    ordered_columns = ["date", "news_count", *regression_daily_columns]
+    ordered_columns = [
+        "date",
+        "news_count",
+        "negative_news_count",
+        "positive_news_count",
+        "negative_news_ratio",
+        "positive_news_ratio",
+        *regression_daily_columns,
+    ]
     daily = daily[ordered_columns]
     daily = daily.sort_values("date").reset_index(drop=True)
     return daily

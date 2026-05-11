@@ -13,6 +13,10 @@ EMBEDDING_DECAY_HALF_LIFE_DAYS = 3.0
 
 SENTIMENT_FILL_ZERO_COLUMNS = [
     "news_count",
+    "negative_news_count",
+    "positive_news_count",
+    "negative_news_ratio",
+    "positive_news_ratio",
     "title_positive_prob",
     "title_negative_prob",
     "title_sentiment_score",
@@ -38,6 +42,14 @@ REGRESSION_STYLE_NEWS_FEATURE_COLUMNS = [
     "fomc_recent_5d",
     "sentiment_divergence",
 ]
+
+
+def _rolling_zscore(series: pd.Series, window: int, min_periods: int = 5) -> pd.Series:
+    rolling = series.rolling(window, min_periods=min_periods)
+    mean = rolling.mean()
+    std = rolling.std(ddof=0)
+    zscore = (series - mean) / (std + 1e-9)
+    return zscore.where(std > 0, 0.0).fillna(0.0)
 
 
 def _merge_daily_news_table(
@@ -124,6 +136,11 @@ def _build_regression_style_news_features(merged: pd.DataFrame) -> list[str]:
         / (merged["body_negative_prob"].rolling(5).mean() + 1e-9)
     )
     merged["news_count_5d"] = merged["news_count"].rolling(5).sum()
+    merged["news_count_zscore_20d"] = _rolling_zscore(merged["news_count"], 20)
+    merged["negative_count_ratio_5d"] = (
+        merged["negative_news_count"].rolling(5).sum()
+        / (merged["news_count_5d"] + 1e-9)
+    )
     merged["sentiment_gap"] = merged["title_positive_prob"] - merged["title_negative_prob"]
     merged["body_sentiment_gap"] = (
         merged["body_positive_prob"] - merged["body_negative_prob"]
@@ -131,13 +148,20 @@ def _build_regression_style_news_features(merged: pd.DataFrame) -> list[str]:
     merged["sentiment_shock"] = (
         merged["sentiment_gap"] - merged["sentiment_gap"].rolling(5).mean()
     )
+    merged["sentiment_shock_zscore_20d"] = _rolling_zscore(
+        merged["sentiment_shock"],
+        20,
+    )
     merged["fomc_sentiment"] = merged["body_sentiment_score"] * merged["category_FOMC"]
+    merged["fomc_sentiment_shock"] = (
+        merged["fomc_sentiment"] - merged["fomc_sentiment"].rolling(20).mean()
+    )
     merged["fomc_recent_5d"] = merged["category_FOMC"].rolling(5).max()
     merged["sentiment_divergence"] = (
         merged["title_sentiment_score"] - merged["body_sentiment_score"]
     ).abs()
     # 반감기 3/7/15일 감쇠 — days_since_news 는 항상 현재 날짜 이전 뉴스 기준이므로 lookahead 없음
-    for half_life in (3, 7, 15):
+    for half_life in (3, 5, 7, 15):
         merged[f"body_sentiment_decay_{half_life}d"] = last_body_sentiment * (
             0.5 ** (merged["days_since_news"] / half_life)
         )

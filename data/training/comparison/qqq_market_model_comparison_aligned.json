@@ -39,19 +39,19 @@
         "test_start_date": "2024-06-20",
         "test_end_date": "2026-04-24",
         "metrics": {
-          "mae": 11.264406441941869,
-          "rmse": 14.60048986041179,
-          "r2_score": 0.9409631669862023,
-          "direction_accuracy": 0.572354211663067,
-          "mape": 2.1419357724726575,
-          "baseline_mae": 11.502158113483734,
-          "baseline_rmse": 14.654098639891888,
-          "baseline_mape": 2.1801778185583878,
-          "high_conf_threshold": 0.4343450963497162,
-          "high_conf_long_accuracy": 0.6030534351145038,
-          "high_conf_long_count": 131,
-          "high_conf_short_accuracy": 0.75,
-          "high_conf_short_count": 8
+          "mae": 11.319814076632413,
+          "rmse": 14.711206784607258,
+          "r2_score": 0.9400644083950296,
+          "direction_accuracy": 0.5421166306695464,
+          "mape": 2.150691328268854,
+          "baseline_mae": 11.502159299912257,
+          "baseline_rmse": 14.654098946305949,
+          "baseline_mape": 2.180178039472875,
+          "high_conf_threshold": 0.4604173004627228,
+          "high_conf_long_accuracy": 0.6153846153846154,
+          "high_conf_long_count": 130,
+          "high_conf_short_accuracy": 0.5555555555555556,
+          "high_conf_short_count": 9
         },
         "config": {
           "target_ticker": "QQQ",
@@ -90,7 +90,7 @@
             15
           ],
           "top_feature_count": 30,
-          "embedding_top_feature_count": 5,
+          "embedding_top_feature_count": 4,
           "optuna_trials": 200,
           "train_ratio": 0.8,
           "random_seed": 42,
@@ -105,8 +105,8 @@
       "market_news": {
         "experiment_name": "market_news_aligned",
         "best_horizon": 5,
-        "best_horizon_direction_score": 0.525035765379113,
-        "selected_feature_count": 37,
+        "best_horizon_direction_score": 0.5329041487839771,
+        "selected_feature_count": 36,
         "selected_features": [
           "ret_3",
           "ret_5",
@@ -143,8 +143,7 @@
           "body_emb_15",
           "body_emb_29",
           "body_emb_4",
-          "body_emb_19",
-          "body_emb_3"
+          "body_emb_19"
         ],
         "feature_frame_start_date": "2017-02-10",
         "feature_frame_end_date": "2026-04-24",
@@ -155,18 +154,18 @@
         "test_start_date": "2024-06-20",
         "test_end_date": "2026-04-24",
         "metrics": {
-          "mae": 11.239766164930836,
-          "rmse": 14.578000607245636,
-          "r2_score": 0.9411448967455888,
+          "mae": 11.261495231425721,
+          "rmse": 14.588158409241387,
+          "r2_score": 0.94106284912985,
           "direction_accuracy": 0.5831533477321814,
-          "mape": 2.138910812164233,
-          "baseline_mae": 11.502158113483734,
-          "baseline_rmse": 14.654098639891888,
-          "baseline_mape": 2.1801778185583878,
-          "high_conf_threshold": 0.4252798557281494,
-          "high_conf_long_accuracy": 0.6044776119402985,
+          "mape": 2.143196106144689,
+          "baseline_mae": 11.502159299912257,
+          "baseline_rmse": 14.654098946305949,
+          "baseline_mape": 2.180178039472875,
+          "high_conf_threshold": 0.4077358841896057,
+          "high_conf_long_accuracy": 0.6268656716417911,
           "high_conf_long_count": 134,
-          "high_conf_short_accuracy": 1.0,
+          "high_conf_short_accuracy": 0.6,
           "high_conf_short_count": 5
         },
         "config": {
@@ -206,7 +205,7 @@
             15
           ],
           "top_feature_count": 30,
-          "embedding_top_feature_count": 5,
+          "embedding_top_feature_count": 4,
           "optuna_trials": 200,
           "train_ratio": 0.8,
           "random_seed": 42,
@@ -219,21 +218,20 @@
         "feature_selection_mode": "fixed_plus_top_selectable",
         "fixed_feature_count": 32,
         "selectable_feature_count": 30,
-        "selectable_top_feature_count": 5,
+        "selectable_top_feature_count": 4,
         "selected_selectable_features": [
           "body_emb_15",
           "body_emb_29",
           "body_emb_4",
-          "body_emb_19",
-          "body_emb_3"
+          "body_emb_19"
         ]
       },
       "delta_market_news_minus_market_only": {
-        "direction_accuracy": 0.010799136069114423,
-        "rmse": -0.022489253166153134,
-        "mae": -0.024640277011032552,
-        "r2_score": 0.00018172975938646196,
-        "mape": -0.0030249603084246957
+        "direction_accuracy": 0.04103671706263501,
+        "rmse": -0.12304837536587065,
+        "mae": -0.05831884520669206,
+        "r2_score": 0.0009984407348204716,
+        "mape": -0.007495222124164869
       },
       "comparison_scope": "aligned_shared_period",
       "shared_horizon": 5,
@@ -277,19 +275,19 @@
         "test_start_date": "2024-06-17",
         "test_end_date": "2026-04-22",
         "metrics": {
-          "mae": 13.196138731304304,
-          "rmse": 17.296218182914263,
-          "r2_score": 0.917150382428665,
-          "direction_accuracy": 0.5442764578833693,
-          "mape": 2.502754942167518,
-          "baseline_mae": 13.347974674233093,
-          "baseline_rmse": 17.246904097292617,
-          "baseline_mape": 2.525069786808566,
-          "high_conf_threshold": 0.6251559853553772,
-          "high_conf_long_accuracy": 0.6141732283464567,
-          "high_conf_long_count": 127,
-          "high_conf_short_accuracy": 0.5,
-          "high_conf_short_count": 12
+          "mae": 13.143510424643953,
+          "rmse": 17.219121020758504,
+          "r2_score": 0.917887333958643,
+          "direction_accuracy": 0.5615550755939525,
+          "mape": 2.494167390169253,
+          "baseline_mae": 13.347974015106136,
+          "baseline_rmse": 17.246903745975743,
+          "baseline_mape": 2.5250696676943365,
+          "high_conf_threshold": 0.5750906467437744,
+          "high_conf_long_accuracy": 0.6119402985074627,
+          "high_conf_long_count": 134,
+          "high_conf_short_accuracy": 0.4,
+          "high_conf_short_count": 5
         },
         "config": {
           "target_ticker": "QQQ",
@@ -328,7 +326,7 @@
             15
           ],
           "top_feature_count": 30,
-          "embedding_top_feature_count": 5,
+          "embedding_top_feature_count": 4,
           "optuna_trials": 200,
           "train_ratio": 0.8,
           "random_seed": 42,
@@ -343,8 +341,8 @@
       "market_news": {
         "experiment_name": "market_news_aligned",
         "best_horizon": 7,
-        "best_horizon_direction_score": 0.5600858369098712,
-        "selected_feature_count": 37,
+        "best_horizon_direction_score": 0.5486409155937052,
+        "selected_feature_count": 36,
         "selected_features": [
           "ret_3",
           "ret_5",
@@ -381,8 +379,7 @@
           "body_emb_12",
           "body_emb_23",
           "body_emb_8",
-          "body_emb_29",
-          "body_emb_2"
+          "body_emb_29"
         ],
         "feature_frame_start_date": "2017-02-10",
         "feature_frame_end_date": "2026-04-22",
@@ -393,19 +390,19 @@
         "test_start_date": "2024-06-17",
         "test_end_date": "2026-04-22",
         "metrics": {
-          "mae": 13.243476207817496,
-          "rmse": 17.394642484421222,
-          "r2_score": 0.916204786455602,
-          "direction_accuracy": 0.5356371490280778,
-          "mape": 2.5151684746181076,
-          "baseline_mae": 13.347974674233093,
-          "baseline_rmse": 17.246904097292617,
-          "baseline_mape": 2.525069786808566,
-          "high_conf_threshold": 0.6407960057258606,
-          "high_conf_long_accuracy": 0.5655737704918032,
-          "high_conf_long_count": 122,
-          "high_conf_short_accuracy": 0.4117647058823529,
-          "high_conf_short_count": 17
+          "mae": 13.235184975197798,
+          "rmse": 17.316392327639345,
+          "r2_score": 0.9169570000227679,
+          "direction_accuracy": 0.5485961123110151,
+          "mape": 2.512398818184878,
+          "baseline_mae": 13.347974015106136,
+          "baseline_rmse": 17.246903745975743,
+          "baseline_mape": 2.5250696676943365,
+          "high_conf_threshold": 0.5978487730026245,
+          "high_conf_long_accuracy": 0.5514705882352942,
+          "high_conf_long_count": 136,
+          "high_conf_short_accuracy": 0.3333333333333333,
+          "high_conf_short_count": 3
         },
         "config": {
           "target_ticker": "QQQ",
@@ -444,7 +441,7 @@
             15
           ],
           "top_feature_count": 30,
-          "embedding_top_feature_count": 5,
+          "embedding_top_feature_count": 4,
           "optuna_trials": 200,
           "train_ratio": 0.8,
           "random_seed": 42,
@@ -457,21 +454,20 @@
         "feature_selection_mode": "fixed_plus_top_selectable",
         "fixed_feature_count": 32,
         "selectable_feature_count": 30,
-        "selectable_top_feature_count": 5,
+        "selectable_top_feature_count": 4,
         "selected_selectable_features": [
           "body_emb_12",
           "body_emb_23",
           "body_emb_8",
-          "body_emb_29",
-          "body_emb_2"
+          "body_emb_29"
         ]
       },
       "delta_market_news_minus_market_only": {
-        "direction_accuracy": -0.008639308855291516,
-        "rmse": 0.09842430150695947,
-        "mae": 0.0473374765131922,
-        "r2_score": -0.0009455959730629848,
-        "mape": 0.012413532450589404
+        "direction_accuracy": -0.01295896328293733,
+        "rmse": 0.09727130688084173,
+        "mae": 0.09167455055384544,
+        "r2_score": -0.0009303339358750495,
+        "mape": 0.018231428015625273
       },
       "comparison_scope": "aligned_shared_period",
       "shared_horizon": 7,
@@ -515,19 +511,19 @@
         "test_start_date": "2024-06-13",
         "test_end_date": "2026-04-17",
         "metrics": {
-          "mae": 15.398427917308302,
-          "rmse": 20.580921405341428,
-          "r2_score": 0.8826566262130503,
-          "direction_accuracy": 0.577922077922078,
-          "mape": 2.9244949218953793,
+          "mae": 15.361427505514627,
+          "rmse": 20.529090829871862,
+          "r2_score": 0.8832469130792706,
+          "direction_accuracy": 0.5757575757575758,
+          "mape": 2.9190379150440626,
           "baseline_mae": 15.731205465473654,
-          "baseline_rmse": 20.46336620218615,
-          "baseline_mape": 2.9764755771880784,
-          "high_conf_threshold": 0.8490076065063477,
-          "high_conf_long_accuracy": 0.672,
-          "high_conf_long_count": 125,
+          "baseline_rmse": 20.46336495886056,
+          "baseline_mape": 2.9764756479538135,
+          "high_conf_threshold": 0.8642977476119995,
+          "high_conf_long_accuracy": 0.6439393939393939,
+          "high_conf_long_count": 132,
           "high_conf_short_accuracy": 0.2857142857142857,
-          "high_conf_short_count": 14
+          "high_conf_short_count": 7
         },
         "config": {
           "target_ticker": "QQQ",
@@ -566,7 +562,7 @@
             15
           ],
           "top_feature_count": 30,
-          "embedding_top_feature_count": 5,
+          "embedding_top_feature_count": 4,
           "optuna_trials": 200,
           "train_ratio": 0.8,
           "random_seed": 42,
@@ -581,8 +577,8 @@
       "market_news": {
         "experiment_name": "market_news_aligned",
         "best_horizon": 10,
-        "best_horizon_direction_score": 0.5727598566308244,
-        "selected_feature_count": 37,
+        "best_horizon_direction_score": 0.5741935483870968,
+        "selected_feature_count": 36,
         "selected_features": [
           "ret_3",
           "ret_5",
@@ -619,8 +615,7 @@
           "body_emb_26",
           "body_emb_29",
           "body_emb_17",
-          "body_emb_3",
-          "body_emb_28"
+          "body_emb_3"
         ],
         "feature_frame_start_date": "2017-02-10",
         "feature_frame_end_date": "2026-04-17",
@@ -631,19 +626,19 @@
         "test_start_date": "2024-06-13",
         "test_end_date": "2026-04-17",
         "metrics": {
-          "mae": 15.414348470413568,
-          "rmse": 20.82530310000398,
-          "r2_score": 0.8798533670724589,
-          "direction_accuracy": 0.5757575757575758,
-          "mape": 2.931779142745889,
+          "mae": 15.349268226721454,
+          "rmse": 20.505181521093256,
+          "r2_score": 0.8835187088514551,
+          "direction_accuracy": 0.5822510822510822,
+          "mape": 2.915674987092903,
           "baseline_mae": 15.731205465473654,
-          "baseline_rmse": 20.46336620218615,
-          "baseline_mape": 2.9764755771880784,
-          "high_conf_threshold": 0.9389878511428833,
-          "high_conf_long_accuracy": 0.6229508196721312,
-          "high_conf_long_count": 122,
-          "high_conf_short_accuracy": 0.23529411764705882,
-          "high_conf_short_count": 17
+          "baseline_rmse": 20.46336495886056,
+          "baseline_mape": 2.9764756479538135,
+          "high_conf_threshold": 0.8619484901428223,
+          "high_conf_long_accuracy": 0.582089552238806,
+          "high_conf_long_count": 134,
+          "high_conf_short_accuracy": 0.0,
+          "high_conf_short_count": 5
         },
         "config": {
           "target_ticker": "QQQ",
@@ -682,7 +677,7 @@
             15
           ],
           "top_feature_count": 30,
-          "embedding_top_feature_count": 5,
+          "embedding_top_feature_count": 4,
           "optuna_trials": 200,
           "train_ratio": 0.8,
           "random_seed": 42,
@@ -695,21 +690,20 @@
         "feature_selection_mode": "fixed_plus_top_selectable",
         "fixed_feature_count": 32,
         "selectable_feature_count": 30,
-        "selectable_top_feature_count": 5,
+        "selectable_top_feature_count": 4,
         "selected_selectable_features": [
           "body_emb_26",
           "body_emb_29",
           "body_emb_17",
-          "body_emb_3",
-          "body_emb_28"
+          "body_emb_3"
         ]
       },
       "delta_market_news_minus_market_only": {
-        "direction_accuracy": -0.0021645021645021467,
-        "rmse": 0.24438169466255033,
-        "mae": 0.015920553105265967,
-        "r2_score": -0.0028032591405914298,
-        "mape": 0.007284220850509726
+        "direction_accuracy": 0.00649350649350644,
+        "rmse": -0.023909308778605975,
+        "mae": -0.012159278793172135,
+        "r2_score": 0.0002717957721845021,
+        "mape": -0.0033629279511595556
       },
       "comparison_scope": "aligned_shared_period",
       "shared_horizon": 10,
@@ -753,19 +747,19 @@
         "test_start_date": "2024-06-07",
         "test_end_date": "2026-04-10",
         "metrics": {
-          "mae": 18.29169859557437,
-          "rmse": 24.983168385132572,
-          "r2_score": 0.8269963422416176,
-          "direction_accuracy": 0.6203904555314533,
-          "mape": 3.4692622151939254,
-          "baseline_mae": 19.103235273712887,
-          "baseline_rmse": 25.081190180998487,
-          "baseline_mape": 3.609010009175242,
-          "high_conf_threshold": 1.2487276792526245,
-          "high_conf_long_accuracy": 0.7441860465116279,
-          "high_conf_long_count": 129,
-          "high_conf_short_accuracy": 0.4,
-          "high_conf_short_count": 10
+          "mae": 18.401776057133574,
+          "rmse": 25.079159032906897,
+          "r2_score": 0.8256643565110721,
+          "direction_accuracy": 0.6030368763557483,
+          "mape": 3.4899782133900685,
+          "baseline_mae": 19.10323759066567,
+          "baseline_rmse": 25.08119251914301,
+          "baseline_mape": 3.609010479129413,
+          "high_conf_threshold": 1.246928334236145,
+          "high_conf_long_accuracy": 0.7153846153846154,
+          "high_conf_long_count": 130,
+          "high_conf_short_accuracy": 0.4444444444444444,
+          "high_conf_short_count": 9
         },
         "config": {
           "target_ticker": "QQQ",
@@ -804,7 +798,7 @@
             15
           ],
           "top_feature_count": 30,
-          "embedding_top_feature_count": 5,
+          "embedding_top_feature_count": 4,
           "optuna_trials": 200,
           "train_ratio": 0.8,
           "random_seed": 42,
@@ -819,8 +813,8 @@
       "market_news": {
         "experiment_name": "market_news_aligned",
         "best_horizon": 15,
-        "best_horizon_direction_score": 0.5754310344827586,
-        "selected_feature_count": 37,
+        "best_horizon_direction_score": 0.5811781609195402,
+        "selected_feature_count": 36,
         "selected_features": [
           "ret_3",
           "ret_5",
@@ -855,7 +849,6 @@
           "fomc_recent_5d",
           "sentiment_divergence",
           "body_emb_12",
-          "body_emb_18",
           "body_emb_23",
           "body_emb_10",
           "body_emb_6"
@@ -869,19 +862,19 @@
         "test_start_date": "2024-06-07",
         "test_end_date": "2026-04-10",
         "metrics": {
-          "mae": 18.144669095940444,
-          "rmse": 24.84215086108682,
-          "r2_score": 0.8289438689861945,
-          "direction_accuracy": 0.6160520607375272,
-          "mape": 3.4421732999851544,
-          "baseline_mae": 19.103235273712887,
-          "baseline_rmse": 25.081190180998487,
-          "baseline_mape": 3.609010009175242,
-          "high_conf_threshold": 1.260254979133606,
-          "high_conf_long_accuracy": 0.7372262773722628,
-          "high_conf_long_count": 137,
-          "high_conf_short_accuracy": 0.5,
-          "high_conf_short_count": 2
+          "mae": 18.108684842894455,
+          "rmse": 24.88341807660098,
+          "r2_score": 0.828375089790272,
+          "direction_accuracy": 0.6225596529284165,
+          "mape": 3.4335106398939774,
+          "baseline_mae": 19.10323759066567,
+          "baseline_rmse": 25.08119251914301,
+          "baseline_mape": 3.609010479129413,
+          "high_conf_threshold": 1.3025193214416504,
+          "high_conf_long_accuracy": 0.7238805970149254,
+          "high_conf_long_count": 134,
+          "high_conf_short_accuracy": 0.4,
+          "high_conf_short_count": 5
         },
         "config": {
           "target_ticker": "QQQ",
@@ -920,7 +913,7 @@
             15
           ],
           "top_feature_count": 30,
-          "embedding_top_feature_count": 5,
+          "embedding_top_feature_count": 4,
           "optuna_trials": 200,
           "train_ratio": 0.8,
           "random_seed": 42,
@@ -933,21 +926,20 @@
         "feature_selection_mode": "fixed_plus_top_selectable",
         "fixed_feature_count": 32,
         "selectable_feature_count": 30,
-        "selectable_top_feature_count": 5,
+        "selectable_top_feature_count": 4,
         "selected_selectable_features": [
           "body_emb_12",
-          "body_emb_18",
           "body_emb_23",
           "body_emb_10",
           "body_emb_6"
         ]
       },
       "delta_market_news_minus_market_only": {
-        "direction_accuracy": -0.00433839479392617,
-        "rmse": -0.14101752404575052,
-        "mae": -0.14702949963392697,
-        "r2_score": 0.0019475267445769884,
-        "mape": -0.02708891520877099
+        "direction_accuracy": 0.01952277657266821,
+        "rmse": -0.1957409563059187,
+        "mae": -0.2930912142391193,
+        "r2_score": 0.002710733279199906,
+        "mape": -0.056467573496091106
       },
       "comparison_scope": "aligned_shared_period",
       "shared_horizon": 15,
@@ -958,10 +950,10 @@
   "skipped_horizons": [],
   "summary": {
     "best_shared_horizon_by_direction_accuracy_delta": 5,
-    "direction_accuracy_delta": 0.010799136069114423,
-    "rmse_delta": -0.022489253166153134,
-    "mae_delta": -0.024640277011032552,
-    "r2_score_delta": 0.00018172975938646196,
-    "mape_delta": -0.0030249603084246957
+    "direction_accuracy_delta": 0.04103671706263501,
+    "rmse_delta": -0.12304837536587065,
+    "mae_delta": -0.05831884520669206,
+    "r2_score_delta": 0.0009984407348204716,
+    "mape_delta": -0.007495222124164869
   }
 }

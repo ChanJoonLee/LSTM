@@ -29,8 +29,10 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from shared.cluster.model import (
+    CLUSTER_BASE_FEATURE_COLS,
     CLUSTER_FEATURE_COLS,
     VOLATILITY_LABELS,
+    build_event_dataset_with_embedding_pca,
     load_cluster_model,
 )
 
@@ -197,14 +199,34 @@ def main() -> None:
     feature_columns = model_dict.get("feature_columns", CLUSTER_FEATURE_COLS)
 
     news_df = pd.read_csv(news_path, encoding="utf-8-sig")
-    X_raw = news_df[feature_columns].dropna().to_numpy(dtype=float)
-    X_scaled = scaler.transform(X_raw)
+    embedding_pca = model_dict.get("embedding_pca")
+    if embedding_pca is not None:
+        X_raw, point_labels, _dates, feature_columns, _embedding_pca = (
+            build_event_dataset_with_embedding_pca(
+                news_df,
+                news_df,
+                horizon=model_dict.get("horizon", 15),
+                window_days=model_dict.get("window_days", 15),
+                base_feature_columns=model_dict.get(
+                    "base_feature_columns",
+                    CLUSTER_BASE_FEATURE_COLS,
+                ),
+                embedding_pca=embedding_pca,
+            )
+        )
+        counts = np.array(
+            [sum(1 for l in point_labels if l == lbl) for lbl in VOLATILITY_LABELS],
+            dtype=int,
+        )
+    else:
+        X_raw = news_df[feature_columns].dropna().to_numpy(dtype=float)
+        X_scaled = scaler.transform(X_raw)
 
-    point_labels = _assign_nearest_labels(X_scaled, centroids)
-    counts = np.array(
-        [sum(1 for l in point_labels if l == lbl) for lbl in VOLATILITY_LABELS],
-        dtype=int,
-    )
+        point_labels = _assign_nearest_labels(X_scaled, centroids)
+        counts = np.array(
+            [sum(1 for l in point_labels if l == lbl) for lbl in VOLATILITY_LABELS],
+            dtype=int,
+        )
 
     save_cluster_visualization(
         vectors=X_raw,

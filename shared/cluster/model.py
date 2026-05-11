@@ -15,21 +15,32 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
+from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 
 
-CLUSTER_FEATURE_COLS: list[str] = [
-    "news_count_5d",
-    "days_since_news",
-    "sentiment_gap",
-    "sentiment_shock",
-    "negative_news_spike_5d",
+CLUSTER_BASE_FEATURE_COLS: list[str] = [
+    "ret_5",
+    "ret_accel",
+    "vol_5",
+    "vol_shock",
+    "vix_z_score_5",
+    "drawdown",
+    "vol_ratio_5",
+    "rel_strength_5",
+    "news_count_zscore_20d",
+    "negative_count_ratio_5d",
+    "sentiment_shock_zscore_20d",
+    "body_sentiment_decay_5d",
     "fomc_recent_5d",
-    "body_emb_12",
-    "body_emb_15",
-    "body_emb_20",
-    "body_emb_29",
+    "fomc_sentiment_shock",
 ]
+
+CLUSTER_EMBEDDING_PCA_COMPONENTS = 5
+CLUSTER_EMBEDDING_PC_COLS: list[str] = [
+    f"body_emb_cluster_pc{i}" for i in range(1, CLUSTER_EMBEDDING_PCA_COMPONENTS + 1)
+]
+CLUSTER_FEATURE_COLS: list[str] = CLUSTER_BASE_FEATURE_COLS + CLUSTER_EMBEDDING_PC_COLS
 
 VOLATILITY_LABELS: list[str] = [
     "rise_strong",
@@ -139,6 +150,137 @@ def build_event_dataset(
         dates.append(row.Date)
 
     return np.array(vectors, dtype=float), labels, dates
+
+
+def infer_embedding_feature_columns(df: pd.DataFrame) -> list[str]:
+    """Return body embedding columns in numeric suffix order."""
+    embedding_columns = [column for column in df.columns if column.startswith("body_emb_")]
+
+    def sort_key(column: str) -> tuple[int, str]:
+        suffix = column.removeprefix("body_emb_")
+        return (int(suffix), column) if suffix.isdigit() else (10**9, column)
+
+    return sorted(embedding_columns, key=sort_key)
+
+
+def transform_embedding_pca_features(
+    embedding_vectors: np.ndarray,
+    embedding_pca: dict,
+) -> np.ndarray:
+    """Transform raw embedding window vectors with a saved cluster PCA payload."""
+    scaler_mean = np.array(embedding_pca["scaler_mean"], dtype=float)
+    scaler_scale = np.array(embedding_pca["scaler_scale"], dtype=float)
+    pca_mean = np.array(embedding_pca["pca_mean"], dtype=float)
+    pca_components = np.array(embedding_pca["pca_components"], dtype=float)
+
+    scaled = (embedding_vectors - scaler_mean) / scaler_scale
+    return (scaled - pca_mean) @ pca_components.T
+
+
+def fit_embedding_pca_features(
+    embedding_vectors: np.ndarray,
+    source_columns: list[str],
+    n_components: int = CLUSTER_EMBEDDING_PCA_COMPONENTS,
+) -> tuple[np.ndarray, dict]:
+    """Fit the cluster-only embedding PCA and return transformed PC features."""
+    if embedding_vectors.ndim != 2:
+        raise ValueError("Embedding vectors must be a 2D array.")
+    if embedding_vectors.shape[1] == 0:
+        raise ValueError("Embedding PCA requires at least one source embedding column.")
+
+    resolved_components = min(n_components, embedding_vectors.shape[1])
+    scaler = StandardScaler()
+    embedding_scaled = scaler.fit_transform(embedding_vectors)
+    pca = PCA(n_components=resolved_components, random_state=42)
+    embedding_pc_vectors = pca.fit_transform(embedding_scaled)
+    feature_columns = [f"body_emb_cluster_pc{i}" for i in range(1, resolved_components + 1)]
+
+    payload: dict = {
+        "source_columns": source_columns,
+        "feature_columns": feature_columns,
+        "n_components": resolved_components,
+        "scaler_mean": scaler.mean_.tolist(),
+        "scaler_scale": scaler.scale_.tolist(),
+        "pca_mean": pca.mean_.tolist(),
+        "pca_components": pca.components_.tolist(),
+        "explained_variance": pca.explained_variance_.tolist(),
+        "explained_variance_ratio": pca.explained_variance_ratio_.tolist(),
+        "singular_values": pca.singular_values_.tolist(),
+    }
+    return embedding_pc_vectors, payload
+
+
+def build_event_dataset_with_embedding_pca(
+    market_df: pd.DataFrame,
+    daily_news_df: pd.DataFrame,
+    horizon: int = 15,
+    window_days: int = 15,
+    base_feature_columns: list[str] | None = None,
+    embedding_feature_columns: list[str] | None = None,
+    n_components: int = CLUSTER_EMBEDDING_PCA_COMPONENTS,
+    embedding_pca: dict | None = None,
+) -> tuple[np.ndarray, list[str], list[pd.Timestamp], list[str], dict]:
+    """Build cluster event vectors and append cluster-only embedding PCA features."""
+    resolved_base_columns = (
+        CLUSTER_BASE_FEATURE_COLS if base_feature_columns is None else base_feature_columns
+    )
+    resolved_embedding_columns = (
+        embedding_pca.get("source_columns", [])
+        if embedding_pca is not None and embedding_feature_columns is None
+        else embedding_feature_columns
+    )
+    if resolved_embedding_columns is None:
+        resolved_embedding_columns = infer_embedding_feature_columns(daily_news_df)
+    if not resolved_embedding_columns:
+        raise ValueError("No body_emb_* columns are available for cluster embedding PCA.")
+
+    base_vectors, labels, dates = build_event_dataset(
+        market_df,
+        daily_news_df,
+        horizon=horizon,
+        window_days=window_days,
+        feature_columns=resolved_base_columns,
+    )
+    embedding_vectors, embedding_labels, embedding_dates = build_event_dataset(
+        market_df,
+        daily_news_df,
+        horizon=horizon,
+        window_days=window_days,
+        feature_columns=resolved_embedding_columns,
+    )
+
+    if labels != embedding_labels or dates != embedding_dates:
+        raise ValueError("Base cluster vectors and embedding vectors are not aligned.")
+
+    if embedding_pca is None:
+        embedding_pc_vectors, resolved_embedding_pca = fit_embedding_pca_features(
+            embedding_vectors,
+            source_columns=resolved_embedding_columns,
+            n_components=n_components,
+        )
+    else:
+        embedding_pc_vectors = transform_embedding_pca_features(
+            embedding_vectors,
+            embedding_pca,
+        )
+        resolved_embedding_pca = embedding_pca
+
+    feature_columns = resolved_base_columns + list(resolved_embedding_pca["feature_columns"])
+    vectors = np.hstack([base_vectors, embedding_pc_vectors])
+    return vectors, labels, dates, feature_columns, resolved_embedding_pca
+
+
+def build_cluster_vector_with_embedding_pca(
+    base_window_vector: np.ndarray,
+    embedding_window_vector: np.ndarray,
+    embedding_pca: dict,
+) -> np.ndarray:
+    """Create one inference-time cluster vector using the saved embedding PCA payload."""
+    embedding_pc_vector = transform_embedding_pca_features(
+        embedding_window_vector.reshape(1, -1),
+        embedding_pca,
+    )[0]
+    return np.concatenate([base_window_vector, embedding_pc_vector])
 
 
 def fit_news_centroids(
