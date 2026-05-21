@@ -9,7 +9,6 @@
 - 정책/거시 이벤트 문서를 크롤링해 학습 가능한 형태로 정리.
 - QQQ와 거시 자산 데이터를 함께 사용해 가격 예측용 피처 생성.
 - `market_only`와 `market_news` 두 실험을 같은 절차로 학습해 성능을 비교.
-- 여기에 `market_news`도 추가. (뉴스데이터와, 주가데이터 날짜 일치)
 
 ## 현재 기본 설정 요약
 
@@ -18,11 +17,11 @@
 - 메인 뉴스 입력 파일은 `data/crawler/features/merged_finbert_with_embeddings.csv`.
 - 이 파일에는 FinBERT 감성 컬럼과 함께 `body_summary_embedding` 컬럼이 있어야 함.
 - `shared/news/features.py`는 `body_summary_embedding`을 파싱해 `body_emb_0`, `body_emb_1` 같은 숫자 피처로 펼치고, 행마다 임베딩 차원이 같은지 검증함.
-- `market_only`는 고정된 시장 피처 20개를 사용하고, `market_news`는 시장 피처 20개 + 스칼라 뉴스 피처 12개 + `body_emb_*` 중 상위 N개를 사용함.
-- `body_emb_*` 상위 N개는 train 구간에서 XGBoost importance로 고르며, 현재 기본값은 `embedding_top_feature_count = 7`.
+- `market_only`는 고정된 시장 피처 20개를 사용하고, `market_news`는 시장 피처 20개 + 스칼라 뉴스 피처 12개 + `body_emb_*` 30차원을 train 구간에서 `StandardScaler + PCA(5)`로 줄인 임베딩 PC 5개를 사용함.
+- 학습용 임베딩 PCA는 처음 기준인 5차원으로 두고, 설명/클러스터용 임베딩은 별도로 PCA(10)를 유지함.
 - 뉴스가 없는 날의 일반 뉴스/감성 값은 대부분 0으로 채우되, `body_sentiment_decay_3d`와 `body_emb_*`는 마지막 실제 뉴스의 잔존 효과를 감쇠해서 반영함.
-- 클러스터링은 비지도 KMeans가 아니라, 5거래일 선행 수익률을 6개 구간으로 나눈 뒤 각 구간의 클러스터 피처 중심점을 저장하는 방식임.
-- 클러스터링에서는 회귀용 raw `body_emb_*` 선택과 별도로, 5일 뉴스 윈도우 평균 임베딩 30차원을 `StandardScaler + PCA(5)`로 줄인 `body_emb_cluster_pc1~5`를 사용함.
+- 클러스터 요약은 비지도 KMeans가 아니라, `market_news` 회귀 모델이 예측한 5거래일 뒤 가격을 현재가와 비교해 예측 수익률을 계산하고, 그 값을 4개 상승/하락 구간으로 나눠 label별 profile을 정리하는 방식임.
+- 예측 수익률 profile에도 5일 뉴스 윈도우 평균 임베딩 30차원을 `StandardScaler + PCA(10)`로 줄인 `body_emb_cluster_pc1~10`을 사용함.
 
 ## 프로젝트 개요(대략적인 프로젝트 파이프라인)
 
@@ -65,7 +64,9 @@
    QQQ와 거시 자산 가격 데이터를 내려받아 시장 피처를 생성.
 5. `shared/training/`
    horizon 선택, 피처 선택, Optuna 튜닝, XGBoost 학습과 평가를 수행.
-6. `data/`
+6. `shared/cluster/`
+   `market_news` 테스트 예측값을 4개 예측 수익률 구간으로 나누고, label별 시장/뉴스 profile과 대표 뉴스를 정리.
+7. `data/`
    중간 산출물과 최종 모델, 메타데이터, 비교 결과를 저장.
 
 ## 디렉터리 구조
@@ -299,7 +300,7 @@ python shared/run_market_news_training.py \
   --horizons 5,10,15,20 \
   --optuna-trials 30 \
   --top-feature-count 20 \
-  --embedding-top-feature-count 7
+  --training-embedding-pca-components 5
 ```
 
 주요 옵션:
@@ -315,9 +316,11 @@ python shared/run_market_news_training.py \
 - `--optuna-trials`
   하이퍼파라미터 탐색 횟수
 - `--top-feature-count`
-  일반 importance 기반 피처 선택 모드에서 남길 상위 피처 개수. 현재 메인 `market_news`의 임베딩 개수는 아래 옵션이 결정함
+  일반 importance 기반 피처 선택 모드에서 남길 상위 피처 개수. 현재 메인 `market_news`의 임베딩 PCA 개수는 아래 `--training-embedding-pca-components`가 결정함
 - `--embedding-top-feature-count`
-  `market_news`에서 `body_emb_*` 후보 중 train 구간 importance 기준으로 사용할 상위 임베딩 피처 개수
+  importance 기반 임베딩 선택 모드에서 사용할 legacy 옵션. 현재 메인 `market_news` 경로는 raw `body_emb_*` 상위 N개 대신 PCA 압축 피처를 사용함
+- `--training-embedding-pca-components`
+  `market_news` 학습에서 `body_emb_*` 30차원을 몇 개 PCA 축으로 압축할지 결정. 기본값은 5
 - `--market-news-only`
   `market_only` 학습과 aligned comparison을 건너뛰고 `market_news`만 실행. 실험 중 빠른 반복이 필요할 때 사용
 
@@ -466,19 +469,17 @@ python shared/run_market_news_training.py \
 추가로 `shared`에서는 aligned comparison 시작일 계산을 위해 `news_count_lag1` 보조 컬럼도 남겨 둠.
 이 컬럼은 메인 뉴스 피처라기보다 비교 구간을 자르는 데 쓰는 운영용 컬럼이라고 보면 됨.
 
-임베딩은 모든 `body_emb_*`를 그대로 넣지 않음.
+학습용 임베딩은 모든 `body_emb_*`를 원본 30차원 그대로 넣지 않고, train 구간에서 PCA로 압축해 넣음.
 
 - 고정 피처: 시장 피처 20개 + 위 스칼라 뉴스 피처 12개
-- 선택 피처: `body_emb_*` 전체 후보
-- 선택 방식: train 구간에서 XGBoost importance를 계산하고 `body_emb_*` 중 상위 N개만 추가
-- 현재 기본 N: `embedding_top_feature_count = 7`
-- 선택된 임베딩은 메타데이터의 `selected_selectable_features`와 `selected_features`에서 확인 가능
+- 임베딩 입력: `body_emb_0~29` 전체 30차원
+- 압축 방식: train 구간에서만 `StandardScaler + PCA(5)`를 fit하고, test 구간은 같은 PCA 좌표계로 transform
+- 최종 학습용 임베딩 피처: `body_emb_cluster_pc1~5`
+- 최종 `market_news` 피처 수: 시장 20개 + 스칼라 뉴스 12개 + 임베딩 PC 5개 = 37개
 
-이렇게 한 이유는 임베딩 차원이 늘어나면서 노이즈가 같이 들어올 수 있기 때문임.
-스칼라 뉴스 신호는 모두 유지하되, 임베딩은 train 기준으로 설명력이 큰 축만 제한적으로 붙이는 구조임.
+학습 쪽은 처음 기준인 PCA5로 단순하게 두고, 설명/클러스터 쪽은 대표 뉴스 복원과 해석을 위해 별도의 PCA(10)를 유지함.
 
-이 선택 규칙은 `market_news` 회귀 모델용임.
-클러스터링은 같은 raw `body_emb_*` 후보를 직접 고르지 않고, 별도의 클러스터 전용 PCA 압축 피처를 사용함.
+train/test 누수를 막기 위해 PCA는 train split에서만 fit하고, test 구간에는 transform만 적용함.
 
 ### 6. 학습 타깃과 Optuna 목적함수도 `train_regression.py` 기준
 
@@ -517,7 +518,7 @@ python shared/run_market_news_training.py --market-news-only
 중요한 점:
 
 - `market_only`는 고정 시장 피처 20개를 사용
-- `market_news`는 고정 시장 피처 + 스칼라 뉴스 피처 12개 + train 기준 상위 임베딩 피처를 사용
+- `market_news`는 고정 시장 피처 + 스칼라 뉴스 피처 12개 + train 기준 임베딩 PCA 5개를 사용
 - aligned comparison은 `--horizons`에 들어온 후보 horizon들에 대해 같은 선택 규칙으로 다시 비교함
 
 즉 현재 구조를 한 문장으로 정리하면:
@@ -525,82 +526,96 @@ python shared/run_market_news_training.py --market-news-only
 - 기본 회귀 학습 로직은 `train_regression.py` 흐름을 따르고
 - shared는 그 위에 비교 실험과 저장 구조만 얹어 둔 상태라고 보면 됨.
 
-### 8. 뉴스 클러스터링 기준
+### 8. 5일 선행 예측 수익률 profile 요약
 
-클러스터링은 `shared/cluster/model.py`에서 처리함.
-현재 방식은 뉴스 피처끼리만 비지도 군집화하는 KMeans가 아니라, 미래 수익률 레이블을 먼저 정하고 그 레이블별 클러스터 피처 중심점을 저장하는 방식임.
+예측 수익률 profile 요약은 `shared/cluster/model.py`에서 처리함.
+현재 방식은 뉴스 피처끼리만 비지도 군집화하는 KMeans가 아니고, 별도 classifier를 새로 학습하는 방식도 아님.
+이미 학습된 `market_news` 회귀 모델이 test 구간에서 예측한 `Pred_Future_Price`를 `Current_Price`와 비교해 예측 수익률을 계산하고, 그 예측 수익률을 4개 label로 나눈 뒤 label별 뉴스/시장 profile centroid를 저장함.
 
 기본 설정:
 
-- 예측 기준 수익률: anchor 날짜 이후 5거래일 선행 수익률
+- 예측 대상: `market_news` 회귀 모델이 예측한 `T+5` 가격의 현재가 대비 수익률
 - 뉴스 집계 창: anchor 날짜 직전 5일(달력일)
-- 레이블 개수: 6개
-- 중심점 계산: 레이블별 표준화 클러스터 피처 평균 벡터
+- 레이블 개수: 4개
+- label 생성: `(Pred_Future_Price / Current_Price - 1) * 100`
+- profile centroid: 모델의 예측 수익률 label별 test 벡터 평균
 
-6개 레이블 경계:
+4개 예측 수익률 레이블 경계:
 
-| 레이블 | 5거래일 선행 수익률 |
+| 레이블 | 5거래일 뒤 예측 수익률 |
 | --- | ---: |
-| `rise_strong` | `+3.5%` 이상 |
-| `rise_mid` | `+2.0%` 이상, `+3.5%` 미만 |
-| `rise` | `+0.8%` 이상, `+2.0%` 미만 |
-| `neutral` | `-0.8%` 이상, `+0.8%` 미만 |
-| `fall` | `-2.0%` 이상, `-0.8%` 미만 |
-| `fall_strong` | `-2.0%` 미만 |
+| `fall` | `0%` 미만 |
+| `neutral` | `0%` 이상, `+0.3%` 미만 |
+| `rise` | `+0.3%` 이상, `+0.6%` 미만 |
+| `rise_strong` | `+0.6%` 이상 |
 
-현재 클러스터 피처는 19개임.
+현재 클러스터 피처는 24개임.
 
 기본 시장/뉴스 피처 14개:
 
 - `ret_5`
-- `ret_accel`
 - `vol_5`
-- `vol_shock`
-- `vix_z_score_5`
-- `drawdown`
 - `vol_ratio_5`
-- `rel_strength_5`
-- `news_count_zscore_20d`
+- `drawdown`
+- `vix_z_score_5`
+- `vol_shock`
+- `days_since_news`
+- `news_count_lag1`
 - `negative_count_ratio_5d`
-- `sentiment_shock_zscore_20d`
+- `title_sentiment_3d_mean`
+- `title_sentiment_5d_mean`
 - `body_sentiment_decay_5d`
 - `fomc_recent_5d`
 - `fomc_sentiment_shock`
 
-임베딩 PCA 피처 5개:
+임베딩 PCA 피처 10개:
 
-- `body_emb_cluster_pc1`
-- `body_emb_cluster_pc2`
-- `body_emb_cluster_pc3`
-- `body_emb_cluster_pc4`
-- `body_emb_cluster_pc5`
+- `body_emb_cluster_pc1~10`
 
 임베딩 PCA 처리 방식:
 
-1. 클러스터 학습용 anchor 날짜마다 직전 5일 뉴스 윈도우의 `body_emb_0~29` 평균 벡터를 만듦
-2. 이 30차원 임베딩 윈도우 벡터에 `StandardScaler`를 fit해서 평균 0, 표준편차 1 스케일로 변환
-3. 표준화된 30차원 벡터에 `PCA(n_components=5)`를 fit해서 `body_emb_cluster_pc1~5`로 압축
-4. 위 14개 기본 피처와 5개 PCA 피처를 합친 19차원 벡터를 다시 클러스터용 `StandardScaler`로 표준화
-5. 레이블별 평균 벡터를 centroid로 저장
+1. `market_news` 회귀 모델의 test 예측 테이블에서 `Current_Date`, `Current_Price`, `Pred_Future_Price`를 읽음
+2. train 구간의 30차원 임베딩 윈도우 벡터에만 `StandardScaler + PCA(n_components=10)`를 fit
+3. 전체 이벤트 벡터를 같은 PCA 좌표계로 transform해서 `body_emb_cluster_pc1~10`으로 압축
+4. 각 test 예측 row의 `Pred_Future_Price / Current_Price - 1`로 예측 수익률을 계산
+5. 예측 수익률을 4개 label로 나누고, 위 14개 기본 피처와 10개 PCA 피처를 합친 24차원 벡터를 label별로 묶음
+6. 예측 label별 평균 profile centroid, 평균 예측 수익률, 실제 수익률, 방향성 적중률을 저장
 
 새 뉴스가 들어왔을 때는 PCA를 다시 학습하지 않음.
-`qqq_volatility_cluster_model.json`에 저장된 `embedding_pca.scaler_mean`, `embedding_pca.scaler_scale`, `embedding_pca.pca_mean`, `embedding_pca.pca_components`를 복원해서 새 5일 뉴스 윈도우 임베딩을 같은 PCA 좌표계로 transform만 함.
-그다음 저장된 클러스터 scaler와 centroid를 사용해 6개 레이블과의 거리를 비교함.
+먼저 저장된 `market_news` 회귀 모델이 미래 가격을 예측하고, 그 예측 가격을 현재가와 비교해 수익률 label을 정함.
+`qqq_volatility_cluster_model.json`의 centroid는 그 label이 어떤 뉴스/시장 profile에서 자주 나왔는지를 설명하는 용도임.
 
 `qqq_volatility_cluster_model.json`에는 다음 정보가 함께 저장됨:
 
-- `feature_columns`: 최종 19개 클러스터 피처 목록
+- `feature_columns`: 최종 24개 예측 수익률 profile 피처 목록
 - `base_feature_columns`: 임베딩 PCA를 제외한 기본 14개 피처 목록
 - `embedding_pca.source_columns`: PCA 입력으로 사용한 raw `body_emb_*` 컬럼 목록
 - `embedding_pca.feature_columns`: 생성된 `body_emb_cluster_pc*` 컬럼 목록
 - `embedding_pca.explained_variance_ratio`: 각 임베딩 PCA 축의 설명분산 비율
-- `centroids`, `scaler_mean`, `scaler_scale`: 최종 19차원 클러스터 공간의 centroid와 scaler
+- `source_model`: 예측 수익률을 만든 `market_news` 회귀 모델의 horizon과 평가 지표
+- `centroids`, `scaler_mean`, `scaler_scale`: test 구간 예측 label별 profile centroid와 시각화용 scaler
+- `qqq_volatility_cluster_report.json`의 `predicted_groups[].profile_feature_ranking`:
+  label별 centroid가 전체 평균 대비 가장 크게 다른 상위 피처 10개를 `z_diff` 기준으로 저장함
+- `qqq_volatility_cluster_report.json`의 `predicted_groups[].representative_embedding_news`:
+  label centroid의 `body_emb_cluster_pc*` 값을 원본 30차원 `body_emb_*` 공간으로 복원한 뒤, `merged_finbert_with_embeddings.csv`의 source news 임베딩과 cosine similarity가 높은 실제 뉴스 문서를 저장함
+
+10차원 선택 배경:
+
+- 현재 데이터로 같은 방식의 임베딩 윈도우 PCA를 계산하면 설명분산 합은 5차원 약 24.0%, 10차원 약 44.3%, 15차원 약 61.7%, 20차원 약 77.1%임.
+- 5차원은 뉴스 임베딩 정보를 지나치게 버릴 가능성이 있고, 30차원 원본은 profile 요약에서 임베딩 블록이 시장/스칼라 뉴스 피처보다 과하게 커질 수 있음.
+- 10차원은 임베딩 정보의 일부를 보존하면서도 원본 30차원 대비 차원을 1/3로 줄이는 절충안이라, 설명/클러스터링 쪽 기본값으로 유지함. 회귀 학습 쪽은 과적합과 피처 수 부담을 줄이기 위해 별도의 PCA(5)를 사용함.
 
 출력 파일:
 
 - `data/training/comparison/qqq_volatility_cluster_model.json`
 - `data/training/comparison/qqq_volatility_cluster_report.json`
 - `data/training/comparison/qqq_cluster_visualization.png`
+
+`qqq_cluster_visualization.png`를 생성할 때는 label 분리가 잘 보이도록 LDA 2D 투영을 우선 사용하고, 조건이 맞지 않으면 PCA 2D 투영으로 fallback함. 그림 오른쪽에는 각 레이블별로 중심점 피처가 전체 평균 대비 얼마나 차이가 나는지 계산한 상위 피처 순위 테이블을 표시함.
+
+- `+` 값: 해당 피처의 중심값이 전체 이벤트 평균보다 높음
+- `-` 값: 해당 피처의 중심값이 전체 이벤트 평균보다 낮음
+- `value`: 해당 예측 label profile의 원래 피처 평균값
 
 ### 9. 평가 지표 — 고확신 구간 분석 (`evaluate_model`에 추가됨)
 
@@ -642,7 +657,7 @@ Direction accuracy: 56.10%
 
 - importance plot 시각화
 - threshold별 전략 곡선
-- 산점도, 누적수익률, 에러 분포 시각화
+- 모델 평가용 산점도, 누적수익률, 에러 분포 시각화
 
 즉 "모델을 학습하고 비교하는 코어 로직"은 대부분 옮겼고,
 "실험 분석용 시각화/리포트 코드"는 아직 `train_regression.py` 쪽에 더 많이 남아 있음.
@@ -655,105 +670,21 @@ Direction accuracy: 56.10%
 이렇게 역할을 나눠서 작업해보면 될듯.
 
 
-## 과거 실험 결과(2026.04.01 기준)
+## 결과 해석 기준
 
-아래 결과는 당시 프로젝트 루트에서 다음 명령으로 실행한 산출물 기준.
-현재는 임베딩 피처 선택과 클러스터링 기준이 바뀌었으므로, 최종 판단은 새로 생성된 `data/training/*/*metadata.json`과 comparison 산출물을 기준으로 보는 것이 좋음.
+예전 실험 결과 표는 현재 코드의 기본 설정과 달라져 README에서 제거함. 현재 성능 판단은 매번 새로 생성되는 아래 산출물을 기준으로 보는 것이 가장 안전함.
 
-```bash
-./venv/bin/python shared/run_market_news_training.py --horizons 10,20 --optuna-trials 10
-```
-
-### 1. 기본 비교 결과
-
-출력 파일:
-
-- `data/training/comparison/qqq_market_model_comparison.csv`
+- `data/training/market_news/qqq_market_news_metadata.json`
+- `data/training/market_only/qqq_market_only_metadata.json`
 - `data/training/comparison/qqq_market_model_comparison.json`
-
-결과 요약:
-
-| experiment_name | best_horizon | direction_accuracy | rmse | mae | r2_score | mape |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| market_only | 10 | 60.98% | 17.3639 | 13.3083 | 0.9285 | 2.7178 |
-| market_news | 20 | 71.29% | 22.9058 | 17.7965 | 0.8746 | 3.6617 |
-| market_news - market_only | +10 | +10.31%p | +5.5418 | +4.4882 | -0.0539 | +0.9440 |
-
-해석:
-
-- 이 비교만 보면 `market_news`가 방향 정확도는 더 높게 나옴.
-- 하지만 `market_only`는 10거래일 예측, `market_news`는 20거래일 예측이라 완전한 동일 조건 비교는 아님.
-- 따라서 위 표는 참고용으로 보고, 실제 결론은 아래 aligned comparison 기준으로 판단하는 것이 좋음.
-
-### 2. 공정 비교 결과 (Aligned Comparison)
-
-출력 파일:
-
-- `data/training/comparison/qqq_market_model_comparison_aligned.csv`
 - `data/training/comparison/qqq_market_model_comparison_aligned.json`
+- `data/training/comparison/qqq_volatility_cluster_report.json`
 
-aligned comparison은 다음 조건으로 비교:
+특히 `market_news`와 `market_only` 비교는 다음 조건을 우선 확인해야 함.
 
-- 뉴스가 실제로 존재하는 구간만 사용
-- 시작일: `2019-03-22`
-- 같은 거래일끼리 `market_only`와 `market_news`를 직접 비교
+- 같은 horizon을 비교했는지
+- 같은 날짜 구간을 비교했는지
+- 뉴스가 실제로 존재하는 기간만 따로 비교했는지
+- `market_news` 학습 피처가 현재 기본값인 시장 20개 + 스칼라 뉴스 12개 + 학습 PCA 5개인지
 
-결과 요약:
-
-| shared_horizon | market_only direction | market_news direction | direction delta | rmse delta | mae delta | r2 delta | mape delta |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| 10 | 60.18% | 57.23% | -2.95%p | +0.2294 | +0.2947 | -0.0031 | +0.0538 |
-| 20 | 67.95% | 66.77% | -1.19%p | +0.2384 | +0.1286 | -0.0044 | +0.0264 |
-
-해석:
-
-- `10일`, `20일` 모두에서 현재 `market_news`가 `market_only`보다 약간 성능이 낮음.
-- 방향 정확도도 소폭 낮고, RMSE/MAE/MAPE도 모두 조금 더 큼.
-- 즉 현재 데이터와 피처 구성에서는 뉴스 피처가 추가적인 예측력으로 연결됐다고 보기 어려움.
-- aligned comparison의 요약 기준으로 보면 `20일 horizon`이 `10일 horizon`보다 덜 나쁘지만, 그래도 개선은 아님.
-
-### 3. 현재 실험에서 볼 수 있는 결론
-
-- 지금 시점의 기준 모델은 `market_only`로 보는 것이 안전함.
-- 뉴스 피처는 일부 중요 피처로 선택되긴 했지만, 공정 비교 기준 성능 개선까지는 이어지지 못함.
-
-
-### 4. 날짜 범위 문제에 대한 설명
-
-- 시장 데이터 시작일은 기본적으로 `2015-01-01`로 설정되어 있음.
-- 뉴스 피처는 현재 저장된 파일 기준 `2019-03-21`부터 존재함.
-- 뉴스를 시장 프레임에 병합할 때는 날짜 기준 `left join` 이후 빈 뉴스 값을 `0.0`으로 채우는 구조라, 모델 입장에서는 아래 두 경우를 구분하지 못함.
-  - 진짜로 그날 뉴스가 0건인 경우
-  - 아직 그 시기 뉴스 데이터를 아예 수집하지 못한 경우
-
-현재 생성된 `market_news` 학습 프레임 기준으로 보면:
-
-- 전체 학습 프레임 시작일: `2015-06-25`
-- `news_count_lag1`이 처음 0이 아닌 날짜: `2019-03-22`
-- 전체 행 수: `2626`
-- `news_count_lag1 = 0`인 행 수: `2139`
-- train 구간 행 수: `2100`
-- train 구간에서 실제로 뉴스가 있는 행 수: `214`
-
-해석:
-
-- 즉 `market_news` 모델이라 해도 학습 초반의 긴 구간은 사실상 뉴스 없이 학습되고 있음.
-- 이런 상태에서는 `market_news`가 실제 뉴스 신호를 얼마나 잘 활용하는지보다, 오랫동안 `market_only`처럼 학습한 효과가 섞여 들어가게 됨.
-- 그래서 기본 비교 결과보다 aligned comparison 결과를 더 중요하게 봐야 함.
-
-소스별 현실적인 제약도 있음.
-
-- White House는 정권이 바뀌면 HTML 구조와 문서 분류 방식이 달라질 수 있음.
-- 과거 아카이브는 구조가 일정하지 않아 장기 백필이 어렵고, 기사 품질도 시기별로 들쭉날쭉할 수 있음.
-- 이런 상황에서 과거 구간을 무리하게 `0`으로 채워 넣으면 White House 관련 피처 의미가 희석될 수 있음.
-
-정리하면:
-
-- `0`은 "그날 뉴스가 없었다"는 값으로는 쓸 수 있지만, "그 시기 뉴스 데이터가 아직 없다"는 결측 표현으로는 위험함.
-- 현재 실험 결과를 해석할 때는 반드시 이 점을 염두에 두어야 하고, 앞으로도 동일 horizon + 동일 기간의 aligned comparison을 기준 지표로 삼는 것이 좋음.
-
-추후 진행할 것:
-
-1. 뉴스 결측과 실제 0건을 더 명확히 분리
-2. 감성 평균 외에 이벤트성 피처를 더 정교하게 설계
-3. aligned comparison 결과를 기준 지표로 계속 발전시키는 게 나을듯 한데
+뉴스 결측 해석에는 여전히 주의가 필요함. 시장 데이터 기간 전체에 뉴스가 촘촘히 존재하는 것은 아니므로, `0`으로 채워진 뉴스 피처가 항상 "그날 실제 뉴스가 없었다"는 뜻은 아닐 수 있음. 장기 성능 판단은 기본 비교보다 aligned comparison 산출물을 우선해서 보는 편이 안전함.

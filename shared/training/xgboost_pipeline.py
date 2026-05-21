@@ -14,6 +14,7 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.model_selection import TimeSeriesSplit
 from xgboost import XGBRegressor
 
+from shared.cluster.model import fit_embedding_pca_features, transform_embedding_pca_features
 from shared.config.schema import MarketNewsTrainingConfig
 from shared.common.utils import write_json
 
@@ -522,11 +523,15 @@ def _fit_and_evaluate_supervised_experiment(
     horizon: int,
     horizon_score: float | None,
     config: MarketNewsTrainingConfig,
+    embedding_columns_for_pca: list[str] | None = None,
+    n_embedding_pca_components: int = 5,
 ) -> tuple[dict, pd.DataFrame, XGBRegressor]:
     """
     이미 준비된 supervised frame을 받아 최종 튜닝, 학습, 평가를 수행한다.
 
     일반 실험과 aligned 비교 실험이 같은 학습 코드를 공유하도록 분리했다.
+    embedding_columns_for_pca가 주어지면, train 구간에서만 PCA를 fit하고
+    test 구간에는 transform만 적용해 leakage를 방지한다.
     """
     split_index = int(len(supervised_frame) * config.train_ratio)
     train_frame = supervised_frame.iloc[:split_index].copy()
@@ -538,8 +543,30 @@ def _fit_and_evaluate_supervised_experiment(
             "Check input data coverage."
         )
 
+    active_features = list(selected_features)
+    embedding_pca_payload: dict | None = None
+
+    if embedding_columns_for_pca:
+        train_emb = train_frame[embedding_columns_for_pca].to_numpy(dtype=float)
+        emb_pc_vectors, embedding_pca_payload = fit_embedding_pca_features(
+            train_emb,
+            source_columns=embedding_columns_for_pca,
+            n_components=n_embedding_pca_components,
+        )
+        pc_columns: list[str] = embedding_pca_payload["feature_columns"]
+
+        for i, col in enumerate(pc_columns):
+            train_frame[col] = emb_pc_vectors[:, i]
+
+        test_emb = test_frame[embedding_columns_for_pca].to_numpy(dtype=float)
+        test_pc_vectors = transform_embedding_pca_features(test_emb, embedding_pca_payload)
+        for i, col in enumerate(pc_columns):
+            test_frame[col] = test_pc_vectors[:, i]
+
+        active_features = active_features + pc_columns
+
     best_params = optimize_model_hyperparameters(
-        train_frame[selected_features],
+        train_frame[active_features],
         train_frame["target_logret"],
         horizon,
         config,
@@ -551,17 +578,17 @@ def _fit_and_evaluate_supervised_experiment(
         tree_method="hist",
         objective="reg:squarederror",
     )
-    final_model.fit(train_frame[selected_features], train_frame["target_logret"])
+    final_model.fit(train_frame[active_features], train_frame["target_logret"])
 
-    metrics, predictions = evaluate_model(final_model, test_frame, selected_features)
-    metadata = {
+    metrics, predictions = evaluate_model(final_model, test_frame, active_features)
+    metadata: dict = {
         "experiment_name": experiment_name,
         "best_horizon": int(horizon),
         "best_horizon_direction_score": (
             None if horizon_score is None else float(horizon_score)
         ),
-        "selected_feature_count": len(selected_features),
-        "selected_features": selected_features,
+        "selected_feature_count": len(active_features),
+        "selected_features": active_features,
         "feature_frame_start_date": _serialize_timestamp(supervised_frame["Date"].iloc[0]),
         "feature_frame_end_date": _serialize_timestamp(supervised_frame["Date"].iloc[-1]),
         "train_rows": int(len(train_frame)),
@@ -572,6 +599,8 @@ def _fit_and_evaluate_supervised_experiment(
         "test_end_date": _serialize_timestamp(test_frame["Date"].iloc[-1]),
         "metrics": metrics,
     }
+    if embedding_pca_payload is not None:
+        metadata["embedding_pca"] = embedding_pca_payload
     return metadata, predictions, final_model
 
 
@@ -589,6 +618,8 @@ def run_training_experiment(
     fixed_selected_features: list[str] | None = None,
     selectable_feature_columns: list[str] | None = None,
     selectable_top_feature_count: int | None = None,
+    embedding_columns_for_pca: list[str] | None = None,
+    n_embedding_pca_components: int = 5,
     min_date: str | pd.Timestamp | None = None,
     persist_artifacts: bool = True,
 ) -> dict:
@@ -642,7 +673,9 @@ def run_training_experiment(
             )
         horizon_score = None
         horizon_selection_mode = "fixed"
-        feature_selection_mode = "fixed_regression_style"
+        feature_selection_mode = (
+            "fixed_plus_embedding_pca" if embedding_columns_for_pca else "fixed_regression_style"
+        )
         selected_selectable_features: list[str] = []
     elif has_fixed_plus_top_selection:
         best_horizon = int(forced_horizon)
@@ -698,6 +731,8 @@ def run_training_experiment(
         horizon=best_horizon,
         horizon_score=horizon_score,
         config=config,
+        embedding_columns_for_pca=embedding_columns_for_pca,
+        n_embedding_pca_components=n_embedding_pca_components,
     )
     metadata["config"] = _to_serializable_config(config)
     metadata["comparison_min_date"] = _serialize_timestamp(min_date)
@@ -839,6 +874,8 @@ def run_aligned_horizon_comparison_suite(
     fixed_market_news_features: list[str] | None = None,
     selectable_market_news_features: list[str] | None = None,
     selectable_market_news_top_feature_count: int | None = None,
+    market_news_embedding_columns_for_pca: list[str] | None = None,
+    market_news_n_embedding_pca_components: int = 5,
 ) -> tuple[pd.DataFrame, dict]:
     """
     뉴스 커버리지가 실제로 존재하는 기간만 남기고,
@@ -938,6 +975,8 @@ def run_aligned_horizon_comparison_suite(
                 horizon=horizon,
                 horizon_score=market_news_score,
                 config=config,
+                embedding_columns_for_pca=market_news_embedding_columns_for_pca,
+                n_embedding_pca_components=market_news_n_embedding_pca_components,
             )
         except ValueError as exc:
             skipped_horizons.append(
@@ -959,7 +998,11 @@ def run_aligned_horizon_comparison_suite(
         else:
             market_only_result["feature_selection_mode"] = "model_importance_top_k"
         if forced_market_news_features is not None:
-            market_news_result["feature_selection_mode"] = "fixed_regression_style"
+            market_news_result["feature_selection_mode"] = (
+                "fixed_plus_embedding_pca"
+                if market_news_embedding_columns_for_pca
+                else "fixed_regression_style"
+            )
         elif fixed_market_news_features is not None:
             market_news_result["feature_selection_mode"] = "fixed_plus_top_selectable"
             market_news_result["fixed_feature_count"] = len(fixed_market_news_features)
