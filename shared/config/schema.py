@@ -172,6 +172,7 @@ class MarketNewsTrainingConfig:
     horizon_candidates: tuple[int, ...] = (5, 7, 10, 15)
     top_feature_count: int = 30
     embedding_top_feature_count: int = 4
+    training_embedding_pca_components: int = 5
     optuna_trials: int = 200
     train_ratio: float = 0.8
     random_seed: int = 42

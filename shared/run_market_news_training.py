@@ -94,7 +94,16 @@ def parse_args() -> argparse.Namespace:
         "--embedding-top-feature-count",
         type=int,
         default=default_config.embedding_top_feature_count,
-        help="Number of body_emb_* columns selected on top of fixed market/scalar-news features.",
+        help=(
+            "Legacy top-k body_emb_* count for importance-selection mode. "
+            "The main market_news path now uses PCA components instead."
+        ),
+    )
+    parser.add_argument(
+        "--training-embedding-pca-components",
+        type=int,
+        default=default_config.training_embedding_pca_components,
+        help="Number of body_emb_* PCA components added to the main market_news training.",
     )
     parser.add_argument("--optuna-trials", type=int, default=default_config.optuna_trials)
     parser.add_argument("--train-ratio", type=float, default=default_config.train_ratio)
@@ -112,7 +121,7 @@ def parse_args() -> argparse.Namespace:
         "--market-news-only",
         action="store_true",
         default=False,
-        help="Skip market-only baseline and aligned comparison — run only market+news training.",
+        help="Skip market-only baseline and aligned comparison - run only market+news training.",
     )
     return parser.parse_args()
 
@@ -150,6 +159,7 @@ def main() -> None:
         horizon_candidates=_parse_horizon_candidates(args.horizons),
         top_feature_count=args.top_feature_count,
         embedding_top_feature_count=args.embedding_top_feature_count,
+        training_embedding_pca_components=args.training_embedding_pca_components,
         optuna_trials=args.optuna_trials,
         train_ratio=args.train_ratio,
         random_seed=args.random_seed,
@@ -207,16 +217,47 @@ def main() -> None:
             f"{config.aligned_comparison_metadata_output_path}"
         )
 
-    cluster_report = result.get("volatility_cluster_report", {})
-    clusters = cluster_report.get("clusters", [])
-    if clusters:
-        print("--- Volatility cluster centroids (15-day forward return labels) ---")
-        for cluster in clusters:
-            label = cluster["label"]
-            count = cluster["count"]
-            dr = cluster.get("date_range", {})
+    cluster_report = (
+        result.get("predicted_return_cluster_report")
+        or result.get("volatility_prediction_report")
+        or result.get("volatility_cluster_report", {})
+    )
+    predicted_groups = cluster_report.get("predicted_groups", [])
+    if predicted_groups:
+        metrics = cluster_report.get("source_model_metrics", {})
+        print(
+            "--- Predicted return regimes "
+            f"({cluster_report.get('horizon', config.cluster_horizon)}-trading-day "
+            "model forecast vs current price, "
+            f"{config.cluster_window_days}-calendar-day news window) ---"
+        )
+        if metrics:
+            print(
+                "Source model direction accuracy: "
+                f"{metrics.get('direction_accuracy', 0.0) * 100:.2f}%"
+            )
+            print(f"Source model RMSE: {metrics.get('rmse', 0.0):.4f}")
+        for group in predicted_groups:
+            label = group["label"]
+            count = group["count"]
+            avg_pred_return = group.get("average_predicted_return_pct")
+            avg_return_str = (
+                "N/A"
+                if avg_pred_return is None
+                else f"{avg_pred_return:+.2f}% avg pred"
+            )
+            direction_accuracy = group.get("direction_accuracy")
+            direction_str = (
+                "N/A"
+                if direction_accuracy is None
+                else f"{direction_accuracy * 100:.1f}% dir acc"
+            )
+            dr = group.get("date_range", {})
             date_str = f"{dr.get('first', '?')} ~ {dr.get('last', '?')}" if dr else "N/A"
-            print(f"  [{label:8s}]  n={count:4d}  ({date_str})")
+            print(
+                f"  [{label:13s}]  n={count:4d}  {avg_return_str}  "
+                f"{direction_str}  ({date_str})"
+            )
         print(f"Cluster model saved to:         {config.cluster_model_output_path}")
         print(f"Cluster report saved to:        {config.cluster_report_output_path}")
         print(f"Cluster visualization saved to: {config.cluster_visualization_output_path}")

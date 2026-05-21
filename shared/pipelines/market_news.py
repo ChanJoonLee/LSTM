@@ -28,10 +28,12 @@ from shared.cluster import (
     CLUSTER_EMBEDDING_PCA_COMPONENTS,
     FIXED_THRESHOLDS,
     VOLATILITY_LABELS,
-    build_cluster_summary,
-    build_event_dataset_with_embedding_pca,
+    build_predicted_return_cluster_dataset,
+    build_predicted_return_cluster_summary,
+    build_representative_embedding_news,
     fit_news_centroids,
     infer_embedding_feature_columns,
+    rank_cluster_features,
     save_cluster_visualization,
 )
 from shared.training.xgboost_pipeline import (
@@ -217,9 +219,9 @@ def run_market_news_training_pipeline(
         metadata_output_path=config.metadata_output_path,
         config=config,
         forced_horizon=config.regression_style_fixed_horizon,
-        fixed_selected_features=fixed_market_news_feature_columns,
-        selectable_feature_columns=embedding_news_feature_columns,
-        selectable_top_feature_count=config.embedding_top_feature_count,
+        forced_selected_features=fixed_market_news_feature_columns,
+        embedding_columns_for_pca=embedding_news_feature_columns,
+        n_embedding_pca_components=config.training_embedding_pca_components,
     )
 
     if config.market_news_only:
@@ -240,9 +242,9 @@ def run_market_news_training_pipeline(
             aligned_start_date=aligned_comparison_start_date,
             config=config,
             forced_market_only_features=regression_market_feature_columns,
-            fixed_market_news_features=fixed_market_news_feature_columns,
-            selectable_market_news_features=embedding_news_feature_columns,
-            selectable_market_news_top_feature_count=config.embedding_top_feature_count,
+            forced_market_news_features=fixed_market_news_feature_columns,
+            market_news_embedding_columns_for_pca=embedding_news_feature_columns,
+            market_news_n_embedding_pca_components=config.training_embedding_pca_components,
         )
         aligned_comparison_df.to_csv(
             config.aligned_comparison_output_path,
@@ -259,64 +261,128 @@ def run_market_news_training_pipeline(
         comparison_df.to_csv(config.comparison_output_path, index=False, encoding="utf-8-sig")
         comparison_payload["aligned_shared_period_comparison"] = aligned_comparison_payload
 
-    # 7) 뉴스 클러스터 모델을 학습하고 저장한다.
+    # 7) market_news 회귀 모델의 예측 수익률을 고정 구간으로 나누고 profile을 요약한다.
+    cluster_feature_frame = pd.read_csv(config.merged_training_frame_output_path)
     cluster_base_feature_columns = _require_feature_columns(
-        merged_feature_df,
+        cluster_feature_frame,
         CLUSTER_BASE_FEATURE_COLS,
         "cluster feature frame",
     )
     cluster_embedding_feature_columns = _require_feature_columns(
-        merged_feature_df,
-        infer_embedding_feature_columns(merged_feature_df),
+        cluster_feature_frame,
+        infer_embedding_feature_columns(cluster_feature_frame),
         "cluster embedding feature frame",
     )
-    vectors, labels, cluster_dates, cluster_feature_columns, embedding_pca_payload = (
-        build_event_dataset_with_embedding_pca(
-            market_feature_df,
-            merged_feature_df,
-            horizon=config.cluster_horizon,
-            window_days=config.cluster_window_days,
-            base_feature_columns=cluster_base_feature_columns,
-            embedding_feature_columns=cluster_embedding_feature_columns,
-            n_components=CLUSTER_EMBEDDING_PCA_COMPONENTS,
-        )
+    market_news_predictions = pd.read_csv(config.predictions_output_path)
+    (
+        prediction_vectors,
+        prediction_labels,
+        prediction_dates,
+        cluster_feature_columns,
+        embedding_pca_payload,
+        prediction_records,
+    ) = build_predicted_return_cluster_dataset(
+        cluster_feature_frame,
+        cluster_feature_frame,
+        market_news_predictions,
+        window_days=config.cluster_window_days,
+        base_feature_columns=cluster_base_feature_columns,
+        embedding_feature_columns=cluster_embedding_feature_columns,
+        n_components=CLUSTER_EMBEDDING_PCA_COMPONENTS,
+        pca_fit_ratio=config.train_ratio,
     )
-    centroids, counts, scaler = fit_news_centroids(vectors, labels)
-    cluster_summary = build_cluster_summary(
-        labels,
-        cluster_dates,
-        centroids,
-        counts,
-        scaler,
+    prediction_centroids, prediction_counts, profile_scaler = fit_news_centroids(
+        prediction_vectors,
+        prediction_labels,
+    )
+    prediction_summary = build_predicted_return_cluster_summary(
+        dates=prediction_dates,
+        labels=prediction_labels,
+        prediction_records=prediction_records,
+        vectors=prediction_vectors,
         feature_columns=cluster_feature_columns,
     )
+    representative_news = build_representative_embedding_news(
+        centroids=prediction_centroids,
+        counts=prediction_counts,
+        scaler=profile_scaler,
+        feature_columns=cluster_feature_columns,
+        embedding_pca=embedding_pca_payload,
+        source_news_df=news_source_df,
+        top_n=5,
+    )
+    for group in prediction_summary:
+        group["representative_embedding_news"] = representative_news.get(
+            group["label"],
+            [],
+        )
+    feature_rankings = rank_cluster_features(
+        centroids=prediction_centroids,
+        scaler=profile_scaler,
+        feature_columns=cluster_feature_columns,
+        top_n=10,
+    )
+    for group in prediction_summary:
+        group["profile_feature_ranking"] = feature_rankings.get(
+            group["label"],
+            [],
+        )
 
     cluster_model_payload: dict = {
-        "centroids": centroids.tolist(),
-        "scaler_mean": scaler.mean_.tolist(),
-        "scaler_scale": scaler.scale_.tolist(),
+        "model_kind": "predicted_forward_return_profile_clusters",
+        "target": "market_news_model_predicted_forward_return",
+        "prediction_summary_scope": "market_news_test_predictions",
+        "centroids": prediction_centroids.tolist(),
+        "scaler_mean": profile_scaler.mean_.tolist(),
+        "scaler_scale": profile_scaler.scale_.tolist(),
         "feature_columns": cluster_feature_columns,
         "base_feature_columns": cluster_base_feature_columns,
         "embedding_pca": embedding_pca_payload,
+        "source_model": {
+            "experiment_name": market_news_result.get("experiment_name"),
+            "best_horizon": market_news_result.get("best_horizon"),
+            "metrics": market_news_result.get("metrics", {}),
+        },
         "labels": VOLATILITY_LABELS,
         "fixed_thresholds": list(FIXED_THRESHOLDS),
-        "horizon": config.cluster_horizon,
+        "horizon": market_news_result.get("best_horizon", config.cluster_horizon),
         "window_days": config.cluster_window_days,
     }
     write_json(cluster_model_payload, config.cluster_model_output_path)
 
-    cluster_report_payload: dict = {"clusters": cluster_summary}
+    cluster_report_payload: dict = {
+        "model_kind": "predicted_forward_return_profile_clusters",
+        "target": "market_news_model_predicted_forward_return",
+        "prediction_summary_scope": "market_news_test_predictions",
+        "horizon": market_news_result.get("best_horizon", config.cluster_horizon),
+        "window_days": config.cluster_window_days,
+        "labels": VOLATILITY_LABELS,
+        "fixed_thresholds": list(FIXED_THRESHOLDS),
+        "feature_columns": cluster_feature_columns,
+        "source_model_metrics": market_news_result.get("metrics", {}),
+        "representative_news_method": (
+            "Label centroid body_emb_cluster_pc* values are inverse-transformed "
+            "to the original body_emb_* space, then matched to source news by "
+            "cosine similarity."
+        ),
+        "profile_feature_ranking_method": (
+            "For each label centroid, original-scale feature values are compared "
+            "against the global profile mean and sorted by absolute z-difference."
+        ),
+        "predicted_groups": prediction_summary,
+    }
     write_json(cluster_report_payload, config.cluster_report_output_path)
+    comparison_payload["predicted_return_cluster_report"] = cluster_report_payload
     comparison_payload["volatility_cluster_report"] = cluster_report_payload
 
     save_cluster_visualization(
-        vectors=vectors,
-        labels=labels,
-        counts=counts,
-        centroids=centroids,
-        scaler=scaler,
+        vectors=prediction_vectors,
+        labels=prediction_labels,
+        counts=prediction_counts,
+        centroids=prediction_centroids,
+        scaler=profile_scaler,
         output_path=config.cluster_visualization_output_path,
-        horizon=config.cluster_horizon,
+        horizon=market_news_result.get("best_horizon", config.cluster_horizon),
         window_days=config.cluster_window_days,
         feature_columns=cluster_feature_columns,
     )

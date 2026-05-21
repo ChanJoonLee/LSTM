@@ -1,178 +1,695 @@
 {
-  "clusters": [
+  "model_kind": "predicted_forward_return_profile_clusters",
+  "target": "market_news_model_predicted_forward_return",
+  "prediction_summary_scope": "market_news_test_predictions",
+  "horizon": 5,
+  "window_days": 5,
+  "labels": [
+    "fall",
+    "neutral",
+    "rise",
+    "rise_strong"
+  ],
+  "fixed_thresholds": [
+    0.0,
+    0.003,
+    0.006
+  ],
+  "feature_columns": [
+    "ret_5",
+    "vol_5",
+    "vol_ratio_5",
+    "drawdown",
+    "vix_z_score_5",
+    "vol_shock",
+    "days_since_news",
+    "news_count_lag1",
+    "negative_count_ratio_5d",
+    "title_sentiment_3d_mean",
+    "title_sentiment_5d_mean",
+    "body_sentiment_decay_5d",
+    "fomc_recent_5d",
+    "fomc_sentiment_shock",
+    "body_emb_cluster_pc1",
+    "body_emb_cluster_pc2",
+    "body_emb_cluster_pc3",
+    "body_emb_cluster_pc4",
+    "body_emb_cluster_pc5",
+    "body_emb_cluster_pc6",
+    "body_emb_cluster_pc7",
+    "body_emb_cluster_pc8",
+    "body_emb_cluster_pc9",
+    "body_emb_cluster_pc10"
+  ],
+  "source_model_metrics": {
+    "mae": 11.176660014022161,
+    "rmse": 14.502449070701447,
+    "r2_score": 0.9418821069096392,
+    "direction_accuracy": 0.582441113490364,
+    "mape": 2.1257730544723947,
+    "baseline_mae": 11.439499195433786,
+    "baseline_rmse": 14.59642978402227,
+    "baseline_mape": 2.1690736303106637,
+    "high_conf_threshold": 0.42638087272644043,
+    "high_conf_long_accuracy": 0.6296296296296297,
+    "high_conf_long_count": 135,
+    "high_conf_short_accuracy": 0.8,
+    "high_conf_short_count": 5
+  },
+  "representative_news_method": "Label centroid body_emb_cluster_pc* values are inverse-transformed to the original body_emb_* space, then matched to source news by cosine similarity.",
+  "profile_feature_ranking_method": "For each label centroid, original-scale feature values are compared against the global profile mean and sorted by absolute z-difference.",
+  "predicted_groups": [
     {
-      "label": "rise_strong",
-      "count": 245,
+      "label": "fall",
+      "count": 25,
       "date_range": {
-        "first": "2017-12-29",
-        "last": "2026-04-13"
+        "first": "2024-07-02",
+        "last": "2026-04-17"
       },
-      "centroid_feature_means": {
-        "ret_5": -0.0018,
-        "ret_accel": -0.0008,
-        "vol_5": 0.0173,
-        "vol_shock": 0.9881,
-        "vix_z_score_5": 0.0323,
-        "drawdown": -0.1111,
-        "vol_ratio_5": 1.3814,
-        "rel_strength_5": 0.0006,
-        "news_count_zscore_20d": -0.0112,
-        "negative_count_ratio_5d": 0.1885,
-        "sentiment_shock_zscore_20d": -0.0711,
-        "body_sentiment_decay_5d": 0.0521,
-        "fomc_recent_5d": 0.2083,
-        "fomc_sentiment_shock": -0.0051,
-        "body_emb_cluster_pc1": 0.1352,
-        "body_emb_cluster_pc2": -0.0698,
-        "body_emb_cluster_pc3": 0.1707,
-        "body_emb_cluster_pc4": -0.1768,
-        "body_emb_cluster_pc5": -0.0563
-      }
-    },
-    {
-      "label": "rise_mid",
-      "count": 358,
-      "date_range": {
-        "first": "2017-01-19",
-        "last": "2026-04-23"
+      "average_predicted_return_pct": -0.26840734481811523,
+      "min_predicted_return_pct": -2.0932018756866455,
+      "max_predicted_return_pct": -0.01169443130493164,
+      "average_actual_return_pct": 0.0748187423515354,
+      "direction_accuracy": 0.48,
+      "profile_feature_means": {
+        "ret_5": -0.0205,
+        "vol_5": 0.023,
+        "vol_ratio_5": 1.3407,
+        "drawdown": -0.0916,
+        "vix_z_score_5": 0.2023,
+        "vol_shock": 1.294,
+        "days_since_news": 2.0133,
+        "news_count_lag1": 0.8967,
+        "negative_count_ratio_5d": 0.2307,
+        "title_sentiment_3d_mean": 0.0315,
+        "title_sentiment_5d_mean": 0.0224,
+        "body_sentiment_decay_5d": -0.0524,
+        "fomc_recent_5d": 0.246,
+        "fomc_sentiment_shock": -0.004,
+        "body_emb_cluster_pc1": -0.4677,
+        "body_emb_cluster_pc2": 0.1568,
+        "body_emb_cluster_pc3": -0.0451,
+        "body_emb_cluster_pc4": 0.1666,
+        "body_emb_cluster_pc5": -0.3185,
+        "body_emb_cluster_pc6": 0.2146,
+        "body_emb_cluster_pc7": 0.0164,
+        "body_emb_cluster_pc8": -0.3218,
+        "body_emb_cluster_pc9": 0.0033,
+        "body_emb_cluster_pc10": 0.515
       },
-      "centroid_feature_means": {
-        "ret_5": 0.0036,
-        "ret_accel": -0.0003,
-        "vol_5": 0.0117,
-        "vol_shock": 0.9464,
-        "vix_z_score_5": 0.075,
-        "drawdown": -0.0539,
-        "vol_ratio_5": 1.4248,
-        "rel_strength_5": 0.0006,
-        "news_count_zscore_20d": -0.0229,
-        "negative_count_ratio_5d": 0.1991,
-        "sentiment_shock_zscore_20d": -0.0304,
-        "body_sentiment_decay_5d": 0.0591,
-        "fomc_recent_5d": 0.2854,
-        "fomc_sentiment_shock": 0.0033,
-        "body_emb_cluster_pc1": -0.0621,
-        "body_emb_cluster_pc2": -0.0547,
-        "body_emb_cluster_pc3": -0.0847,
-        "body_emb_cluster_pc4": -0.01,
-        "body_emb_cluster_pc5": -0.0375
-      }
-    },
-    {
-      "label": "rise",
-      "count": 499,
-      "date_range": {
-        "first": "2017-01-17",
-        "last": "2026-04-24"
-      },
-      "centroid_feature_means": {
-        "ret_5": 0.0059,
-        "ret_accel": 0.0003,
-        "vol_5": 0.0105,
-        "vol_shock": 0.9322,
-        "vix_z_score_5": -0.1144,
-        "drawdown": -0.0426,
-        "vol_ratio_5": 1.4632,
-        "rel_strength_5": 0.0018,
-        "news_count_zscore_20d": -0.0127,
-        "negative_count_ratio_5d": 0.2322,
-        "sentiment_shock_zscore_20d": -0.0324,
-        "body_sentiment_decay_5d": 0.0719,
-        "fomc_recent_5d": 0.2949,
-        "fomc_sentiment_shock": 0.0032,
-        "body_emb_cluster_pc1": -0.0439,
-        "body_emb_cluster_pc2": 0.0369,
-        "body_emb_cluster_pc3": -0.1236,
-        "body_emb_cluster_pc4": -0.0155,
-        "body_emb_cluster_pc5": -0.0252
-      }
+      "representative_embedding_news": [
+        {
+          "rank": 1,
+          "similarity": 0.68791,
+          "date": "2017-03-17",
+          "category": "UCSB",
+          "doc_type": "News Conferences",
+          "title": "The President's News Conference With Chancellor Angela Merkel of Germany",
+          "body_sentiment_score": 0.6104639917612076,
+          "title_sentiment_score": 0.0181537866592407,
+          "link": "https://www.presidency.ucsb.edu/documents/the-presidents-news-conference-with-chancellor-angela-merkel-germany-5"
+        },
+        {
+          "rank": 2,
+          "similarity": 0.67633,
+          "date": "2018-04-03",
+          "category": "UCSB",
+          "doc_type": "News Conferences",
+          "title": "The President's News Conference With President Kersti Kaljulaid of Estonia, President Raimonds Vejonis of Latvia, and President Dalia Grybauskaite of Lithuania",
+          "body_sentiment_score": 0.889109319075942,
+          "title_sentiment_score": 0.0120311938226223,
+          "link": "https://www.presidency.ucsb.edu/documents/the-presidents-news-conference-with-president-kersti-kaljulaid-estonia-president-raimonds"
+        },
+        {
+          "rank": 3,
+          "similarity": 0.665216,
+          "date": "2018-07-30",
+          "category": "UCSB",
+          "doc_type": "News Conferences",
+          "title": "The President's News Conference With Prime Minister Giuseppe Conte of Italy",
+          "body_sentiment_score": 0.7505434413714189,
+          "title_sentiment_score": 0.0165466293692588,
+          "link": "https://www.presidency.ucsb.edu/documents/the-presidents-news-conference-with-prime-minister-giuseppe-conte-italy"
+        },
+        {
+          "rank": 4,
+          "similarity": 0.643595,
+          "date": "2019-03-19",
+          "category": "UCSB",
+          "doc_type": "News Conferences",
+          "title": "The President's News Conference With President Jair Messias Bolsonaro of Brazil",
+          "body_sentiment_score": 0.91324545443058,
+          "title_sentiment_score": 0.0212263260036706,
+          "link": "https://www.presidency.ucsb.edu/documents/the-presidents-news-conference-with-president-jair-messias-bolsonaro-brazil"
+        },
+        {
+          "rank": 5,
+          "similarity": 0.635746,
+          "date": "2019-06-04",
+          "category": "UCSB",
+          "doc_type": "News Conferences",
+          "title": "The President's News Conference With Prime Minister Theresa May of the United Kingdom in London, United Kingdom",
+          "body_sentiment_score": 0.8543867394328117,
+          "title_sentiment_score": 0.0003653466701507,
+          "link": "https://www.presidency.ucsb.edu/documents/the-presidents-news-conference-with-prime-minister-theresa-may-the-united-kingdom-london"
+        }
+      ],
+      "profile_feature_ranking": [
+        {
+          "feature": "vol_5",
+          "centroid_value": 0.02298569348033069,
+          "z_diff": 1.608817634953419,
+          "abs_z": 1.608817634953419
+        },
+        {
+          "feature": "drawdown",
+          "centroid_value": -0.09156626070241192,
+          "z_diff": -1.2996864234278322,
+          "abs_z": 1.2996864234278322
+        },
+        {
+          "feature": "vol_shock",
+          "centroid_value": 1.29397773030572,
+          "z_diff": 1.0520303773215522,
+          "abs_z": 1.0520303773215522
+        },
+        {
+          "feature": "ret_5",
+          "centroid_value": -0.020486028096387505,
+          "z_diff": -0.9534703072176424,
+          "abs_z": 0.9534703072176424
+        },
+        {
+          "feature": "body_emb_cluster_pc1",
+          "centroid_value": -0.4676840889494023,
+          "z_diff": -0.6159975781644786,
+          "abs_z": 0.6159975781644786
+        },
+        {
+          "feature": "body_sentiment_decay_5d",
+          "centroid_value": -0.05235901308431781,
+          "z_diff": -0.3803526638989268,
+          "abs_z": 0.3803526638989268
+        },
+        {
+          "feature": "body_emb_cluster_pc10",
+          "centroid_value": 0.5150139794650221,
+          "z_diff": 0.37393356630833724,
+          "abs_z": 0.37393356630833724
+        },
+        {
+          "feature": "body_emb_cluster_pc5",
+          "centroid_value": -0.3184817612544421,
+          "z_diff": -0.3274569075211718,
+          "abs_z": 0.3274569075211718
+        },
+        {
+          "feature": "body_emb_cluster_pc6",
+          "centroid_value": 0.21459487586801912,
+          "z_diff": 0.320338633114729,
+          "abs_z": 0.320338633114729
+        },
+        {
+          "feature": "vol_ratio_5",
+          "centroid_value": 1.3407349542631057,
+          "z_diff": -0.2300458253023022,
+          "abs_z": 0.2300458253023022
+        }
+      ]
     },
     {
       "label": "neutral",
-      "count": 558,
+      "count": 200,
       "date_range": {
-        "first": "2017-01-13",
-        "last": "2026-03-25"
+        "first": "2024-06-18",
+        "last": "2026-04-24"
       },
-      "centroid_feature_means": {
-        "ret_5": 0.0077,
-        "ret_accel": 0.0001,
-        "vol_5": 0.0101,
-        "vol_shock": 0.8925,
-        "vix_z_score_5": -0.1198,
-        "drawdown": -0.0422,
-        "vol_ratio_5": 1.4484,
-        "rel_strength_5": 0.0021,
-        "news_count_zscore_20d": -0.024,
-        "negative_count_ratio_5d": 0.2117,
-        "sentiment_shock_zscore_20d": 0.0216,
-        "body_sentiment_decay_5d": 0.0554,
-        "fomc_recent_5d": 0.3066,
-        "fomc_sentiment_shock": -0.0014,
-        "body_emb_cluster_pc1": -0.0632,
-        "body_emb_cluster_pc2": 0.0423,
-        "body_emb_cluster_pc3": 0.022,
-        "body_emb_cluster_pc4": 0.0996,
-        "body_emb_cluster_pc5": 0.0588
-      }
+      "average_predicted_return_pct": 0.20153182744979758,
+      "min_predicted_return_pct": 0.014650821685791016,
+      "max_predicted_return_pct": 0.29871463775634766,
+      "average_actual_return_pct": 0.2665144670275487,
+      "direction_accuracy": 0.535,
+      "profile_feature_means": {
+        "ret_5": 0.0083,
+        "vol_5": 0.0111,
+        "vol_ratio_5": 1.4846,
+        "drawdown": -0.0347,
+        "vix_z_score_5": -0.0052,
+        "vol_shock": 0.9405,
+        "days_since_news": 2.02,
+        "news_count_lag1": 0.8025,
+        "negative_count_ratio_5d": 0.2021,
+        "title_sentiment_3d_mean": 0.0378,
+        "title_sentiment_5d_mean": 0.0366,
+        "body_sentiment_decay_5d": 0.0216,
+        "fomc_recent_5d": 0.2504,
+        "fomc_sentiment_shock": 0.0046,
+        "body_emb_cluster_pc1": 0.2517,
+        "body_emb_cluster_pc2": -0.0741,
+        "body_emb_cluster_pc3": -0.1132,
+        "body_emb_cluster_pc4": -0.0816,
+        "body_emb_cluster_pc5": -0.0027,
+        "body_emb_cluster_pc6": -0.1072,
+        "body_emb_cluster_pc7": 0.1932,
+        "body_emb_cluster_pc8": -0.1294,
+        "body_emb_cluster_pc9": -0.1548,
+        "body_emb_cluster_pc10": 0.1191
+      },
+      "representative_embedding_news": [
+        {
+          "rank": 1,
+          "similarity": 0.561064,
+          "date": "2024-04-23",
+          "category": "UCSB",
+          "doc_type": "Statements",
+          "title": "Statement on Senate Passage of National Security Supplemental Appropriations Legislation",
+          "body_sentiment_score": 0.3361615362615945,
+          "title_sentiment_score": 0.0746098477393388,
+          "link": "https://www.presidency.ucsb.edu/documents/statement-senate-passage-national-security-supplemental-appropriations-legislation"
+        },
+        {
+          "rank": 2,
+          "similarity": 0.528003,
+          "date": "2021-02-04",
+          "category": "UCSB",
+          "doc_type": "Executive Orders",
+          "title": "Executive Order 14013—Rebuilding and Enhancing Programs To Resettle Refugees and Planning for the Impact of Climate Change on Migration",
+          "body_sentiment_score": 0.3010595823003418,
+          "title_sentiment_score": 0.5329092126339674,
+          "link": "https://www.presidency.ucsb.edu/documents/executive-order-14013-rebuilding-and-enhancing-programs-resettle-refugees-and-planning-for"
+        },
+        {
+          "rank": 3,
+          "similarity": 0.525093,
+          "date": "2024-02-04",
+          "category": "UCSB",
+          "doc_type": "Statements",
+          "title": "Statement on the Bipartisan Senate Agreement for National Security Legislation",
+          "body_sentiment_score": 0.3170387814272011,
+          "title_sentiment_score": 0.0279759317636489,
+          "link": "https://www.presidency.ucsb.edu/documents/statement-the-bipartisan-senate-agreement-for-national-security-legislation"
+        },
+        {
+          "rank": 4,
+          "similarity": 0.502625,
+          "date": "2017-12-11",
+          "category": "UCSB",
+          "doc_type": "Statements",
+          "title": "Statement on the Terrorist Attack in New York City",
+          "body_sentiment_score": 0.0288976896822322,
+          "title_sentiment_score": -0.052900468930602,
+          "link": "https://www.presidency.ucsb.edu/documents/statement-the-terrorist-attack-new-york-city-0"
+        },
+        {
+          "rank": 5,
+          "similarity": 0.488803,
+          "date": "2025-05-01",
+          "category": "UCSB",
+          "doc_type": "Statements",
+          "title": "Statement on the Nomination of Michael G. Waltz To Be United States Permanent Representative to the United Nations",
+          "body_sentiment_score": 0.4204673878848552,
+          "title_sentiment_score": 0.0408884994685649,
+          "link": "https://www.presidency.ucsb.edu/documents/statement-the-nomination-michael-g-waltz-be-united-states-permanent-representative-the"
+        }
+      ],
+      "profile_feature_ranking": [
+        {
+          "feature": "vol_ratio_5",
+          "centroid_value": 1.4845680524999532,
+          "z_diff": 0.23088341830935258,
+          "abs_z": 0.23088341830935258
+        },
+        {
+          "feature": "body_emb_cluster_pc1",
+          "centroid_value": 0.25165941312859186,
+          "z_diff": 0.1902704623524072,
+          "abs_z": 0.1902704623524072
+        },
+        {
+          "feature": "ret_5",
+          "centroid_value": 0.008298533498240498,
+          "z_diff": 0.16282122076065383,
+          "abs_z": 0.16282122076065383
+        },
+        {
+          "feature": "drawdown",
+          "centroid_value": -0.03467602647411567,
+          "z_diff": 0.09696906004558616,
+          "abs_z": 0.09696906004558616
+        },
+        {
+          "feature": "fomc_sentiment_shock",
+          "centroid_value": 0.004621773393563417,
+          "z_diff": 0.09507302455448398,
+          "abs_z": 0.09507302455448398
+        },
+        {
+          "feature": "body_emb_cluster_pc3",
+          "centroid_value": -0.11321116143179247,
+          "z_diff": -0.07374674461435862,
+          "abs_z": 0.07374674461435862
+        },
+        {
+          "feature": "days_since_news",
+          "centroid_value": 2.02,
+          "z_diff": 0.07027030544658075,
+          "abs_z": 0.07027030544658075
+        },
+        {
+          "feature": "body_emb_cluster_pc2",
+          "centroid_value": -0.07406074346327121,
+          "z_diff": -0.06695971050811628,
+          "abs_z": 0.06695971050811628
+        },
+        {
+          "feature": "body_emb_cluster_pc10",
+          "centroid_value": 0.11913415895437193,
+          "z_diff": -0.06079983754707403,
+          "abs_z": 0.06079983754707403
+        },
+        {
+          "feature": "negative_count_ratio_5d",
+          "centroid_value": 0.20206045336906925,
+          "z_diff": -0.057890755321257925,
+          "abs_z": 0.057890755321257925
+        }
+      ]
     },
     {
-      "label": "fall",
-      "count": 273,
+      "label": "rise",
+      "count": 201,
       "date_range": {
-        "first": "2017-03-14",
-        "last": "2026-03-24"
+        "first": "2024-06-13",
+        "last": "2026-04-22"
       },
-      "centroid_feature_means": {
-        "ret_5": 0.0077,
-        "ret_accel": 0.0004,
-        "vol_5": 0.0105,
-        "vol_shock": 0.9057,
-        "vix_z_score_5": -0.1492,
-        "drawdown": -0.0449,
-        "vol_ratio_5": 1.4525,
-        "rel_strength_5": 0.0019,
-        "news_count_zscore_20d": 0.0232,
-        "negative_count_ratio_5d": 0.2206,
-        "sentiment_shock_zscore_20d": 0.0712,
-        "body_sentiment_decay_5d": 0.057,
-        "fomc_recent_5d": 0.2963,
-        "fomc_sentiment_shock": -0.0037,
-        "body_emb_cluster_pc1": -0.0591,
-        "body_emb_cluster_pc2": -0.0234,
-        "body_emb_cluster_pc3": -0.0163,
-        "body_emb_cluster_pc4": -0.1137,
-        "body_emb_cluster_pc5": 0.0184
-      }
+      "average_predicted_return_pct": 0.42428561110994617,
+      "min_predicted_return_pct": 0.3034710884094016,
+      "max_predicted_return_pct": 0.5990028381347656,
+      "average_actual_return_pct": 0.5406786453834204,
+      "direction_accuracy": 0.6417910447761194,
+      "profile_feature_means": {
+        "ret_5": 0.0065,
+        "vol_5": 0.0097,
+        "vol_ratio_5": 1.3539,
+        "drawdown": -0.0317,
+        "vix_z_score_5": -0.0596,
+        "vol_shock": 0.8887,
+        "days_since_news": 1.8238,
+        "news_count_lag1": 0.8031,
+        "negative_count_ratio_5d": 0.2359,
+        "title_sentiment_3d_mean": 0.0273,
+        "title_sentiment_5d_mean": 0.0327,
+        "body_sentiment_decay_5d": 0.0147,
+        "fomc_recent_5d": 0.3009,
+        "fomc_sentiment_shock": -0.0035,
+        "body_emb_cluster_pc1": 0.0712,
+        "body_emb_cluster_pc2": 0.0465,
+        "body_emb_cluster_pc3": -0.0284,
+        "body_emb_cluster_pc4": -0.0487,
+        "body_emb_cluster_pc5": 0.0132,
+        "body_emb_cluster_pc6": -0.0686,
+        "body_emb_cluster_pc7": 0.1276,
+        "body_emb_cluster_pc8": -0.1457,
+        "body_emb_cluster_pc9": -0.0019,
+        "body_emb_cluster_pc10": 0.1447
+      },
+      "representative_embedding_news": [
+        {
+          "rank": 1,
+          "similarity": 0.503609,
+          "date": "2024-03-23",
+          "category": "UCSB",
+          "doc_type": "Statements",
+          "title": "Statement on Signing the Further Consolidated Appropriations Act, 2024",
+          "body_sentiment_score": 0.2721659689631364,
+          "title_sentiment_score": 0.0205642133951187,
+          "link": "https://www.presidency.ucsb.edu/documents/statement-signing-the-further-consolidated-appropriations-act-2024"
+        },
+        {
+          "rank": 2,
+          "similarity": 0.5005,
+          "date": "2025-03-18",
+          "category": "UCSB",
+          "doc_type": "Statements",
+          "title": "Statement on the President's Meeting With National Security Adviser Tahnoon bin Zayed Al Nahyan of the United Arab Emirates",
+          "body_sentiment_score": 0.7988798646256328,
+          "title_sentiment_score": 0.057671308517456,
+          "link": "https://www.presidency.ucsb.edu/documents/statement-the-presidents-meeting-with-national-security-adviser-tahnoon-bin-zayed-al"
+        },
+        {
+          "rank": 3,
+          "similarity": 0.483959,
+          "date": "2023-11-21",
+          "category": "UCSB",
+          "doc_type": "Statements",
+          "title": "Statement on the Release of Hostages Held by Hamas in Gaza, Palestinian Territories",
+          "body_sentiment_score": 0.4727169765827533,
+          "title_sentiment_score": -0.0686657652258873,
+          "link": "https://www.presidency.ucsb.edu/documents/statement-the-release-hostages-held-hamas-gaza-palestinian-territories"
+        },
+        {
+          "rank": 4,
+          "similarity": 0.482509,
+          "date": "2025-05-01",
+          "category": "UCSB",
+          "doc_type": "Statements",
+          "title": "Statement on the Nomination of Michael G. Waltz To Be United States Permanent Representative to the United Nations",
+          "body_sentiment_score": 0.4204673878848552,
+          "title_sentiment_score": 0.0408884994685649,
+          "link": "https://www.presidency.ucsb.edu/documents/statement-the-nomination-michael-g-waltz-be-united-states-permanent-representative-the"
+        },
+        {
+          "rank": 5,
+          "similarity": 0.468258,
+          "date": "2024-04-23",
+          "category": "UCSB",
+          "doc_type": "Statements",
+          "title": "Statement on Senate Passage of National Security Supplemental Appropriations Legislation",
+          "body_sentiment_score": 0.3361615362615945,
+          "title_sentiment_score": 0.0746098477393388,
+          "link": "https://www.presidency.ucsb.edu/documents/statement-senate-passage-national-security-supplemental-appropriations-legislation"
+        }
+      ],
+      "profile_feature_ranking": [
+        {
+          "feature": "vol_5",
+          "centroid_value": 0.009734550039848725,
+          "z_diff": -0.22553217472544673,
+          "abs_z": 0.22553217472544673
+        },
+        {
+          "feature": "vol_ratio_5",
+          "centroid_value": 1.353855576248628,
+          "z_diff": -0.18799932528502106,
+          "abs_z": 0.18799932528502106
+        },
+        {
+          "feature": "drawdown",
+          "centroid_value": -0.03168668135894227,
+          "z_diff": 0.1703574948751405,
+          "abs_z": 0.1703574948751405
+        },
+        {
+          "feature": "vol_shock",
+          "centroid_value": 0.8886586928609846,
+          "z_diff": -0.16818558980612588,
+          "abs_z": 0.16818558980612588
+        },
+        {
+          "feature": "vix_z_score_5",
+          "centroid_value": -0.059585925425560717,
+          "z_diff": -0.11603192113534443,
+          "abs_z": 0.11603192113534443
+        },
+        {
+          "feature": "fomc_sentiment_shock",
+          "centroid_value": -0.0034562444182960434,
+          "z_diff": -0.10616730062618808,
+          "abs_z": 0.10616730062618808
+        },
+        {
+          "feature": "negative_count_ratio_5d",
+          "centroid_value": 0.23587752642964405,
+          "z_diff": 0.10003379708496452,
+          "abs_z": 0.10003379708496452
+        },
+        {
+          "feature": "body_emb_cluster_pc9",
+          "centroid_value": -0.0018574712846427949,
+          "z_diff": 0.09737293410017196,
+          "abs_z": 0.09737293410017196
+        },
+        {
+          "feature": "fomc_recent_5d",
+          "centroid_value": 0.3008844665561083,
+          "z_diff": 0.09736665286983927,
+          "abs_z": 0.09736665286983927
+        },
+        {
+          "feature": "ret_5",
+          "centroid_value": 0.006543118449654623,
+          "z_diff": 0.09474462559070244,
+          "abs_z": 0.09474462559070244
+        }
+      ]
     },
     {
-      "label": "fall_strong",
-      "count": 399,
+      "label": "rise_strong",
+      "count": 41,
       "date_range": {
-        "first": "2017-06-02",
-        "last": "2026-03-23"
+        "first": "2024-07-11",
+        "last": "2026-03-30"
       },
-      "centroid_feature_means": {
-        "ret_5": -0.0014,
-        "ret_accel": 0.0002,
-        "vol_5": 0.0141,
-        "vol_shock": 0.9818,
-        "vix_z_score_5": 0.0158,
-        "drawdown": -0.0843,
-        "vol_ratio_5": 1.4347,
-        "rel_strength_5": -0.001,
-        "news_count_zscore_20d": 0.0006,
-        "negative_count_ratio_5d": 0.2414,
-        "sentiment_shock_zscore_20d": 0.0469,
-        "body_sentiment_decay_5d": 0.0449,
-        "fomc_recent_5d": 0.2677,
-        "fomc_sentiment_shock": 0.0008,
-        "body_emb_cluster_pc1": 0.1564,
-        "body_emb_cluster_pc2": 0.0028,
-        "body_emb_cluster_pc3": 0.1062,
-        "body_emb_cluster_pc4": 0.0755,
-        "body_emb_cluster_pc5": 0.0049
-      }
+      "average_predicted_return_pct": 0.8484913081657562,
+      "min_predicted_return_pct": 0.6000041961669922,
+      "max_predicted_return_pct": 1.8309354782104492,
+      "average_actual_return_pct": 0.5363297034119698,
+      "direction_accuracy": 0.5853658536585366,
+      "profile_feature_means": {
+        "ret_5": -0.0134,
+        "vol_5": 0.0137,
+        "vol_ratio_5": 1.3924,
+        "drawdown": -0.0596,
+        "vix_z_score_5": 0.5586,
+        "vol_shock": 1.0249,
+        "days_since_news": 1.3069,
+        "news_count_lag1": 1.0285,
+        "negative_count_ratio_5d": 0.16,
+        "title_sentiment_3d_mean": 0.0266,
+        "title_sentiment_5d_mean": 0.0202,
+        "body_sentiment_decay_5d": 0.098,
+        "fomc_recent_5d": 0.1831,
+        "fomc_sentiment_shock": 0.006,
+        "body_emb_cluster_pc1": -0.3585,
+        "body_emb_cluster_pc2": -0.0073,
+        "body_emb_cluster_pc3": 0.1449,
+        "body_emb_cluster_pc4": 0.0563,
+        "body_emb_cluster_pc5": -0.0874,
+        "body_emb_cluster_pc6": -0.0061,
+        "body_emb_cluster_pc7": 0.5784,
+        "body_emb_cluster_pc8": -0.2239,
+        "body_emb_cluster_pc9": -0.416,
+        "body_emb_cluster_pc10": 0.383
+      },
+      "representative_embedding_news": [
+        {
+          "rank": 1,
+          "similarity": 0.66249,
+          "date": "2018-01-10",
+          "category": "UCSB",
+          "doc_type": "News Conferences",
+          "title": "The President's News Conference With Prime Minister Erna Solberg of Norway",
+          "body_sentiment_score": 0.824013558216393,
+          "title_sentiment_score": 0.0171574279665946,
+          "link": "https://www.presidency.ucsb.edu/documents/the-presidents-news-conference-with-prime-minister-erna-solberg-norway"
+        },
+        {
+          "rank": 2,
+          "similarity": 0.657547,
+          "date": "2017-03-17",
+          "category": "UCSB",
+          "doc_type": "News Conferences",
+          "title": "The President's News Conference With Chancellor Angela Merkel of Germany",
+          "body_sentiment_score": 0.6104639917612076,
+          "title_sentiment_score": 0.0181537866592407,
+          "link": "https://www.presidency.ucsb.edu/documents/the-presidents-news-conference-with-chancellor-angela-merkel-germany-5"
+        },
+        {
+          "rank": 3,
+          "similarity": 0.64629,
+          "date": "2025-02-27",
+          "category": "UCSB",
+          "doc_type": "News Conferences",
+          "title": "The President's News Conference With Prime Minister Keir Starmer of the United Kingdom",
+          "body_sentiment_score": 0.7199896859424472,
+          "title_sentiment_score": 0.0293534882366657,
+          "link": "https://www.presidency.ucsb.edu/documents/the-presidents-news-conference-with-prime-minister-keir-starmer-the-united-kingdom"
+        },
+        {
+          "rank": 4,
+          "similarity": 0.645686,
+          "date": "2022-01-19",
+          "category": "UCSB",
+          "doc_type": "News Conferences",
+          "title": "The President's News Conference",
+          "body_sentiment_score": 0.4310243112743515,
+          "title_sentiment_score": -0.0088912360370159,
+          "link": "https://www.presidency.ucsb.edu/documents/the-presidents-news-conference-1269"
+        },
+        {
+          "rank": 5,
+          "similarity": 0.616098,
+          "date": "2023-06-08",
+          "category": "UCSB",
+          "doc_type": "News Conferences",
+          "title": "The President's News Conference With Prime Minister Rishi Sunak of the United Kingdom",
+          "body_sentiment_score": 0.8614823352355219,
+          "title_sentiment_score": 0.0340282283723354,
+          "link": "https://www.presidency.ucsb.edu/documents/the-presidents-news-conference-with-prime-minister-rishi-sunak-the-united-kingdom"
+        }
+      ],
+      "profile_feature_ranking": [
+        {
+          "feature": "ret_5",
+          "centroid_value": -0.013365900566699607,
+          "z_diff": -0.6773452735468507,
+          "abs_z": 0.6773452735468507
+        },
+        {
+          "feature": "vix_z_score_5",
+          "centroid_value": 0.5585683361980031,
+          "z_diff": 0.6670487963429996,
+          "abs_z": 0.6670487963429996
+        },
+        {
+          "feature": "drawdown",
+          "centroid_value": -0.05963180131052535,
+          "z_diff": -0.5156953144713222,
+          "abs_z": 0.5156953144713222
+        },
+        {
+          "feature": "body_emb_cluster_pc1",
+          "centroid_value": -0.35853093881284237,
+          "z_diff": -0.4936545025370191,
+          "abs_z": 0.4936545025370191
+        },
+        {
+          "feature": "body_emb_cluster_pc7",
+          "centroid_value": 0.578436775581608,
+          "z_diff": 0.44456179442610577,
+          "abs_z": 0.44456179442610577
+        },
+        {
+          "feature": "body_sentiment_decay_5d",
+          "centroid_value": 0.09797744786475833,
+          "z_diff": 0.39513640954310764,
+          "abs_z": 0.39513640954310764
+        },
+        {
+          "feature": "vol_5",
+          "centroid_value": 0.013743594444966374,
+          "z_diff": 0.3294380340382284,
+          "abs_z": 0.3294380340382284
+        },
+        {
+          "feature": "news_count_lag1",
+          "centroid_value": 1.0284552845528454,
+          "z_diff": 0.2997982550030336,
+          "abs_z": 0.2997982550030336
+        },
+        {
+          "feature": "body_emb_cluster_pc9",
+          "centroid_value": -0.41601907750221145,
+          "z_diff": -0.2996333624624753,
+          "abs_z": 0.2996333624624753
+        },
+        {
+          "feature": "days_since_news",
+          "centroid_value": 1.3069105691056908,
+          "z_diff": -0.2696615460915774,
+          "abs_z": 0.2696615460915774
+        }
+      ]
     }
   ]
 }
