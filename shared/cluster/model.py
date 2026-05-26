@@ -43,28 +43,25 @@ CLUSTER_BASE_FEATURE_COLS: list[str] = [
 ]
 
 CLUSTER_EMBEDDING_PCA_COMPONENTS = 10
-CLUSTER_EMBEDDING_PC_COLS: list[str] = [
+CLUSTER_FEATURE_COLS: list[str] = CLUSTER_BASE_FEATURE_COLS + [
     f"body_emb_cluster_pc{i}" for i in range(1, CLUSTER_EMBEDDING_PCA_COMPONENTS + 1)
 ]
-CLUSTER_FEATURE_COLS: list[str] = CLUSTER_BASE_FEATURE_COLS + CLUSTER_EMBEDDING_PC_COLS
 
-PREDICTED_RETURN_LABELS: list[str] = [
+VOLATILITY_LABELS: list[str] = [
+    "fall_strong",
     "fall",
     "neutral",
     "rise",
     "rise_strong",
 ]
 
-# Backward-compatible name. The files are still named "volatility_cluster" in
-# the project, but the labels now mean predicted 5-day return regimes.
-VOLATILITY_LABELS: list[str] = PREDICTED_RETURN_LABELS
-
 # 5-trading-day predicted simple-return thresholds:
-# fall < 0%, neutral 0~+0.3%,
+# fall_strong < -0.3%, fall -0.3~0%, neutral 0~+0.3%,
 # rise +0.3~+0.6%, rise_strong >= +0.6%
-# Calibrated against the market_news model's actual prediction distribution
-# so each label captures a meaningful portion of test samples.
+# Symmetric around 0 for fall/rise pairs; calibrated against the
+# market_news model's actual prediction distribution.
 FIXED_THRESHOLDS: tuple[float, ...] = (
+    -0.003,
     0.0,
     0.003,
     0.006,
@@ -78,14 +75,9 @@ def _assign_label_fixed(predicted_return: float) -> str:
         return "rise"
     if predicted_return >= 0.0:
         return "neutral"
-    return "fall"
-
-
-def _compute_forward_return(
-    price: pd.Series,
-    horizon: int,
-) -> pd.Series:
-    return price.shift(-horizon) / price - 1.0
+    if predicted_return >= -0.003:
+        return "fall"
+    return "fall_strong"
 
 
 def _predicted_return_from_row(row: pd.Series) -> float:
@@ -139,69 +131,7 @@ def _aggregate_news_window(
     return window.mean(axis=0).to_numpy(dtype=float)
 
 
-def build_event_dataset(
-    market_df: pd.DataFrame,
-    daily_news_df: pd.DataFrame,
-    horizon: int = 5,
-    window_days: int = 5,
-    feature_columns: list[str] | None = None,
-) -> tuple[np.ndarray, list[str], list[pd.Timestamp]]:
-    """각 거래일의 horizon-일 실제 선행 수익률로 레이블을 붙이고 벡터를 반환한다.
-
-    이 함수는 legacy/분석용이다. 현재 파이프라인의 profile clustering은
-    실제 미래 수익률이 아니라 market_news 모델의 예측 수익률 label을 사용한다.
-
-    Parameters
-    ----------
-    market_df     : Date, target_price 컬럼을 포함한 시장 피처 프레임
-    daily_news_df : date 컬럼을 포함한 일자별 뉴스 피처 테이블
-    horizon       : 실제 선행 수익률 계산 거래일 수
-    window_days   : anchor 이전 달력일 수 (뉴스 창 크기)
-
-    Returns
-    -------
-    vectors : (N, n_features) float 배열
-    labels  : N 길이 레이블 리스트 (VOLATILITY_LABELS 중 하나)
-    dates   : N 길이 anchor 날짜 리스트
-    """
-    df = market_df[["Date", "target_price"]].dropna().copy()
-    df["Date"] = pd.to_datetime(df["Date"], errors="coerce").dt.tz_localize(None)
-    df = df.sort_values("Date").reset_index(drop=True)
-    df["forward_return"] = _compute_forward_return(
-        df["target_price"],
-        horizon,
-    )
-
-    news = daily_news_df.copy()
-    resolved_feature_columns = CLUSTER_FEATURE_COLS if feature_columns is None else feature_columns
-    date_column = "date" if "date" in news.columns else "Date"
-    news[date_column] = pd.to_datetime(news[date_column], errors="coerce").dt.tz_localize(None)
-    news_indexed = news.sort_values(date_column).set_index(date_column).sort_index()
-
-    vectors: list[np.ndarray] = []
-    labels: list[str] = []
-    dates: list[pd.Timestamp] = []
-
-    for row in df.itertuples(index=False):
-        forward_return = row.forward_return
-        if pd.isna(forward_return):
-            continue
-        vec = _aggregate_news_window(
-            row.Date,
-            news_indexed,
-            window_days,
-            resolved_feature_columns,
-        )
-        if vec is None:
-            continue
-        vectors.append(vec)
-        labels.append(_assign_label_fixed(float(forward_return)))
-        dates.append(row.Date)
-
-    return np.array(vectors, dtype=float), labels, dates
-
-
-def build_window_feature_dataset(
+def _build_window_feature_dataset(
     market_df: pd.DataFrame,
     daily_news_df: pd.DataFrame,
     window_days: int = 5,
@@ -308,81 +238,6 @@ def fit_embedding_pca_features(
     return embedding_pc_vectors, payload
 
 
-def build_event_dataset_with_embedding_pca(
-    market_df: pd.DataFrame,
-    daily_news_df: pd.DataFrame,
-    horizon: int = 5,
-    window_days: int = 5,
-    base_feature_columns: list[str] | None = None,
-    embedding_feature_columns: list[str] | None = None,
-    n_components: int = CLUSTER_EMBEDDING_PCA_COMPONENTS,
-    embedding_pca: dict | None = None,
-    pca_fit_ratio: float | None = None,
-) -> tuple[np.ndarray, list[str], list[pd.Timestamp], list[str], dict]:
-    """Build cluster event vectors and append cluster-only embedding PCA features."""
-    resolved_base_columns = (
-        CLUSTER_BASE_FEATURE_COLS if base_feature_columns is None else base_feature_columns
-    )
-    resolved_embedding_columns = (
-        embedding_pca.get("source_columns", [])
-        if embedding_pca is not None and embedding_feature_columns is None
-        else embedding_feature_columns
-    )
-    if resolved_embedding_columns is None:
-        resolved_embedding_columns = infer_embedding_feature_columns(daily_news_df)
-    if not resolved_embedding_columns:
-        raise ValueError("No body_emb_* columns are available for cluster embedding PCA.")
-
-    base_vectors, labels, dates = build_event_dataset(
-        market_df,
-        daily_news_df,
-        horizon=horizon,
-        window_days=window_days,
-        feature_columns=resolved_base_columns,
-    )
-    embedding_vectors, embedding_labels, embedding_dates = build_event_dataset(
-        market_df,
-        daily_news_df,
-        horizon=horizon,
-        window_days=window_days,
-        feature_columns=resolved_embedding_columns,
-    )
-
-    if labels != embedding_labels or dates != embedding_dates:
-        raise ValueError("Base cluster vectors and embedding vectors are not aligned.")
-
-    if embedding_pca is None:
-        if pca_fit_ratio is None:
-            embedding_pc_vectors, resolved_embedding_pca = fit_embedding_pca_features(
-                embedding_vectors,
-                source_columns=resolved_embedding_columns,
-                n_components=n_components,
-            )
-        else:
-            pca_fit_rows = int(len(embedding_vectors) * pca_fit_ratio)
-            if pca_fit_rows <= 0 or pca_fit_rows >= len(embedding_vectors):
-                raise ValueError("Embedding PCA fit split is empty.")
-            _, resolved_embedding_pca = fit_embedding_pca_features(
-                embedding_vectors[:pca_fit_rows],
-                source_columns=resolved_embedding_columns,
-                n_components=n_components,
-            )
-            embedding_pc_vectors = transform_embedding_pca_features(
-                embedding_vectors,
-                resolved_embedding_pca,
-            )
-    else:
-        embedding_pc_vectors = transform_embedding_pca_features(
-            embedding_vectors,
-            embedding_pca,
-        )
-        resolved_embedding_pca = embedding_pca
-
-    feature_columns = resolved_base_columns + list(resolved_embedding_pca["feature_columns"])
-    vectors = np.hstack([base_vectors, embedding_pc_vectors])
-    return vectors, labels, dates, feature_columns, resolved_embedding_pca
-
-
 def build_predicted_return_cluster_dataset(
     market_df: pd.DataFrame,
     daily_news_df: pd.DataFrame,
@@ -408,13 +263,13 @@ def build_predicted_return_cluster_dataset(
     if not resolved_embedding_columns:
         raise ValueError("No body_emb_* columns are available for cluster embedding PCA.")
 
-    base_vectors, dates = build_window_feature_dataset(
+    base_vectors, dates = _build_window_feature_dataset(
         market_df,
         daily_news_df,
         window_days=window_days,
         feature_columns=resolved_base_columns,
     )
-    embedding_vectors, embedding_dates = build_window_feature_dataset(
+    embedding_vectors, embedding_dates = _build_window_feature_dataset(
         market_df,
         daily_news_df,
         window_days=window_days,
@@ -529,19 +384,6 @@ def build_predicted_return_cluster_dataset(
         resolved_embedding_pca,
         prediction_records,
     )
-
-
-def build_cluster_vector_with_embedding_pca(
-    base_window_vector: np.ndarray,
-    embedding_window_vector: np.ndarray,
-    embedding_pca: dict,
-) -> np.ndarray:
-    """Create one inference-time cluster vector using the saved embedding PCA payload."""
-    embedding_pc_vector = transform_embedding_pca_features(
-        embedding_window_vector.reshape(1, -1),
-        embedding_pca,
-    )[0]
-    return np.concatenate([base_window_vector, embedding_pc_vector])
 
 
 def fit_news_centroids(
@@ -803,67 +645,6 @@ def build_representative_embedding_news(
         representative[label] = label_news
 
     return representative
-
-
-def predict_label_probabilities(
-    news_window_vector: np.ndarray,
-    centroids: np.ndarray,
-    scaler: StandardScaler,
-) -> dict[str, float]:
-    """새 뉴스 창 벡터와 예측 profile 중심점 간 역거리 비율을 반환한다.
-
-    Parameters
-    ----------
-    news_window_vector : (n_features,) 원래 스케일 벡터
-    """
-    scaled = scaler.transform(news_window_vector.reshape(1, -1))[0]
-    distances = np.linalg.norm(centroids - scaled, axis=1)
-    inv_dist = 1.0 / (distances + 1e-9)
-    probs = inv_dist / inv_dist.sum()
-    return {label: float(probs[i]) for i, label in enumerate(VOLATILITY_LABELS)}
-
-
-def get_closest_label(probabilities: dict[str, float]) -> tuple[str, float]:
-    """확률 딕셔너리에서 최고 확률 레이블과 그 확률을 반환한다."""
-    best = max(probabilities, key=probabilities.__getitem__)
-    return best, probabilities[best]
-
-
-def build_cluster_summary(
-    labels: list[str],
-    dates: list[pd.Timestamp],
-    centroids: np.ndarray,
-    counts: np.ndarray,
-    scaler: StandardScaler,
-    feature_columns: list[str] | None = None,
-) -> list[dict]:
-    """각 클러스터(레이블)의 샘플 수, 날짜 범위, 중심점 피처 평균을 반환한다."""
-    summary = []
-    resolved_feature_columns = CLUSTER_FEATURE_COLS if feature_columns is None else feature_columns
-    for i, label in enumerate(VOLATILITY_LABELS):
-        idx = _label_indices(labels, label)
-        if idx:
-            selected = [dates[j] for j in idx]
-            date_range: dict = {
-                "first": str(min(selected).date()),
-                "last": str(max(selected).date()),
-            }
-        else:
-            date_range = {}
-
-        centroid_original = scaler.inverse_transform(centroids[i].reshape(1, -1))[0]
-        summary.append(
-            {
-                "label": label,
-                "count": int(counts[i]),
-                "date_range": date_range,
-                "centroid_feature_means": {
-                    col: round(float(centroid_original[j]), 4)
-                    for j, col in enumerate(resolved_feature_columns)
-                },
-            }
-        )
-    return summary
 
 
 def rank_cluster_features(

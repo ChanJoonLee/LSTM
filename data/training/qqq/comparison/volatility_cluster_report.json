@@ -1,0 +1,855 @@
+{
+  "model_kind": "predicted_forward_return_profile_clusters",
+  "target": "market_news_model_predicted_forward_return",
+  "prediction_summary_scope": "market_news_test_predictions",
+  "horizon": 5,
+  "window_days": 5,
+  "labels": [
+    "fall_strong",
+    "fall",
+    "neutral",
+    "rise",
+    "rise_strong"
+  ],
+  "fixed_thresholds": [
+    -0.003,
+    0.0,
+    0.003,
+    0.006
+  ],
+  "feature_columns": [
+    "ret_5",
+    "vol_5",
+    "vol_ratio_5",
+    "drawdown",
+    "vix_z_score_5",
+    "vol_shock",
+    "days_since_news",
+    "news_count_lag1",
+    "negative_count_ratio_5d",
+    "title_sentiment_3d_mean",
+    "title_sentiment_5d_mean",
+    "body_sentiment_decay_5d",
+    "fomc_recent_5d",
+    "fomc_sentiment_shock",
+    "body_emb_cluster_pc1",
+    "body_emb_cluster_pc2",
+    "body_emb_cluster_pc3",
+    "body_emb_cluster_pc4",
+    "body_emb_cluster_pc5",
+    "body_emb_cluster_pc6",
+    "body_emb_cluster_pc7",
+    "body_emb_cluster_pc8",
+    "body_emb_cluster_pc9",
+    "body_emb_cluster_pc10"
+  ],
+  "source_model_metrics": {
+    "mae": 11.129206305869689,
+    "rmse": 14.448710441551874,
+    "r2_score": 0.9423120193469399,
+    "direction_accuracy": 0.5781584582441114,
+    "mape": 2.1177241860175875,
+    "baseline_mae": 11.439497888471125,
+    "baseline_rmse": 14.59642962548806,
+    "baseline_mape": 2.1690734056154515,
+    "high_conf_threshold": 0.4753167927265167,
+    "high_conf_long_accuracy": 0.6538461538461539,
+    "high_conf_long_count": 130,
+    "high_conf_short_accuracy": 0.5,
+    "high_conf_short_count": 10
+  },
+  "representative_news_method": "Label centroid body_emb_cluster_pc* values are inverse-transformed to the original body_emb_* space, then matched to source news by cosine similarity.",
+  "profile_feature_ranking_method": "For each label centroid, original-scale feature values are compared against the global profile mean and sorted by absolute z-difference.",
+  "predicted_groups": [
+    {
+      "label": "fall_strong",
+      "count": 20,
+      "date_range": {
+        "first": "2024-10-07",
+        "last": "2025-05-05"
+      },
+      "average_predicted_return_pct": -0.47213882207870317,
+      "min_predicted_return_pct": -0.9150445461273193,
+      "max_predicted_return_pct": -0.3004133701324463,
+      "average_actual_return_pct": 0.2712159067294073,
+      "direction_accuracy": 0.45,
+      "profile_feature_means": {
+        "ret_5": -0.0048,
+        "vol_5": 0.0129,
+        "vol_ratio_5": 1.4312,
+        "drawdown": -0.0476,
+        "vix_z_score_5": 0.2422,
+        "vol_shock": 0.986,
+        "days_since_news": 2.2125,
+        "news_count_lag1": 0.5833,
+        "negative_count_ratio_5d": 0.2454,
+        "title_sentiment_3d_mean": 0.0044,
+        "title_sentiment_5d_mean": 0.0007,
+        "body_sentiment_decay_5d": 0.0491,
+        "fomc_recent_5d": 0.1117,
+        "fomc_sentiment_shock": 0.0005,
+        "body_emb_cluster_pc1": 0.1465,
+        "body_emb_cluster_pc2": 0.4217,
+        "body_emb_cluster_pc3": -0.1484,
+        "body_emb_cluster_pc4": 0.0493,
+        "body_emb_cluster_pc5": -0.1882,
+        "body_emb_cluster_pc6": 0.1173,
+        "body_emb_cluster_pc7": 0.5457,
+        "body_emb_cluster_pc8": -0.796,
+        "body_emb_cluster_pc9": -0.0217,
+        "body_emb_cluster_pc10": 0.025
+      },
+      "representative_embedding_news": [
+        {
+          "rank": 1,
+          "similarity": 0.61523,
+          "date": "2018-04-03",
+          "category": "UCSB",
+          "doc_type": "News Conferences",
+          "title": "The President's News Conference With President Kersti Kaljulaid of Estonia, President Raimonds Vejonis of Latvia, and President Dalia Grybauskaite of Lithuania",
+          "body_sentiment_score": 0.889109319075942,
+          "title_sentiment_score": 0.0120311938226223,
+          "link": "https://www.presidency.ucsb.edu/documents/the-presidents-news-conference-with-president-kersti-kaljulaid-estonia-president-raimonds"
+        },
+        {
+          "rank": 2,
+          "similarity": 0.54598,
+          "date": "2024-12-22",
+          "category": "UCSB",
+          "doc_type": "Statements",
+          "title": "Statement by President-elect Donald J. Trump Announcing the Nomination of Ken Howery as Ambassador to the Kingdom of Denmark",
+          "body_sentiment_score": 0.2143567114339008,
+          "title_sentiment_score": 0.0458626840263605,
+          "link": "https://www.presidency.ucsb.edu/documents/statement-president-elect-donald-j-trump-announcing-the-nomination-ken-howery-ambassador"
+        },
+        {
+          "rank": 3,
+          "similarity": 0.543036,
+          "date": "2021-07-15",
+          "category": "UCSB",
+          "doc_type": "Statements",
+          "title": "Joint Statement by President Biden and Chancellor Angela Merkel of Germany—Washington Declaration",
+          "body_sentiment_score": 0.3783809374932921,
+          "title_sentiment_score": 0.0887309024110436,
+          "link": "https://www.presidency.ucsb.edu/documents/joint-statement-president-biden-and-chancellor-angela-merkel-germany-washington"
+        },
+        {
+          "rank": 4,
+          "similarity": 0.542216,
+          "date": "2018-04-03",
+          "category": "UCSB",
+          "doc_type": "Statements",
+          "title": "Joint Statement—A Declaration To Celebrate 100 Years of Independence of Estonia, Latvia, and Lithuania and Renewed Partnership",
+          "body_sentiment_score": 0.684488954251347,
+          "title_sentiment_score": 0.6623453674837947,
+          "link": "https://www.presidency.ucsb.edu/documents/joint-statement-declaration-celebrate-100-years-independence-estonia-latvia-and-lithuania"
+        },
+        {
+          "rank": 5,
+          "similarity": 0.540723,
+          "date": "2022-06-28",
+          "category": "UCSB",
+          "doc_type": "Statements",
+          "title": "Joint Declaration Between the Kingdom of Spain and the United States of America",
+          "body_sentiment_score": 0.9214593386277556,
+          "title_sentiment_score": 0.3970305602997541,
+          "link": "https://www.presidency.ucsb.edu/documents/joint-declaration-between-the-kingdom-spain-and-the-united-states-america"
+        }
+      ],
+      "profile_feature_ranking": [
+        {
+          "feature": "body_emb_cluster_pc8",
+          "centroid_value": -0.7960201567695089,
+          "z_diff": -0.6780717777449791,
+          "abs_z": 0.6780717777449791
+        },
+        {
+          "feature": "fomc_recent_5d",
+          "centroid_value": 0.11166666666666664,
+          "z_diff": -0.43067966799855983,
+          "abs_z": 0.43067966799855983
+        },
+        {
+          "feature": "body_emb_cluster_pc7",
+          "centroid_value": 0.5457443146750587,
+          "z_diff": 0.4072094456809195,
+          "abs_z": 0.4072094456809195
+        },
+        {
+          "feature": "body_emb_cluster_pc2",
+          "centroid_value": 0.42173734610945207,
+          "z_diff": 0.40642249767209,
+          "abs_z": 0.40642249767209
+        },
+        {
+          "feature": "news_count_lag1",
+          "centroid_value": 0.5833333333333333,
+          "z_diff": -0.3646709486621296,
+          "abs_z": 0.3646709486621296
+        },
+        {
+          "feature": "title_sentiment_5d_mean",
+          "centroid_value": 0.0006980714673279625,
+          "z_diff": -0.34717364517752647,
+          "abs_z": 0.34717364517752647
+        },
+        {
+          "feature": "ret_5",
+          "centroid_value": -0.004753979151260937,
+          "z_diff": -0.34336711526539904,
+          "abs_z": 0.34336711526539904
+        },
+        {
+          "feature": "vix_z_score_5",
+          "centroid_value": 0.24222377070578927,
+          "z_diff": 0.26630201726979574,
+          "abs_z": 0.26630201726979574
+        },
+        {
+          "feature": "title_sentiment_3d_mean",
+          "centroid_value": 0.004445916270983605,
+          "z_diff": -0.2525691987342385,
+          "abs_z": 0.2525691987342385
+        },
+        {
+          "feature": "drawdown",
+          "centroid_value": -0.04760737493177693,
+          "z_diff": -0.22049611832767788,
+          "abs_z": 0.22049611832767788
+        }
+      ]
+    },
+    {
+      "label": "fall",
+      "count": 15,
+      "date_range": {
+        "first": "2024-10-10",
+        "last": "2026-03-27"
+      },
+      "average_predicted_return_pct": -0.18619616826375252,
+      "min_predicted_return_pct": -0.27927160263061523,
+      "max_predicted_return_pct": -0.007927417755126953,
+      "average_actual_return_pct": 0.8075064799056864,
+      "direction_accuracy": 0.4666666666666667,
+      "profile_feature_means": {
+        "ret_5": -0.0089,
+        "vol_5": 0.0176,
+        "vol_ratio_5": 1.2361,
+        "drawdown": -0.0623,
+        "vix_z_score_5": -0.1426,
+        "vol_shock": 1.0531,
+        "days_since_news": 1.45,
+        "news_count_lag1": 1.1278,
+        "negative_count_ratio_5d": 0.1011,
+        "title_sentiment_3d_mean": 0.0436,
+        "title_sentiment_5d_mean": 0.0249,
+        "body_sentiment_decay_5d": 0.1261,
+        "fomc_recent_5d": 0.1644,
+        "fomc_sentiment_shock": 0.0014,
+        "body_emb_cluster_pc1": 0.262,
+        "body_emb_cluster_pc2": 0.1942,
+        "body_emb_cluster_pc3": 0.1264,
+        "body_emb_cluster_pc4": 0.2306,
+        "body_emb_cluster_pc5": -0.4044,
+        "body_emb_cluster_pc6": 0.0202,
+        "body_emb_cluster_pc7": 0.6009,
+        "body_emb_cluster_pc8": -0.3801,
+        "body_emb_cluster_pc9": 0.3132,
+        "body_emb_cluster_pc10": -0.0707
+      },
+      "representative_embedding_news": [
+        {
+          "rank": 1,
+          "similarity": 0.60731,
+          "date": "2021-07-15",
+          "category": "UCSB",
+          "doc_type": "Statements",
+          "title": "Joint Statement by President Biden and Chancellor Angela Merkel of Germany—Washington Declaration",
+          "body_sentiment_score": 0.3783809374932921,
+          "title_sentiment_score": 0.0887309024110436,
+          "link": "https://www.presidency.ucsb.edu/documents/joint-statement-president-biden-and-chancellor-angela-merkel-germany-washington"
+        },
+        {
+          "rank": 2,
+          "similarity": 0.58643,
+          "date": "2024-07-11",
+          "category": "UCSB",
+          "doc_type": "Statements",
+          "title": "Joint Statement by President Biden, Prime Minister Justin P.J. Trudeau of Canada, and President Alexander Stubb of Finland on the Icebreaker Collaboration Effort (ICE) Pact",
+          "body_sentiment_score": 0.7447287438732021,
+          "title_sentiment_score": 0.6886738361790776,
+          "link": "https://www.presidency.ucsb.edu/documents/joint-statement-president-biden-prime-minister-justin-pj-trudeau-canada-and-president-0"
+        },
+        {
+          "rank": 3,
+          "similarity": 0.572896,
+          "date": "2025-10-08",
+          "category": "UCSB",
+          "doc_type": "Memoranda",
+          "title": "Memorandum on Construction of Arctic Security Cutters",
+          "body_sentiment_score": -0.1331972150575252,
+          "title_sentiment_score": 0.2707950556650758,
+          "link": "https://www.presidency.ucsb.edu/documents/memorandum-construction-arctic-security-cutters"
+        },
+        {
+          "rank": 4,
+          "similarity": 0.572636,
+          "date": "2021-06-10",
+          "category": "UCSB",
+          "doc_type": "Statements",
+          "title": "Joint Statement by President Biden and Prime Minister Boris Johnson of the United Kingdom—The New Atlantic Charter",
+          "body_sentiment_score": 0.5218015678976521,
+          "title_sentiment_score": 0.5401296690106392,
+          "link": "https://www.presidency.ucsb.edu/documents/joint-statement-president-biden-and-prime-minister-boris-johnson-the-united-kingdom-the"
+        },
+        {
+          "rank": 5,
+          "similarity": 0.571817,
+          "date": "2019-11-25",
+          "category": "UCSB",
+          "doc_type": "Statements",
+          "title": "Joint Statement by President Trump and Prime Minister Boyko Borisov of Bulgaria",
+          "body_sentiment_score": 0.7575494467265197,
+          "title_sentiment_score": 0.1428673500195145,
+          "link": "https://www.presidency.ucsb.edu/documents/joint-statement-president-trump-and-prime-minister-boyko-borisov-bulgaria"
+        }
+      ],
+      "profile_feature_ranking": [
+        {
+          "feature": "vol_5",
+          "centroid_value": 0.01760786352138806,
+          "z_diff": 0.8643664826204182,
+          "abs_z": 0.8643664826204182
+        },
+        {
+          "feature": "drawdown",
+          "centroid_value": -0.06228625040131551,
+          "z_diff": -0.5808625613649024,
+          "abs_z": 0.5808625613649024
+        },
+        {
+          "feature": "vol_ratio_5",
+          "centroid_value": 1.2361285326338474,
+          "z_diff": -0.5652656070363612,
+          "abs_z": 0.5652656070363612
+        },
+        {
+          "feature": "body_sentiment_decay_5d",
+          "centroid_value": 0.12614758793927439,
+          "z_diff": 0.5404480371230505,
+          "abs_z": 0.5404480371230505
+        },
+        {
+          "feature": "negative_count_ratio_5d",
+          "centroid_value": 0.1011087060714837,
+          "z_diff": -0.5293318962514567,
+          "abs_z": 0.5293318962514567
+        },
+        {
+          "feature": "ret_5",
+          "centroid_value": -0.008916234604027948,
+          "z_diff": -0.504783178381888,
+          "abs_z": 0.504783178381888
+        },
+        {
+          "feature": "body_emb_cluster_pc7",
+          "centroid_value": 0.6008582198106067,
+          "z_diff": 0.4701791257920822,
+          "abs_z": 0.4701791257920822
+        },
+        {
+          "feature": "news_count_lag1",
+          "centroid_value": 1.1277777777777778,
+          "z_diff": 0.44806489923029846,
+          "abs_z": 0.44806489923029846
+        },
+        {
+          "feature": "body_emb_cluster_pc5",
+          "centroid_value": -0.4044452247410552,
+          "z_diff": -0.4218292823220385,
+          "abs_z": 0.4218292823220385
+        },
+        {
+          "feature": "body_emb_cluster_pc9",
+          "centroid_value": 0.313229186369767,
+          "z_diff": 0.3994081425158128,
+          "abs_z": 0.3994081425158128
+        }
+      ]
+    },
+    {
+      "label": "neutral",
+      "count": 73,
+      "date_range": {
+        "first": "2024-06-18",
+        "last": "2026-04-24"
+      },
+      "average_predicted_return_pct": 0.2186371855539803,
+      "min_predicted_return_pct": 0.018882751464821546,
+      "max_predicted_return_pct": 0.2985835075378196,
+      "average_actual_return_pct": 0.22281546020873513,
+      "direction_accuracy": 0.5068493150684932,
+      "profile_feature_means": {
+        "ret_5": 0.0158,
+        "vol_5": 0.0119,
+        "vol_ratio_5": 1.4204,
+        "drawdown": -0.039,
+        "vix_z_score_5": -0.031,
+        "vol_shock": 0.9093,
+        "days_since_news": 1.9658,
+        "news_count_lag1": 0.9874,
+        "negative_count_ratio_5d": 0.1916,
+        "title_sentiment_3d_mean": 0.0411,
+        "title_sentiment_5d_mean": 0.0395,
+        "body_sentiment_decay_5d": -0.0026,
+        "fomc_recent_5d": 0.3467,
+        "fomc_sentiment_shock": 0.0027,
+        "body_emb_cluster_pc1": 0.1899,
+        "body_emb_cluster_pc2": 0.1027,
+        "body_emb_cluster_pc3": -0.0484,
+        "body_emb_cluster_pc4": 0.0783,
+        "body_emb_cluster_pc5": -0.1263,
+        "body_emb_cluster_pc6": -0.2276,
+        "body_emb_cluster_pc7": 0.2665,
+        "body_emb_cluster_pc8": -0.044,
+        "body_emb_cluster_pc9": -0.2275,
+        "body_emb_cluster_pc10": 0.0259
+      },
+      "representative_embedding_news": [
+        {
+          "rank": 1,
+          "similarity": 0.624908,
+          "date": "2021-04-12",
+          "category": "BIS",
+          "doc_type": "press_release",
+          "title": "G. Nagesh Rao Appointed to Chief Information Officer",
+          "body_sentiment_score": 0.3379440689165628,
+          "title_sentiment_score": -0.0006233900785446,
+          "link": "https://www.bis.gov/press-release/g.-nagesh-rao-appointed-chief-information-officer"
+        },
+        {
+          "rank": 2,
+          "similarity": 0.51624,
+          "date": "2021-07-26",
+          "category": "UCSB",
+          "doc_type": "Proclamations",
+          "title": "Proclamation 10234—Made in America Week, 2021",
+          "body_sentiment_score": 0.3547062690174946,
+          "title_sentiment_score": 0.0310698188841342,
+          "link": "https://www.presidency.ucsb.edu/documents/proclamation-10234-made-america-week-2021"
+        },
+        {
+          "rank": 3,
+          "similarity": 0.509587,
+          "date": "2024-01-22",
+          "category": "BIS",
+          "doc_type": "press_release",
+          "title": "BIS Announces Appointment Of Elizabeth “Liz” Cannon As Executive Director Of Office Of Information And Communications Technology And Services",
+          "body_sentiment_score": 0.0628692786973237,
+          "title_sentiment_score": -0.0123368650674819,
+          "link": "https://www.bis.gov/press-release/bis-announces-appointment-elizabeth-liz-cannon-executive-director-office-information-communications"
+        },
+        {
+          "rank": 4,
+          "similarity": 0.50666,
+          "date": "2019-11-25",
+          "category": "UCSB",
+          "doc_type": "Statements",
+          "title": "Joint Statement by President Trump and Prime Minister Boyko Borisov of Bulgaria",
+          "body_sentiment_score": 0.7575494467265197,
+          "title_sentiment_score": 0.1428673500195145,
+          "link": "https://www.presidency.ucsb.edu/documents/joint-statement-president-trump-and-prime-minister-boyko-borisov-bulgaria"
+        },
+        {
+          "rank": 5,
+          "similarity": 0.491273,
+          "date": "2022-06-28",
+          "category": "BIS",
+          "doc_type": "press_release",
+          "title": "Assistant Secretary for Export Enforcement Matthew S. Axelrod at the National Association of College and University Attorneys 2022 Annual Conference Pittsburgh, Pennsylvania",
+          "body_sentiment_score": -0.2263482718360649,
+          "title_sentiment_score": 0.012964904308319,
+          "link": "https://www.bis.gov/press-release/assistant-secretary-export-enforcement-matthew-s.-axelrod-national-association-college-university"
+        }
+      ],
+      "profile_feature_ranking": [
+        {
+          "feature": "ret_5",
+          "centroid_value": 0.01581669235553815,
+          "z_diff": 0.45438228958736204,
+          "abs_z": 0.45438228958736204
+        },
+        {
+          "feature": "news_count_lag1",
+          "centroid_value": 0.9874429223744292,
+          "z_diff": 0.238575815708683,
+          "abs_z": 0.238575815708683
+        },
+        {
+          "feature": "fomc_recent_5d",
+          "centroid_value": 0.34672754946727546,
+          "z_diff": 0.22530002532555382,
+          "abs_z": 0.22530002532555382
+        },
+        {
+          "feature": "body_emb_cluster_pc6",
+          "centroid_value": -0.2275652172728343,
+          "z_diff": -0.18718276875321788,
+          "abs_z": 0.18718276875321788
+        },
+        {
+          "feature": "body_emb_cluster_pc10",
+          "centroid_value": 0.025887057497735455,
+          "z_diff": -0.16319866596829657,
+          "abs_z": 0.16319866596829657
+        },
+        {
+          "feature": "body_emb_cluster_pc4",
+          "centroid_value": 0.07827421918413793,
+          "z_diff": 0.12429253629864549,
+          "abs_z": 0.12429253629864549
+        },
+        {
+          "feature": "body_sentiment_decay_5d",
+          "centroid_value": -0.0026099886913250776,
+          "z_diff": -0.12372945627775403,
+          "abs_z": 0.12372945627775403
+        },
+        {
+          "feature": "body_emb_cluster_pc1",
+          "centroid_value": 0.18994524680928,
+          "z_diff": 0.12109883599216825,
+          "abs_z": 0.12109883599216825
+        },
+        {
+          "feature": "body_emb_cluster_pc9",
+          "centroid_value": -0.22752884549277458,
+          "z_diff": -0.1189507307919051,
+          "abs_z": 0.1189507307919051
+        },
+        {
+          "feature": "body_emb_cluster_pc8",
+          "centroid_value": -0.04396340195455345,
+          "z_diff": 0.117470250042845,
+          "abs_z": 0.117470250042845
+        }
+      ]
+    },
+    {
+      "label": "rise",
+      "count": 299,
+      "date_range": {
+        "first": "2024-06-13",
+        "last": "2026-04-22"
+      },
+      "average_predicted_return_pct": 0.41586627130923,
+      "min_predicted_return_pct": 0.30074119567871094,
+      "max_predicted_return_pct": 0.5990266799926758,
+      "average_actual_return_pct": 0.37825578769055695,
+      "direction_accuracy": 0.6053511705685619,
+      "profile_feature_means": {
+        "ret_5": 0.0067,
+        "vol_5": 0.0098,
+        "vol_ratio_5": 1.4215,
+        "drawdown": -0.0286,
+        "vix_z_score_5": -0.0195,
+        "vol_shock": 0.9167,
+        "days_since_news": 1.837,
+        "news_count_lag1": 0.7695,
+        "negative_count_ratio_5d": 0.2288,
+        "title_sentiment_3d_mean": 0.0307,
+        "title_sentiment_5d_mean": 0.0335,
+        "body_sentiment_decay_5d": 0.0139,
+        "fomc_recent_5d": 0.2775,
+        "fomc_sentiment_shock": 0.002,
+        "body_emb_cluster_pc1": 0.0986,
+        "body_emb_cluster_pc2": -0.0843,
+        "body_emb_cluster_pc3": -0.064,
+        "body_emb_cluster_pc4": -0.0795,
+        "body_emb_cluster_pc5": 0.009,
+        "body_emb_cluster_pc6": -0.03,
+        "body_emb_cluster_pc7": 0.0883,
+        "body_emb_cluster_pc8": -0.1288,
+        "body_emb_cluster_pc9": -0.0619,
+        "body_emb_cluster_pc10": 0.1824
+      },
+      "representative_embedding_news": [
+        {
+          "rank": 1,
+          "similarity": 0.583659,
+          "date": "2023-11-21",
+          "category": "UCSB",
+          "doc_type": "Statements",
+          "title": "Statement on the Release of Hostages Held by Hamas in Gaza, Palestinian Territories",
+          "body_sentiment_score": 0.4727169765827533,
+          "title_sentiment_score": -0.0686657652258873,
+          "link": "https://www.presidency.ucsb.edu/documents/statement-the-release-hostages-held-hamas-gaza-palestinian-territories"
+        },
+        {
+          "rank": 2,
+          "similarity": 0.523452,
+          "date": "2021-11-07",
+          "category": "UCSB",
+          "doc_type": "Statements",
+          "title": "Statement on the Terrorist Attack in Baghdad, Iraq",
+          "body_sentiment_score": 0.0731979254082652,
+          "title_sentiment_score": -0.0664967391639947,
+          "link": "https://www.presidency.ucsb.edu/documents/statement-the-terrorist-attack-baghdad-iraq"
+        },
+        {
+          "rank": 3,
+          "similarity": 0.51502,
+          "date": "2025-02-04",
+          "category": "UCSB",
+          "doc_type": "News Conferences",
+          "title": "The President's News Conference With Prime Minister Benjamin Netanyahu of Israel",
+          "body_sentiment_score": 0.3413196820765733,
+          "title_sentiment_score": 0.0563145354390144,
+          "link": "https://www.presidency.ucsb.edu/documents/the-presidents-news-conference-with-prime-minister-benjamin-netanyahu-israel-0"
+        },
+        {
+          "rank": 4,
+          "similarity": 0.50001,
+          "date": "2019-11-13",
+          "category": "UCSB",
+          "doc_type": "News Conferences",
+          "title": "The President's News Conference With President Recep Tayyip Erdogan of Turkey",
+          "body_sentiment_score": 0.6148108337074518,
+          "title_sentiment_score": 0.0309452582150697,
+          "link": "https://www.presidency.ucsb.edu/documents/the-presidents-news-conference-with-president-recep-tayyip-erdogan-turkey"
+        },
+        {
+          "rank": 5,
+          "similarity": 0.49967,
+          "date": "2021-02-04",
+          "category": "UCSB",
+          "doc_type": "Executive Orders",
+          "title": "Executive Order 14013—Rebuilding and Enhancing Programs To Resettle Refugees and Planning for the Impact of Climate Change on Migration",
+          "body_sentiment_score": 0.3010595823003418,
+          "title_sentiment_score": 0.5329092126339674,
+          "link": "https://www.presidency.ucsb.edu/documents/executive-order-14013-rebuilding-and-enhancing-programs-resettle-refugees-and-planning-for"
+        }
+      ],
+      "profile_feature_ranking": [
+        {
+          "feature": "drawdown",
+          "centroid_value": -0.02862064577610985,
+          "z_diff": 0.24562814745396985,
+          "abs_z": 0.24562814745396985
+        },
+        {
+          "feature": "vol_5",
+          "centroid_value": 0.00976382230102897,
+          "z_diff": -0.2214799401671736,
+          "abs_z": 0.2214799401671736
+        },
+        {
+          "feature": "body_emb_cluster_pc7",
+          "centroid_value": 0.08826204622152983,
+          "z_diff": -0.11548100839229658,
+          "abs_z": 0.11548100839229658
+        },
+        {
+          "feature": "ret_5",
+          "centroid_value": 0.00669101030123897,
+          "z_diff": 0.10048001540606073,
+          "abs_z": 0.10048001540606073
+        },
+        {
+          "feature": "news_count_lag1",
+          "centroid_value": 0.7695094760312151,
+          "z_diff": -0.08675090238944755,
+          "abs_z": 0.08675090238944755
+        },
+        {
+          "feature": "vol_shock",
+          "centroid_value": 0.9167041075067085,
+          "z_diff": -0.08375450781167122,
+          "abs_z": 0.08375450781167122
+        },
+        {
+          "feature": "body_emb_cluster_pc2",
+          "centroid_value": -0.08434085717923742,
+          "z_diff": -0.07677504266359428,
+          "abs_z": 0.07677504266359428
+        },
+        {
+          "feature": "negative_count_ratio_5d",
+          "centroid_value": 0.22884995508705128,
+          "z_diff": 0.06721528388029467,
+          "abs_z": 0.06721528388029467
+        },
+        {
+          "feature": "vix_z_score_5",
+          "centroid_value": -0.019450844451242663,
+          "z_diff": -0.06518861234236925,
+          "abs_z": 0.06518861234236925
+        },
+        {
+          "feature": "body_emb_cluster_pc9",
+          "centroid_value": -0.06186821438003394,
+          "z_diff": 0.03984794261711775,
+          "abs_z": 0.03984794261711775
+        }
+      ]
+    },
+    {
+      "label": "rise_strong",
+      "count": 60,
+      "date_range": {
+        "first": "2024-07-11",
+        "last": "2026-03-30"
+      },
+      "average_predicted_return_pct": 0.8671538035074873,
+      "min_predicted_return_pct": 0.600397586822532,
+      "max_predicted_return_pct": 1.5626192092895286,
+      "average_actual_return_pct": 0.6489729439873069,
+      "direction_accuracy": 0.6,
+      "profile_feature_means": {
+        "ret_5": -0.0169,
+        "vol_5": 0.0166,
+        "vol_ratio_5": 1.3963,
+        "drawdown": -0.0791,
+        "vix_z_score_5": 0.3386,
+        "vol_shock": 1.085,
+        "days_since_news": 1.9292,
+        "news_count_lag1": 0.9292,
+        "negative_count_ratio_5d": 0.1885,
+        "title_sentiment_3d_mean": 0.0338,
+        "title_sentiment_5d_mean": 0.0332,
+        "body_sentiment_decay_5d": 0.0524,
+        "fomc_recent_5d": 0.187,
+        "fomc_sentiment_shock": -0.0075,
+        "body_emb_cluster_pc1": -0.1992,
+        "body_emb_cluster_pc2": 0.0756,
+        "body_emb_cluster_pc3": 0.0036,
+        "body_emb_cluster_pc4": -0.1006,
+        "body_emb_cluster_pc5": 0.1153,
+        "body_emb_cluster_pc6": -0.1199,
+        "body_emb_cluster_pc7": 0.3775,
+        "body_emb_cluster_pc8": -0.1507,
+        "body_emb_cluster_pc9": -0.291,
+        "body_emb_cluster_pc10": 0.427
+      },
+      "representative_embedding_news": [
+        {
+          "rank": 1,
+          "similarity": 0.696326,
+          "date": "2018-11-07",
+          "category": "UCSB",
+          "doc_type": "News Conferences",
+          "title": "The President's News Conference in Washington, D.C.",
+          "body_sentiment_score": 0.8204918261617422,
+          "title_sentiment_score": -0.0107289794832468,
+          "link": "https://www.presidency.ucsb.edu/documents/the-presidents-news-conference-washington-dc"
+        },
+        {
+          "rank": 2,
+          "similarity": 0.693257,
+          "date": "2017-10-16",
+          "category": "UCSB",
+          "doc_type": "News Conferences",
+          "title": "The President's News Conference With Senate Majority Leader A. Mitchell McConnell",
+          "body_sentiment_score": 0.4296058062463999,
+          "title_sentiment_score": 0.0019396301358938,
+          "link": "https://www.presidency.ucsb.edu/documents/the-presidents-news-conference-with-senate-majority-leader-mitchell-mcconnell"
+        },
+        {
+          "rank": 3,
+          "similarity": 0.667207,
+          "date": "2022-01-19",
+          "category": "UCSB",
+          "doc_type": "News Conferences",
+          "title": "The President's News Conference",
+          "body_sentiment_score": 0.4310243112743515,
+          "title_sentiment_score": -0.0088912360370159,
+          "link": "https://www.presidency.ucsb.edu/documents/the-presidents-news-conference-1269"
+        },
+        {
+          "rank": 4,
+          "similarity": 0.661945,
+          "date": "2017-03-17",
+          "category": "UCSB",
+          "doc_type": "News Conferences",
+          "title": "The President's News Conference With Chancellor Angela Merkel of Germany",
+          "body_sentiment_score": 0.6104639917612076,
+          "title_sentiment_score": 0.0181537866592407,
+          "link": "https://www.presidency.ucsb.edu/documents/the-presidents-news-conference-with-chancellor-angela-merkel-germany-5"
+        },
+        {
+          "rank": 5,
+          "similarity": 0.647532,
+          "date": "2022-11-09",
+          "category": "UCSB",
+          "doc_type": "News Conferences",
+          "title": "The President's News Conference",
+          "body_sentiment_score": 0.4645457305014133,
+          "title_sentiment_score": -0.0088912434875965,
+          "link": "https://www.presidency.ucsb.edu/documents/the-presidents-news-conference-1270"
+        }
+      ],
+      "profile_feature_ranking": [
+        {
+          "feature": "drawdown",
+          "centroid_value": -0.079149573495991,
+          "z_diff": -0.9948572010787248,
+          "abs_z": 0.9948572010787248
+        },
+        {
+          "feature": "ret_5",
+          "centroid_value": -0.01686144528925684,
+          "z_diff": -0.8129056960875544,
+          "abs_z": 0.8129056960875544
+        },
+        {
+          "feature": "vol_5",
+          "centroid_value": 0.01658347884443785,
+          "z_diff": 0.7225614607220395,
+          "abs_z": 0.7225614607220395
+        },
+        {
+          "feature": "vol_shock",
+          "centroid_value": 1.0850128054042418,
+          "z_diff": 0.42294009524332077,
+          "abs_z": 0.42294009524332077
+        },
+        {
+          "feature": "vix_z_score_5",
+          "centroid_value": 0.3386421744459471,
+          "z_diff": 0.3884453032849274,
+          "abs_z": 0.3884453032849274
+        },
+        {
+          "feature": "body_emb_cluster_pc1",
+          "centroid_value": -0.1991839485063134,
+          "z_diff": -0.3150522280109077,
+          "abs_z": 0.3150522280109077
+        },
+        {
+          "feature": "body_emb_cluster_pc10",
+          "centroid_value": 0.4270346602363021,
+          "z_diff": 0.2773195260477164,
+          "abs_z": 0.2773195260477164
+        },
+        {
+          "feature": "fomc_recent_5d",
+          "centroid_value": 0.18703703703703703,
+          "z_diff": -0.2203450863692579,
+          "abs_z": 0.2203450863692579
+        },
+        {
+          "feature": "body_emb_cluster_pc7",
+          "centroid_value": 0.3774610483416373,
+          "z_diff": 0.21493957434780797,
+          "abs_z": 0.21493957434780797
+        },
+        {
+          "feature": "fomc_sentiment_shock",
+          "centroid_value": -0.0075196272304228606,
+          "z_diff": -0.20739466821696664,
+          "abs_z": 0.20739466821696664
+        }
+      ]
+    }
+  ]
+}

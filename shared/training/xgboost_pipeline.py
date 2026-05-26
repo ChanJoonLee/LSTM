@@ -513,6 +513,7 @@ def _save_xgboost_model_with_estimator_type(
         else:
             raise TypeError("Could not determine estimator type before saving XGBoost model.")
 
+    output_path.parent.mkdir(parents=True, exist_ok=True)
     model.save_model(str(output_path))
 
 
@@ -746,12 +747,14 @@ def run_training_experiment(
 
     if persist_artifacts:
         if training_frame_output_path is not None:
+            training_frame_output_path.parent.mkdir(parents=True, exist_ok=True)
             supervised_frame.to_csv(
                 training_frame_output_path,
                 index=False,
                 encoding="utf-8-sig",
             )
         if predictions_output_path is not None:
+            predictions_output_path.parent.mkdir(parents=True, exist_ok=True)
             predictions.to_csv(predictions_output_path, index=False, encoding="utf-8-sig")
         if model_output_path is not None:
             _save_xgboost_model_with_estimator_type(final_model, model_output_path)

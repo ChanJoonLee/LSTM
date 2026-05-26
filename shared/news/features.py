@@ -60,24 +60,6 @@ def _validate_embedding_lists(
     return int(lengths.iloc[0])
 
 
-CATEGORY_TO_PREFIX = {
-    "FOMC": "fomc",
-    "BIS": "bis",
-    "UCSB": "ucsb",
-    "UCSB Presidency Project": "ucsb",
-}
-
-DOC_TYPE_TO_FEATURE = {
-    "statement": "fomc_statement_count",
-    "minutes": "fomc_minutes_count",
-    "implementation_note": "fomc_implementation_note_count",
-    "press_release": "bis_press_release_count",
-    "presidential_actions": "ucsb_presidential_actions_count",
-    "briefings_statements": "ucsb_briefings_statements_count",
-    "executive_orders": "ucsb_executive_orders_count",
-}
-
-
 def _validate_required_columns(
     df: pd.DataFrame,
     required_columns: Iterable[str],

@@ -1,0 +1,2187 @@
+{
+  "market_news": {
+    "experiment_name": "market_news",
+    "best_horizon": 5,
+    "best_horizon_direction_score": null,
+    "selected_feature_count": 42,
+    "selected_features": [
+      "ret_1",
+      "ret_3",
+      "ret_5",
+      "ret_accel",
+      "price_to_ma_5",
+      "bb_pos_5",
+      "bb_width_5",
+      "vol_5",
+      "vol_10",
+      "drawdown",
+      "vol_ratio_5",
+      "rel_strength_5",
+      "spy_ret_5",
+      "vix_ret_5",
+      "vix_z_score_5",
+      "hyg_ret_5",
+      "uup_ret_5",
+      "target_spy_rel_ret_5",
+      "uso_ret_5",
+      "uso_shock_5",
+      "xop_ret_5",
+      "xop_shock_5",
+      "oih_ret_5",
+      "oih_shock_5",
+      "xlb_shock_5",
+      "news_count_5d",
+      "days_since_news",
+      "sentiment_gap",
+      "body_sentiment_gap",
+      "sentiment_shock",
+      "body_sentiment_5d_mean",
+      "title_sentiment_5d_mean",
+      "negative_news_spike_5d",
+      "body_sentiment_decay_3d",
+      "fomc_sentiment",
+      "fomc_recent_5d",
+      "sentiment_divergence",
+      "body_emb_cluster_pc1",
+      "body_emb_cluster_pc2",
+      "body_emb_cluster_pc3",
+      "body_emb_cluster_pc4",
+      "body_emb_cluster_pc5"
+    ],
+    "feature_frame_start_date": "2017-01-12",
+    "feature_frame_end_date": "2026-04-24",
+    "train_rows": 1866,
+    "test_rows": 467,
+    "train_start_date": "2017-01-12",
+    "train_end_date": "2024-06-12",
+    "test_start_date": "2024-06-13",
+    "test_end_date": "2026-04-24",
+    "metrics": {
+      "mae": 1.1661421833028192,
+      "rmse": 1.5403402297229312,
+      "r2_score": 0.9093862857417937,
+      "direction_accuracy": 0.49036402569593146,
+      "mape": 2.6104667866161235,
+      "baseline_mae": 1.1521482610600409,
+      "baseline_rmse": 1.5018345242262392,
+      "baseline_mape": 2.572800952450642,
+      "high_conf_threshold": 0.30247727036476135,
+      "high_conf_long_accuracy": 0.5913978494623656,
+      "high_conf_long_count": 93,
+      "high_conf_short_accuracy": 0.3617021276595745,
+      "high_conf_short_count": 47
+    },
+    "embedding_pca": {
+      "source_columns": [
+        "body_emb_0",
+        "body_emb_1",
+        "body_emb_2",
+        "body_emb_3",
+        "body_emb_4",
+        "body_emb_5",
+        "body_emb_6",
+        "body_emb_7",
+        "body_emb_8",
+        "body_emb_9",
+        "body_emb_10",
+        "body_emb_11",
+        "body_emb_12",
+        "body_emb_13",
+        "body_emb_14",
+        "body_emb_15",
+        "body_emb_16",
+        "body_emb_17",
+        "body_emb_18",
+        "body_emb_19",
+        "body_emb_20",
+        "body_emb_21",
+        "body_emb_22",
+        "body_emb_23",
+        "body_emb_24",
+        "body_emb_25",
+        "body_emb_26",
+        "body_emb_27",
+        "body_emb_28",
+        "body_emb_29"
+      ],
+      "feature_columns": [
+        "body_emb_cluster_pc1",
+        "body_emb_cluster_pc2",
+        "body_emb_cluster_pc3",
+        "body_emb_cluster_pc4",
+        "body_emb_cluster_pc5"
+      ],
+      "n_components": 5,
+      "scaler_mean": [
+        0.013313527584192722,
+        -0.001836751295847153,
+        0.006600006350206795,
+        -2.8252106661102798e-05,
+        -0.007577659400404975,
+        0.0033166143742141435,
+        -0.007148309522571085,
+        -0.0017889975948064166,
+        0.0016382908602543187,
+        -0.005878246324584435,
+        0.0030679143565562803,
+        -0.001379213034078323,
+        0.0031125927685049194,
+        0.0019542952029334153,
+        -0.004528183541156416,
+        -0.0025869009018815946,
+        -0.00196510748222725,
+        0.0010298702813893819,
+        -0.0011871058642345116,
+        0.0010415485184480913,
+        0.0037023754784605016,
+        0.0002442318714606614,
+        -0.0013989815220601615,
+        0.00019047325562481342,
+        0.0013434650788587334,
+        -0.0004227482186707165,
+        0.0024411287582156503,
+        1.8415857250481194e-06,
+        -0.00026443683165806734,
+        -0.0024089236128361797
+      ],
+      "scaler_scale": [
+        0.19996245097269616,
+        0.15051890183717986,
+        0.14035879450969882,
+        0.11179197959402278,
+        0.09206955718098786,
+        0.09308597077398655,
+        0.0877272663356039,
+        0.0797194649905677,
+        0.07919720621323051,
+        0.07507267553799607,
+        0.07393582256822197,
+        0.07126725732760747,
+        0.06611341201731208,
+        0.06582600510307579,
+        0.06628019082124284,
+        0.06486962315310628,
+        0.06241422571594316,
+        0.06120507424467089,
+        0.057808671909425374,
+        0.055516721896050954,
+        0.057787492887284714,
+        0.0542430249350597,
+        0.05243253192172696,
+        0.05032130109757826,
+        0.051038301540950036,
+        0.05119036973732514,
+        0.051524317417453426,
+        0.04758052955093281,
+        0.0469911780079735,
+        0.04810963811319915
+      ],
+      "pca_mean": [
+        0.0,
+        -1.523135553612219e-17,
+        -1.3327436094106917e-17,
+        -1.523135553612219e-17,
+        7.615677768061095e-18,
+        1.1423516652091643e-17,
+        7.615677768061095e-18,
+        1.523135553612219e-17,
+        1.523135553612219e-17,
+        0.0,
+        -1.523135553612219e-17,
+        7.615677768061095e-18,
+        -1.1423516652091643e-17,
+        0.0,
+        -3.8078388840305476e-18,
+        1.523135553612219e-17,
+        7.615677768061095e-18,
+        7.615677768061095e-18,
+        0.0,
+        -1.1423516652091643e-17,
+        0.0,
+        -1.523135553612219e-17,
+        -3.8078388840305476e-18,
+        1.523135553612219e-17,
+        1.523135553612219e-17,
+        7.615677768061095e-18,
+        2.2847033304183285e-17,
+        -2.2847033304183285e-17,
+        7.615677768061095e-18,
+        0.0
+      ],
+      "pca_components": [
+        [
+          -0.26267857289784097,
+          -0.19048396786257932,
+          -0.04269162017095271,
+          0.05384817644162628,
+          -0.14240581474556527,
+          -0.23360158643478934,
+          0.25444664538841666,
+          0.3320900397355448,
+          0.21950763238085072,
+          -0.18382002034528344,
+          -0.06301854692152116,
+          -0.13613918464957067,
+          0.17421423317914636,
+          0.3578355435733637,
+          0.013004334367757452,
+          0.2763239816224252,
+          0.07469109531560206,
+          0.07309342667215322,
+          0.1640576289499287,
+          0.31855952088509504,
+          -0.12716910035858794,
+          -0.1996416386703445,
+          0.14461379966065463,
+          0.03249560101921401,
+          0.10399436168130634,
+          0.10287340702308279,
+          -0.17700531838224234,
+          -0.0862649325842932,
+          0.04934757124240932,
+          0.1442159505514021
+        ],
+        [
+          -0.32859912156780186,
+          0.11474909766147195,
+          -0.34340896096954077,
+          -0.25381218686537704,
+          0.2819437637203539,
+          0.20100474293611445,
+          -0.07660557056024594,
+          -0.07998927055314276,
+          -0.23123607591116563,
+          0.07189006315317235,
+          -0.1033681443562154,
+          0.0555316101274004,
+          -0.004493614198274362,
+          0.058138079266358174,
+          0.015626994863507077,
+          -0.01055883849797086,
+          0.19643553919801562,
+          0.1247553061365746,
+          -0.03530107949450965,
+          -0.1287649770204134,
+          -0.26645014403763134,
+          -0.15660153482017727,
+          0.3591266308391257,
+          -0.2071478857616628,
+          0.26375566007903456,
+          -0.22186053397788866,
+          -0.06893074780408778,
+          0.01573001830132947,
+          -0.10056703020218748,
+          0.12206155677792906
+        ],
+        [
+          0.10065840570920816,
+          -0.38326808275573604,
+          -0.19525603390107985,
+          -0.23854299054073724,
+          -0.1829554984808025,
+          0.27264675715607656,
+          -0.0431403652728235,
+          -0.1020700662372931,
+          0.05919195019495631,
+          0.17670245919142788,
+          0.08001963505743101,
+          0.08843192241046872,
+          0.15701485031786983,
+          0.017643058962346914,
+          -0.04484275723402876,
+          0.1352588510257746,
+          0.19428842477797004,
+          0.13383873740266775,
+          -0.005239142578313016,
+          0.015536143886536074,
+          0.339036302350485,
+          -0.23684978872209184,
+          -0.03044773817653496,
+          0.17513915523417217,
+          -0.002216745058573599,
+          -0.24081005963512922,
+          -0.05198080266262891,
+          -0.006661809671569579,
+          0.4059876603865828,
+          -0.22247529203442157
+        ],
+        [
+          0.055112001259001134,
+          0.32016188109662863,
+          0.10148719236942436,
+          -0.008438349751007657,
+          -0.09687049680804846,
+          0.028301609890390326,
+          0.3364166634498459,
+          0.20485359203480963,
+          -0.09974478821022005,
+          -0.011141716152443427,
+          0.04403166847459649,
+          0.16887363785581008,
+          0.43524689467584327,
+          0.042411526246652814,
+          -0.0010982638291803803,
+          -0.18807969085840015,
+          -0.31403984743585084,
+          0.1153533710110077,
+          0.04698862059170615,
+          -0.0822918184468575,
+          -0.10749061792207681,
+          -0.09838611371415207,
+          -0.11013129603904283,
+          -0.16608618564893182,
+          0.09306380761657108,
+          -0.33567366722814906,
+          0.2466240829630149,
+          -0.17737415426988215,
+          0.22578205586054065,
+          -0.07185389197247946
+        ],
+        [
+          -0.2192389870112243,
+          0.05987258750519135,
+          0.08967019379690623,
+          -0.09977854441022133,
+          -0.13664079580768493,
+          0.10225543103502599,
+          -0.27335638423133374,
+          -0.14798575699124508,
+          0.1959910083834743,
+          -0.12563455766148118,
+          0.4866296542367991,
+          0.2276839515442437,
+          -0.09221191445077366,
+          0.07302494322423808,
+          -0.32461528430117803,
+          0.06947787267363387,
+          -0.21319809985130625,
+          0.019245568760269012,
+          0.14176071814789706,
+          0.16460023004804133,
+          -0.024089491032870697,
+          -0.08731451351876726,
+          -0.08216247707915116,
+          -0.3174479892974944,
+          0.1455107679930507,
+          0.1065540797728965,
+          0.0992885892873661,
+          0.27961398090265,
+          0.06230671073787921,
+          0.06728398905431086
+        ]
+      ],
+      "explained_variance": [
+        1.438113395695852,
+        1.4292368672580142,
+        1.3073369323838797,
+        1.2592891004323814,
+        1.2365352474717208
+      ],
+      "explained_variance_ratio": [
+        0.047911423418591705,
+        0.047615697703397575,
+        0.04355454410317855,
+        0.041953808008331386,
+        0.0411957527069446
+      ],
+      "singular_values": [
+        51.78881619590048,
+        51.62873964601689,
+        49.37796450741905,
+        48.46209005301351,
+        48.02226813192771
+      ]
+    },
+    "config": {
+      "target_ticker": "XLE",
+      "preset_name": "xle_energy",
+      "macro_tickers": [
+        "SPY",
+        "^VIX",
+        "TLT",
+        "HYG",
+        "UUP",
+        "USO",
+        "XOP",
+        "OIH",
+        "XLB"
+      ],
+      "supplementary_ticker_feature_suffixes": [],
+      "market_feature_columns": [
+        "ret_1",
+        "ret_3",
+        "ret_5",
+        "ret_accel",
+        "price_to_ma_5",
+        "bb_pos_5",
+        "bb_width_5",
+        "vol_5",
+        "vol_10",
+        "drawdown",
+        "vol_ratio_5",
+        "rel_strength_5",
+        "spy_ret_5",
+        "vix_ret_5",
+        "vix_z_score_5",
+        "hyg_ret_5",
+        "uup_ret_5",
+        "target_spy_rel_ret_5",
+        "uso_ret_5",
+        "uso_shock_5",
+        "xop_ret_5",
+        "xop_shock_5",
+        "oih_ret_5",
+        "oih_shock_5",
+        "xlb_shock_5"
+      ],
+      "start_date": "2017-01-12",
+      "end_date": "2026-05-02",
+      "news_input_path": "C:\\Users\\admin\\data-ml\\data\\crawler\\features\\xle\\merged_finbert_with_embeddings.csv",
+      "market_only_training_frame_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\xle\\market_only\\training_frame.csv",
+      "market_only_predictions_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\xle\\market_only\\predictions.csv",
+      "market_only_model_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\xle\\market_only\\xgboost_model.json",
+      "market_only_metadata_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\xle\\market_only\\metadata.json",
+      "daily_news_features_output_path": "C:\\Users\\admin\\data-ml\\data\\crawler\\features\\xle\\daily_news_features.csv",
+      "merged_training_frame_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\xle\\market_news\\training_frame.csv",
+      "predictions_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\xle\\market_news\\predictions.csv",
+      "model_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\xle\\market_news\\xgboost_model.json",
+      "metadata_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\xle\\market_news\\metadata.json",
+      "comparison_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\xle\\comparison\\market_model_comparison.csv",
+      "comparison_metadata_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\xle\\comparison\\market_model_comparison.json",
+      "aligned_comparison_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\xle\\comparison\\market_model_comparison_aligned.csv",
+      "aligned_comparison_metadata_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\xle\\comparison\\market_model_comparison_aligned.json",
+      "cluster_model_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\xle\\comparison\\volatility_cluster_model.json",
+      "cluster_report_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\xle\\comparison\\volatility_cluster_report.json",
+      "cluster_visualization_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\xle\\comparison\\cluster_visualization.png",
+      "cluster_horizon": 5,
+      "cluster_window_days": 5,
+      "horizon_candidates": [
+        3,
+        5,
+        10,
+        20
+      ],
+      "top_feature_count": 35,
+      "training_embedding_pca_components": 5,
+      "optuna_trials": 30,
+      "train_ratio": 0.8,
+      "random_seed": 73,
+      "aligned_comparison_start_date": null,
+      "regression_style_fixed_horizon": 5,
+      "market_news_only": true
+    },
+    "comparison_min_date": null,
+    "horizon_selection_mode": "fixed",
+    "feature_selection_mode": "fixed_plus_embedding_pca"
+  },
+  "predicted_return_cluster_report": {
+    "model_kind": "predicted_forward_return_profile_clusters",
+    "target": "market_news_model_predicted_forward_return",
+    "prediction_summary_scope": "market_news_test_predictions",
+    "horizon": 5,
+    "window_days": 5,
+    "labels": [
+      "fall_strong",
+      "fall",
+      "neutral",
+      "rise",
+      "rise_strong"
+    ],
+    "fixed_thresholds": [
+      -0.003,
+      0.0,
+      0.003,
+      0.006
+    ],
+    "feature_columns": [
+      "ret_5",
+      "vol_5",
+      "vol_ratio_5",
+      "drawdown",
+      "vix_z_score_5",
+      "vol_shock",
+      "days_since_news",
+      "news_count_lag1",
+      "negative_count_ratio_5d",
+      "title_sentiment_3d_mean",
+      "title_sentiment_5d_mean",
+      "body_sentiment_decay_5d",
+      "fomc_recent_5d",
+      "fomc_sentiment_shock",
+      "body_emb_cluster_pc1",
+      "body_emb_cluster_pc2",
+      "body_emb_cluster_pc3",
+      "body_emb_cluster_pc4",
+      "body_emb_cluster_pc5",
+      "body_emb_cluster_pc6",
+      "body_emb_cluster_pc7",
+      "body_emb_cluster_pc8",
+      "body_emb_cluster_pc9",
+      "body_emb_cluster_pc10"
+    ],
+    "source_model_metrics": {
+      "mae": 1.1661421833028192,
+      "rmse": 1.5403402297229312,
+      "r2_score": 0.9093862857417937,
+      "direction_accuracy": 0.49036402569593146,
+      "mape": 2.6104667866161235,
+      "baseline_mae": 1.1521482610600409,
+      "baseline_rmse": 1.5018345242262392,
+      "baseline_mape": 2.572800952450642,
+      "high_conf_threshold": 0.30247727036476135,
+      "high_conf_long_accuracy": 0.5913978494623656,
+      "high_conf_long_count": 93,
+      "high_conf_short_accuracy": 0.3617021276595745,
+      "high_conf_short_count": 47
+    },
+    "representative_news_method": "Label centroid body_emb_cluster_pc* values are inverse-transformed to the original body_emb_* space, then matched to source news by cosine similarity.",
+    "profile_feature_ranking_method": "For each label centroid, original-scale feature values are compared against the global profile mean and sorted by absolute z-difference.",
+    "predicted_groups": [
+      {
+        "label": "fall_strong",
+        "count": 47,
+        "date_range": {
+          "first": "2024-08-05",
+          "last": "2026-04-24"
+        },
+        "average_predicted_return_pct": -1.391409939907966,
+        "min_predicted_return_pct": -13.593685626983632,
+        "max_predicted_return_pct": -0.303494930267334,
+        "average_actual_return_pct": 0.27700292000439103,
+        "direction_accuracy": 0.3617021276595745,
+        "profile_feature_means": {
+          "ret_5": -0.0133,
+          "vol_5": 0.0144,
+          "vol_ratio_5": 1.8253,
+          "drawdown": -0.0611,
+          "vix_z_score_5": 0.3739,
+          "vol_shock": 0.9895,
+          "days_since_news": 1.9752,
+          "news_count_lag1": 0.539,
+          "negative_count_ratio_5d": 0.2947,
+          "title_sentiment_3d_mean": -0.0037,
+          "title_sentiment_5d_mean": 0.0005,
+          "body_sentiment_decay_5d": -0.0294,
+          "fomc_recent_5d": 0.2176,
+          "fomc_sentiment_shock": 0.0028,
+          "body_emb_cluster_pc1": 0.7332,
+          "body_emb_cluster_pc2": -0.0474,
+          "body_emb_cluster_pc3": 0.0853,
+          "body_emb_cluster_pc4": -0.1734,
+          "body_emb_cluster_pc5": -0.2679,
+          "body_emb_cluster_pc6": -0.237,
+          "body_emb_cluster_pc7": -0.2893,
+          "body_emb_cluster_pc8": -0.4402,
+          "body_emb_cluster_pc9": -0.2435,
+          "body_emb_cluster_pc10": 0.0797
+        },
+        "representative_embedding_news": [
+          {
+            "rank": 1,
+            "similarity": 0.739943,
+            "date": "2025-02-27",
+            "category": "UCSB",
+            "doc_type": "News Conferences",
+            "title": "The President's News Conference With Prime Minister Keir Starmer of the United Kingdom",
+            "body_sentiment_score": 0.8548424113541842,
+            "title_sentiment_score": 0.029353454709053,
+            "link": "https://www.presidency.ucsb.edu/documents/the-presidents-news-conference-with-prime-minister-keir-starmer-the-united-kingdom"
+          },
+          {
+            "rank": 2,
+            "similarity": 0.736525,
+            "date": "2018-04-24",
+            "category": "UCSB",
+            "doc_type": "News Conferences",
+            "title": "The President's News Conference With President Emmanuel Macron of France",
+            "body_sentiment_score": 0.1964870803058147,
+            "title_sentiment_score": 0.0227415338158607,
+            "link": "https://www.presidency.ucsb.edu/documents/the-presidents-news-conference-with-president-emmanuel-macron-france"
+          },
+          {
+            "rank": 3,
+            "similarity": 0.718624,
+            "date": "2025-12-29",
+            "category": "UCSB",
+            "doc_type": "News Conferences",
+            "title": "The President's News Conference With Prime Minister Benjamin Netanyahu of Israel in Palm Beach, Florida",
+            "body_sentiment_score": 0.8214889839291573,
+            "title_sentiment_score": 0.0187179427593946,
+            "link": "https://www.presidency.ucsb.edu/documents/the-presidents-news-conference-with-prime-minister-benjamin-netanyahu-israel-palm-beach"
+          },
+          {
+            "rank": 4,
+            "similarity": 0.697182,
+            "date": "2025-05-30",
+            "category": "UCSB",
+            "doc_type": "News Conferences",
+            "title": "The President's News Conference With White House Senior Adviser Elon R. Musk",
+            "body_sentiment_score": 0.6042971555143595,
+            "title_sentiment_score": -0.0187297947704792,
+            "link": "https://www.presidency.ucsb.edu/documents/the-presidents-news-conference-with-white-house-senior-adviser-elon-r-musk"
+          },
+          {
+            "rank": 5,
+            "similarity": 0.693556,
+            "date": "2018-07-30",
+            "category": "UCSB",
+            "doc_type": "News Conferences",
+            "title": "The President's News Conference With Prime Minister Giuseppe Conte of Italy",
+            "body_sentiment_score": 0.8113262709230185,
+            "title_sentiment_score": 0.0165466163307428,
+            "link": "https://www.presidency.ucsb.edu/documents/the-presidents-news-conference-with-prime-minister-giuseppe-conte-italy"
+          }
+        ],
+        "profile_feature_ranking": [
+          {
+            "feature": "body_emb_cluster_pc1",
+            "centroid_value": 0.7332183840532749,
+            "z_diff": 0.6185084235122849,
+            "abs_z": 0.6185084235122849
+          },
+          {
+            "feature": "ret_5",
+            "centroid_value": -0.013307133235183297,
+            "z_diff": -0.5617188036422087,
+            "abs_z": 0.5617188036422087
+          },
+          {
+            "feature": "vix_z_score_5",
+            "centroid_value": 0.3739444812719133,
+            "z_diff": 0.433166431123326,
+            "abs_z": 0.433166431123326
+          },
+          {
+            "feature": "body_emb_cluster_pc9",
+            "centroid_value": -0.24346050945999376,
+            "z_diff": -0.35754888004214563,
+            "abs_z": 0.35754888004214563
+          },
+          {
+            "feature": "negative_count_ratio_5d",
+            "centroid_value": 0.2946935155290019,
+            "z_diff": 0.3414667886707522,
+            "abs_z": 0.3414667886707522
+          },
+          {
+            "feature": "vol_5",
+            "centroid_value": 0.014438981818955886,
+            "z_diff": 0.32661841415539505,
+            "abs_z": 0.32661841415539505
+          },
+          {
+            "feature": "body_emb_cluster_pc2",
+            "centroid_value": -0.04743800094277051,
+            "z_diff": -0.31393875385592873,
+            "abs_z": 0.31393875385592873
+          },
+          {
+            "feature": "body_emb_cluster_pc5",
+            "centroid_value": -0.26794142305366164,
+            "z_diff": -0.2597701931084719,
+            "abs_z": 0.2597701931084719
+          },
+          {
+            "feature": "vol_shock",
+            "centroid_value": 0.9895364618286456,
+            "z_diff": 0.22933092737087823,
+            "abs_z": 0.22933092737087823
+          },
+          {
+            "feature": "body_sentiment_decay_5d",
+            "centroid_value": -0.029376950185153614,
+            "z_diff": -0.2010364134628442,
+            "abs_z": 0.2010364134628442
+          }
+        ]
+      },
+      {
+        "label": "fall",
+        "count": 151,
+        "date_range": {
+          "first": "2024-06-17",
+          "last": "2026-04-23"
+        },
+        "average_predicted_return_pct": -0.12939955225054,
+        "min_predicted_return_pct": -0.29132962226867676,
+        "max_predicted_return_pct": -0.00024437904357910156,
+        "average_actual_return_pct": 0.810501427209284,
+        "direction_accuracy": 0.3841059602649007,
+        "profile_feature_means": {
+          "ret_5": 0.0008,
+          "vol_5": 0.0112,
+          "vol_ratio_5": 1.8983,
+          "drawdown": -0.067,
+          "vix_z_score_5": 0.0073,
+          "vol_shock": 0.8965,
+          "days_since_news": 2.1308,
+          "news_count_lag1": 0.6015,
+          "negative_count_ratio_5d": 0.2077,
+          "title_sentiment_3d_mean": 0.0122,
+          "title_sentiment_5d_mean": 0.0124,
+          "body_sentiment_decay_5d": 0.0512,
+          "fomc_recent_5d": 0.2859,
+          "fomc_sentiment_shock": 0.0012,
+          "body_emb_cluster_pc1": 0.0576,
+          "body_emb_cluster_pc2": 0.2771,
+          "body_emb_cluster_pc3": -0.0595,
+          "body_emb_cluster_pc4": -0.0826,
+          "body_emb_cluster_pc5": -0.0312,
+          "body_emb_cluster_pc6": 0.0618,
+          "body_emb_cluster_pc7": -0.1967,
+          "body_emb_cluster_pc8": -0.5397,
+          "body_emb_cluster_pc9": 0.063,
+          "body_emb_cluster_pc10": 0.0706
+        },
+        "representative_embedding_news": [
+          {
+            "rank": 1,
+            "similarity": 0.468712,
+            "date": "2024-02-20",
+            "category": "BIS",
+            "doc_type": "press_release",
+            "title": "Readout of Assistant Secretary Matthew Axelrod’s Participation in the 2024 Munich Security Conference",
+            "body_sentiment_score": 0.1605884819900624,
+            "title_sentiment_score": 0.0274512693285942,
+            "link": "https://www.bis.gov/press-release/readout-assistant-secretary-matthew-axelrods-participation-2024-munich-security-conference"
+          },
+          {
+            "rank": 2,
+            "similarity": 0.421443,
+            "date": "2021-07-21",
+            "category": "BIS",
+            "doc_type": "press_release",
+            "title": "Turkish National Indicted for Wire Fraud and Illegally Exporting Defense Articles to Turkey",
+            "body_sentiment_score": -0.3004404446725784,
+            "title_sentiment_score": -0.7733912765979767,
+            "link": "https://www.bis.gov/press-release/turkish-national-indicted-wire-fraud-illegally-exporting-defense-articles-turkey"
+          },
+          {
+            "rank": 3,
+            "similarity": 0.420856,
+            "date": "2024-02-07",
+            "category": "BIS",
+            "doc_type": "press_release",
+            "title": "Justice Department Announces Charges and Arrest in Two Separate Illicit Technology Transfer Schemes to Benefit Governments of China and Iran",
+            "body_sentiment_score": -0.7966285664588213,
+            "title_sentiment_score": -0.7910203952342272,
+            "link": "https://www.bis.gov/press-release/justice-department-announces-charges-arrest-two-separate-illicit-technology-transfer-schemes-benefit"
+          },
+          {
+            "rank": 4,
+            "similarity": 0.420614,
+            "date": "2024-09-05",
+            "category": "BIS",
+            "doc_type": "press_release",
+            "title": "Department of Commerce Implements Controls on Quantum Computing and Other Advanced Technologies Alongside International Partners",
+            "body_sentiment_score": 0.3903128105013906,
+            "title_sentiment_score": 0.0692502940073609,
+            "link": "https://www.bis.gov/press-release/department-commerce-implements-controls-quantum-computing-other-advanced-technologies-alongside"
+          },
+          {
+            "rank": 5,
+            "similarity": 0.404944,
+            "date": "2021-03-30",
+            "category": "BIS",
+            "doc_type": "press_release",
+            "title": "Russian national and engineering company admit guilt in scheme to evade U.S. national security trade sanctions",
+            "body_sentiment_score": -0.2952685247733518,
+            "title_sentiment_score": -0.6880350671708584,
+            "link": "https://www.bis.gov/press-release/russian-national-engineering-company-admit-guilt-scheme-evade-u.s.-national-security-trade-sanctions"
+          }
+        ],
+        "profile_feature_ranking": [
+          {
+            "feature": "body_sentiment_decay_5d",
+            "centroid_value": 0.05123300610523197,
+            "z_diff": 0.18038658754654893,
+            "abs_z": 0.18038658754654893
+          },
+          {
+            "feature": "vol_5",
+            "centroid_value": 0.011219511297716919,
+            "z_diff": -0.15942881879973378,
+            "abs_z": 0.15942881879973378
+          },
+          {
+            "feature": "body_emb_cluster_pc8",
+            "centroid_value": -0.5397430372599518,
+            "z_diff": -0.14598345677460736,
+            "abs_z": 0.14598345677460736
+          },
+          {
+            "feature": "body_emb_cluster_pc6",
+            "centroid_value": 0.06179887765687582,
+            "z_diff": 0.11644890557102057,
+            "abs_z": 0.11644890557102057
+          },
+          {
+            "feature": "vol_shock",
+            "centroid_value": 0.8964875027091209,
+            "z_diff": -0.10961959401621907,
+            "abs_z": 0.10961959401621907
+          },
+          {
+            "feature": "ret_5",
+            "centroid_value": 0.0007594663186807691,
+            "z_diff": -0.08888443927594643,
+            "abs_z": 0.08888443927594643
+          },
+          {
+            "feature": "vol_ratio_5",
+            "centroid_value": 1.8983290323303772,
+            "z_diff": 0.06624761380709798,
+            "abs_z": 0.06624761380709798
+          },
+          {
+            "feature": "body_emb_cluster_pc10",
+            "centroid_value": 0.0706128160090997,
+            "z_diff": 0.05382999584286399,
+            "abs_z": 0.05382999584286399
+          },
+          {
+            "feature": "body_emb_cluster_pc1",
+            "centroid_value": 0.057627233453679975,
+            "z_diff": -0.0537777837083448,
+            "abs_z": 0.0537777837083448
+          },
+          {
+            "feature": "body_emb_cluster_pc9",
+            "centroid_value": 0.0630391755574406,
+            "z_diff": -0.046274993266448496,
+            "abs_z": 0.046274993266448496
+          }
+        ]
+      },
+      {
+        "label": "neutral",
+        "count": 173,
+        "date_range": {
+          "first": "2024-06-13",
+          "last": "2026-04-21"
+        },
+        "average_predicted_return_pct": 0.11573616479862595,
+        "min_predicted_return_pct": 0.0027298927307128906,
+        "max_predicted_return_pct": 0.2959609031677246,
+        "average_actual_return_pct": 0.23582562664432125,
+        "direction_accuracy": 0.5664739884393064,
+        "profile_feature_means": {
+          "ret_5": 0.0109,
+          "vol_5": 0.0111,
+          "vol_ratio_5": 1.7488,
+          "drawdown": -0.0686,
+          "vix_z_score_5": -0.0454,
+          "vol_shock": 0.8934,
+          "days_since_news": 2.211,
+          "news_count_lag1": 0.6007,
+          "negative_count_ratio_5d": 0.1555,
+          "title_sentiment_3d_mean": 0.0247,
+          "title_sentiment_5d_mean": 0.0212,
+          "body_sentiment_decay_5d": 0.0417,
+          "fomc_recent_5d": 0.2559,
+          "fomc_sentiment_shock": 0.0052,
+          "body_emb_cluster_pc1": -0.0334,
+          "body_emb_cluster_pc2": 0.3046,
+          "body_emb_cluster_pc3": -0.2285,
+          "body_emb_cluster_pc4": -0.0184,
+          "body_emb_cluster_pc5": 0.0514,
+          "body_emb_cluster_pc6": -0.0562,
+          "body_emb_cluster_pc7": -0.0808,
+          "body_emb_cluster_pc8": -0.4691,
+          "body_emb_cluster_pc9": 0.2387,
+          "body_emb_cluster_pc10": -0.0072
+        },
+        "representative_embedding_news": [
+          {
+            "rank": 1,
+            "similarity": 0.528754,
+            "date": "2024-02-20",
+            "category": "BIS",
+            "doc_type": "press_release",
+            "title": "Readout of Assistant Secretary Matthew Axelrod’s Participation in the 2024 Munich Security Conference",
+            "body_sentiment_score": 0.1605884819900624,
+            "title_sentiment_score": 0.0274512693285942,
+            "link": "https://www.bis.gov/press-release/readout-assistant-secretary-matthew-axelrods-participation-2024-munich-security-conference"
+          },
+          {
+            "rank": 2,
+            "similarity": 0.511169,
+            "date": "2022-12-21",
+            "category": "BIS",
+            "doc_type": "press_release",
+            "title": "Commerce Imposes Additional Restrictions on Exports to Wagner Group",
+            "body_sentiment_score": -0.2006557724278222,
+            "title_sentiment_score": -0.5752426087856293,
+            "link": "https://www.bis.gov/press-release/commerce-imposes-additional-restrictions-exports-wagner-group"
+          },
+          {
+            "rank": 3,
+            "similarity": 0.500333,
+            "date": "2024-10-30",
+            "category": "BIS",
+            "doc_type": "press_release",
+            "title": "Commerce Targets Illicit Procurement Networks Supplying Russia’s Military and Restricts Chemical Precursors Enabling Russia’s Use of Chemical Weapons Against Ukraine",
+            "body_sentiment_score": 0.0861054562635964,
+            "title_sentiment_score": -0.1525682844221592,
+            "link": "https://www.bis.gov/press-release/commerce-targets-illicit-procurement-networks-supplying-russias-military-restricts-chemical-precursors"
+          },
+          {
+            "rank": 4,
+            "similarity": 0.485887,
+            "date": "2024-06-12",
+            "category": "BIS",
+            "doc_type": "press_release",
+            "title": "Department of Commerce Announces Additional Export Restrictions to Counter Russian Aggression",
+            "body_sentiment_score": -0.1603708400212485,
+            "title_sentiment_score": -0.6444395780563354,
+            "link": "https://www.bis.gov/press-release/department-commerce-announces-additional-export-restrictions-counter-russian-aggression"
+          },
+          {
+            "rank": 5,
+            "similarity": 0.482931,
+            "date": "2024-09-24",
+            "category": "BIS",
+            "doc_type": "press_release",
+            "title": "G7 Announces Industry Guidance on Preventing Evasion of Export Controls and Sanctions Imposed on Russia",
+            "body_sentiment_score": 0.3478885758934507,
+            "title_sentiment_score": 0.2479061484336853,
+            "link": "https://www.bis.gov/press-release/g7-announces-industry-guidance-preventing-evasion-export-controls-sanctions-imposed-russia"
+          }
+        ],
+        "profile_feature_ranking": [
+          {
+            "feature": "ret_5",
+            "centroid_value": 0.010929215077520666,
+            "z_diff": 0.2529612691866744,
+            "abs_z": 0.2529612691866744
+          },
+          {
+            "feature": "negative_count_ratio_5d",
+            "centroid_value": 0.15545587995853813,
+            "z_diff": -0.20070934630304266,
+            "abs_z": 0.20070934630304266
+          },
+          {
+            "feature": "vol_5",
+            "centroid_value": 0.011086523164544393,
+            "z_diff": -0.1795061929263026,
+            "abs_z": 0.1795061929263026
+          },
+          {
+            "feature": "body_emb_cluster_pc3",
+            "centroid_value": -0.22851477341010526,
+            "z_diff": -0.1595158157603283,
+            "abs_z": 0.1595158157603283
+          },
+          {
+            "feature": "body_emb_cluster_pc1",
+            "centroid_value": -0.0333876985426817,
+            "z_diff": -0.14434747719525975,
+            "abs_z": 0.14434747719525975
+          },
+          {
+            "feature": "body_sentiment_decay_5d",
+            "centroid_value": 0.04173707852314949,
+            "z_diff": 0.13545460442180726,
+            "abs_z": 0.13545460442180726
+          },
+          {
+            "feature": "body_emb_cluster_pc9",
+            "centroid_value": 0.23874327893150005,
+            "z_diff": 0.13216597047082698,
+            "abs_z": 0.13216597047082698
+          },
+          {
+            "feature": "vol_shock",
+            "centroid_value": 0.8933864572154327,
+            "z_diff": -0.12091580836269593,
+            "abs_z": 0.12091580836269593
+          },
+          {
+            "feature": "fomc_sentiment_shock",
+            "centroid_value": 0.005248189694309337,
+            "z_diff": 0.10866154401410077,
+            "abs_z": 0.10866154401410077
+          },
+          {
+            "feature": "vix_z_score_5",
+            "centroid_value": -0.045447820022683445,
+            "z_diff": -0.098121702909895,
+            "abs_z": 0.098121702909895
+          }
+        ]
+      },
+      {
+        "label": "rise",
+        "count": 51,
+        "date_range": {
+          "first": "2024-07-19",
+          "last": "2026-04-20"
+        },
+        "average_predicted_return_pct": 0.40386050355200587,
+        "min_predicted_return_pct": 0.30074119567871094,
+        "max_predicted_return_pct": 0.5934834480285645,
+        "average_actual_return_pct": -0.43208243050075823,
+        "direction_accuracy": 0.5294117647058824,
+        "profile_feature_means": {
+          "ret_5": 0.0075,
+          "vol_5": 0.0128,
+          "vol_ratio_5": 1.8185,
+          "drawdown": -0.0588,
+          "vix_z_score_5": 0.1401,
+          "vol_shock": 0.9687,
+          "days_since_news": 2.3693,
+          "news_count_lag1": 0.5768,
+          "negative_count_ratio_5d": 0.2175,
+          "title_sentiment_3d_mean": 0.0188,
+          "title_sentiment_5d_mean": 0.0226,
+          "body_sentiment_decay_5d": -0.0391,
+          "fomc_recent_5d": 0.3119,
+          "fomc_sentiment_shock": -0.0017,
+          "body_emb_cluster_pc1": 0.1535,
+          "body_emb_cluster_pc2": 0.2775,
+          "body_emb_cluster_pc3": -0.0879,
+          "body_emb_cluster_pc4": -0.1596,
+          "body_emb_cluster_pc5": 0.1369,
+          "body_emb_cluster_pc6": -0.2697,
+          "body_emb_cluster_pc7": -0.156,
+          "body_emb_cluster_pc8": -0.1416,
+          "body_emb_cluster_pc9": 0.025,
+          "body_emb_cluster_pc10": -0.1171
+        },
+        "representative_embedding_news": [
+          {
+            "rank": 1,
+            "similarity": 0.664466,
+            "date": "2018-08-01",
+            "category": "FOMC",
+            "doc_type": "statement",
+            "title": "Federal Reserve issues FOMC statement",
+            "body_sentiment_score": 0.3705634111710661,
+            "title_sentiment_score": -0.0491516161710023,
+            "link": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20180801a.htm"
+          },
+          {
+            "rank": 2,
+            "similarity": 0.657733,
+            "date": "2018-09-26",
+            "category": "FOMC",
+            "doc_type": "statement",
+            "title": "Federal Reserve issues FOMC statement",
+            "body_sentiment_score": 0.4199731890199246,
+            "title_sentiment_score": -0.0491516161710023,
+            "link": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20180926a.htm"
+          },
+          {
+            "rank": 3,
+            "similarity": 0.65762,
+            "date": "2018-11-08",
+            "category": "FOMC",
+            "doc_type": "statement",
+            "title": "Federal Reserve issues FOMC statement",
+            "body_sentiment_score": 0.3354999311640301,
+            "title_sentiment_score": -0.049151612445712,
+            "link": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20181108a.htm"
+          },
+          {
+            "rank": 4,
+            "similarity": 0.654151,
+            "date": "2017-04-05",
+            "category": "FOMC",
+            "doc_type": "minutes",
+            "title": "Minutes of the Federal Open Market Committee",
+            "body_sentiment_score": -0.4580605456380031,
+            "title_sentiment_score": -0.0241492707282304,
+            "link": "https://www.federalreserve.gov/monetarypolicy/fomcminutes20170315.htm"
+          },
+          {
+            "rank": 5,
+            "similarity": 0.653699,
+            "date": "2026-03-18",
+            "category": "FOMC",
+            "doc_type": "statement",
+            "title": "Federal Reserve issues FOMC statement",
+            "body_sentiment_score": -0.0213897106051444,
+            "title_sentiment_score": -0.049151612445712,
+            "link": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260318a.htm"
+          }
+        ],
+        "profile_feature_ranking": [
+          {
+            "feature": "body_emb_cluster_pc8",
+            "centroid_value": -0.14160404704167856,
+            "z_diff": 0.27091368785360836,
+            "abs_z": 0.27091368785360836
+          },
+          {
+            "feature": "body_sentiment_decay_5d",
+            "centroid_value": -0.03910179301955809,
+            "z_diff": -0.24705155735997167,
+            "abs_z": 0.24705155735997167
+          },
+          {
+            "feature": "body_emb_cluster_pc6",
+            "centroid_value": -0.2697181821041085,
+            "z_diff": -0.21292335611537186,
+            "abs_z": 0.21292335611537186
+          },
+          {
+            "feature": "drawdown",
+            "centroid_value": -0.05877249905571232,
+            "z_diff": 0.2063149864525385,
+            "abs_z": 0.2063149864525385
+          },
+          {
+            "feature": "body_emb_cluster_pc5",
+            "centroid_value": 0.1368697327369836,
+            "z_diff": 0.16452024419242292,
+            "abs_z": 0.16452024419242292
+          },
+          {
+            "feature": "vol_shock",
+            "centroid_value": 0.9687320522193,
+            "z_diff": 0.15354646346107445,
+            "abs_z": 0.15354646346107445
+          },
+          {
+            "feature": "ret_5",
+            "centroid_value": 0.007484844091850418,
+            "z_diff": 0.13718225952519508,
+            "abs_z": 0.13718225952519508
+          },
+          {
+            "feature": "vix_z_score_5",
+            "centroid_value": 0.14007927516752608,
+            "z_diff": 0.1369048913121389,
+            "abs_z": 0.1369048913121389
+          },
+          {
+            "feature": "body_emb_cluster_pc4",
+            "centroid_value": -0.15962868568616861,
+            "z_diff": -0.12227882733138178,
+            "abs_z": 0.12227882733138178
+          },
+          {
+            "feature": "body_emb_cluster_pc10",
+            "centroid_value": -0.11710846824075713,
+            "z_diff": -0.11346543759224247,
+            "abs_z": 0.11346543759224247
+          }
+        ]
+      },
+      {
+        "label": "rise_strong",
+        "count": 45,
+        "date_range": {
+          "first": "2024-06-21",
+          "last": "2026-04-17"
+        },
+        "average_predicted_return_pct": 1.0045682059393994,
+        "min_predicted_return_pct": 0.6021022796630859,
+        "max_predicted_return_pct": 2.0756840705871804,
+        "average_actual_return_pct": 0.9131266490124513,
+        "direction_accuracy": 0.6444444444444445,
+        "profile_feature_means": {
+          "ret_5": -0.0038,
+          "vol_5": 0.0176,
+          "vol_ratio_5": 1.9601,
+          "drawdown": -0.0797,
+          "vix_z_score_5": -0.067,
+          "vol_shock": 1.0416,
+          "days_since_news": 2.5519,
+          "news_count_lag1": 0.6852,
+          "negative_count_ratio_5d": 0.2993,
+          "title_sentiment_3d_mean": 0.0023,
+          "title_sentiment_5d_mean": 0.0125,
+          "body_sentiment_decay_5d": -0.1213,
+          "fomc_recent_5d": 0.3652,
+          "fomc_sentiment_shock": -0.0204,
+          "body_emb_cluster_pc1": 0.1541,
+          "body_emb_cluster_pc2": 0.2572,
+          "body_emb_cluster_pc3": 0.2295,
+          "body_emb_cluster_pc4": 0.2438,
+          "body_emb_cluster_pc5": -0.1766,
+          "body_emb_cluster_pc6": -0.013,
+          "body_emb_cluster_pc7": -0.1998,
+          "body_emb_cluster_pc8": 0.0805,
+          "body_emb_cluster_pc9": 0.2236,
+          "body_emb_cluster_pc10": -0.0537
+        },
+        "representative_embedding_news": [
+          {
+            "rank": 1,
+            "similarity": 0.865435,
+            "date": "2018-01-03",
+            "category": "FOMC",
+            "doc_type": "minutes",
+            "title": "Minutes of the Federal Open Market Committee",
+            "body_sentiment_score": 0.8665689182504216,
+            "title_sentiment_score": -0.024149278178811,
+            "link": "https://www.federalreserve.gov/monetarypolicy/fomcminutes20171213.htm"
+          },
+          {
+            "rank": 2,
+            "similarity": 0.840558,
+            "date": "2017-04-05",
+            "category": "FOMC",
+            "doc_type": "minutes",
+            "title": "Minutes of the Federal Open Market Committee",
+            "body_sentiment_score": -0.4580605456380031,
+            "title_sentiment_score": -0.0241492707282304,
+            "link": "https://www.federalreserve.gov/monetarypolicy/fomcminutes20170315.htm"
+          },
+          {
+            "rank": 3,
+            "similarity": 0.826947,
+            "date": "2017-05-24",
+            "category": "FOMC",
+            "doc_type": "minutes",
+            "title": "Minutes of the Federal Open Market Committee",
+            "body_sentiment_score": -0.6103485226631165,
+            "title_sentiment_score": -0.024149278178811,
+            "link": "https://www.federalreserve.gov/monetarypolicy/fomcminutes20170503.htm"
+          },
+          {
+            "rank": 4,
+            "similarity": 0.818743,
+            "date": "2020-11-25",
+            "category": "FOMC",
+            "doc_type": "minutes",
+            "title": "Minutes of the Federal Open Market Committee",
+            "body_sentiment_score": 0.8431667660339099,
+            "title_sentiment_score": -0.0241492707282304,
+            "link": "https://www.federalreserve.gov/monetarypolicy/fomcminutes20201105.htm"
+          },
+          {
+            "rank": 5,
+            "similarity": 0.815691,
+            "date": "2018-07-05",
+            "category": "FOMC",
+            "doc_type": "minutes",
+            "title": "Minutes of the Federal Open Market Committee",
+            "body_sentiment_score": 0.9125159932300448,
+            "title_sentiment_score": -0.024149278178811,
+            "link": "https://www.federalreserve.gov/monetarypolicy/fomcminutes20180613.htm"
+          }
+        ],
+        "profile_feature_ranking": [
+          {
+            "feature": "vol_5",
+            "centroid_value": 0.017591928571434344,
+            "z_diff": 0.8026224758752274,
+            "abs_z": 0.8026224758752274
+          },
+          {
+            "feature": "body_sentiment_decay_5d",
+            "centroid_value": -0.12131946144630112,
+            "z_diff": -0.6360817872530979,
+            "abs_z": 0.6360817872530979
+          },
+          {
+            "feature": "body_emb_cluster_pc8",
+            "centroid_value": 0.0804935182332191,
+            "z_diff": 0.5034752883670914,
+            "abs_z": 0.5034752883670914
+          },
+          {
+            "feature": "fomc_sentiment_shock",
+            "centroid_value": -0.020408214078938853,
+            "z_diff": -0.4730693636732939,
+            "abs_z": 0.4730693636732939
+          },
+          {
+            "feature": "vol_shock",
+            "centroid_value": 1.0416446442360823,
+            "z_diff": 0.41914600711666056,
+            "abs_z": 0.41914600711666056
+          },
+          {
+            "feature": "negative_count_ratio_5d",
+            "centroid_value": 0.2992871838861686,
+            "z_diff": 0.35935403118988885,
+            "abs_z": 0.35935403118988885
+          },
+          {
+            "feature": "body_emb_cluster_pc3",
+            "centroid_value": 0.22953736989044,
+            "z_diff": 0.3419212984284231,
+            "abs_z": 0.3419212984284231
+          },
+          {
+            "feature": "body_emb_cluster_pc4",
+            "centroid_value": 0.24376746377334757,
+            "z_diff": 0.30764841311637153,
+            "abs_z": 0.30764841311637153
+          },
+          {
+            "feature": "drawdown",
+            "centroid_value": -0.07971423169988866,
+            "z_diff": -0.29889388899698816,
+            "abs_z": 0.29889388899698816
+          },
+          {
+            "feature": "ret_5",
+            "centroid_value": -0.003826232449726008,
+            "z_diff": -0.2430280156272864,
+            "abs_z": 0.2430280156272864
+          }
+        ]
+      }
+    ]
+  },
+  "volatility_cluster_report": {
+    "model_kind": "predicted_forward_return_profile_clusters",
+    "target": "market_news_model_predicted_forward_return",
+    "prediction_summary_scope": "market_news_test_predictions",
+    "horizon": 5,
+    "window_days": 5,
+    "labels": [
+      "fall_strong",
+      "fall",
+      "neutral",
+      "rise",
+      "rise_strong"
+    ],
+    "fixed_thresholds": [
+      -0.003,
+      0.0,
+      0.003,
+      0.006
+    ],
+    "feature_columns": [
+      "ret_5",
+      "vol_5",
+      "vol_ratio_5",
+      "drawdown",
+      "vix_z_score_5",
+      "vol_shock",
+      "days_since_news",
+      "news_count_lag1",
+      "negative_count_ratio_5d",
+      "title_sentiment_3d_mean",
+      "title_sentiment_5d_mean",
+      "body_sentiment_decay_5d",
+      "fomc_recent_5d",
+      "fomc_sentiment_shock",
+      "body_emb_cluster_pc1",
+      "body_emb_cluster_pc2",
+      "body_emb_cluster_pc3",
+      "body_emb_cluster_pc4",
+      "body_emb_cluster_pc5",
+      "body_emb_cluster_pc6",
+      "body_emb_cluster_pc7",
+      "body_emb_cluster_pc8",
+      "body_emb_cluster_pc9",
+      "body_emb_cluster_pc10"
+    ],
+    "source_model_metrics": {
+      "mae": 1.1661421833028192,
+      "rmse": 1.5403402297229312,
+      "r2_score": 0.9093862857417937,
+      "direction_accuracy": 0.49036402569593146,
+      "mape": 2.6104667866161235,
+      "baseline_mae": 1.1521482610600409,
+      "baseline_rmse": 1.5018345242262392,
+      "baseline_mape": 2.572800952450642,
+      "high_conf_threshold": 0.30247727036476135,
+      "high_conf_long_accuracy": 0.5913978494623656,
+      "high_conf_long_count": 93,
+      "high_conf_short_accuracy": 0.3617021276595745,
+      "high_conf_short_count": 47
+    },
+    "representative_news_method": "Label centroid body_emb_cluster_pc* values are inverse-transformed to the original body_emb_* space, then matched to source news by cosine similarity.",
+    "profile_feature_ranking_method": "For each label centroid, original-scale feature values are compared against the global profile mean and sorted by absolute z-difference.",
+    "predicted_groups": [
+      {
+        "label": "fall_strong",
+        "count": 47,
+        "date_range": {
+          "first": "2024-08-05",
+          "last": "2026-04-24"
+        },
+        "average_predicted_return_pct": -1.391409939907966,
+        "min_predicted_return_pct": -13.593685626983632,
+        "max_predicted_return_pct": -0.303494930267334,
+        "average_actual_return_pct": 0.27700292000439103,
+        "direction_accuracy": 0.3617021276595745,
+        "profile_feature_means": {
+          "ret_5": -0.0133,
+          "vol_5": 0.0144,
+          "vol_ratio_5": 1.8253,
+          "drawdown": -0.0611,
+          "vix_z_score_5": 0.3739,
+          "vol_shock": 0.9895,
+          "days_since_news": 1.9752,
+          "news_count_lag1": 0.539,
+          "negative_count_ratio_5d": 0.2947,
+          "title_sentiment_3d_mean": -0.0037,
+          "title_sentiment_5d_mean": 0.0005,
+          "body_sentiment_decay_5d": -0.0294,
+          "fomc_recent_5d": 0.2176,
+          "fomc_sentiment_shock": 0.0028,
+          "body_emb_cluster_pc1": 0.7332,
+          "body_emb_cluster_pc2": -0.0474,
+          "body_emb_cluster_pc3": 0.0853,
+          "body_emb_cluster_pc4": -0.1734,
+          "body_emb_cluster_pc5": -0.2679,
+          "body_emb_cluster_pc6": -0.237,
+          "body_emb_cluster_pc7": -0.2893,
+          "body_emb_cluster_pc8": -0.4402,
+          "body_emb_cluster_pc9": -0.2435,
+          "body_emb_cluster_pc10": 0.0797
+        },
+        "representative_embedding_news": [
+          {
+            "rank": 1,
+            "similarity": 0.739943,
+            "date": "2025-02-27",
+            "category": "UCSB",
+            "doc_type": "News Conferences",
+            "title": "The President's News Conference With Prime Minister Keir Starmer of the United Kingdom",
+            "body_sentiment_score": 0.8548424113541842,
+            "title_sentiment_score": 0.029353454709053,
+            "link": "https://www.presidency.ucsb.edu/documents/the-presidents-news-conference-with-prime-minister-keir-starmer-the-united-kingdom"
+          },
+          {
+            "rank": 2,
+            "similarity": 0.736525,
+            "date": "2018-04-24",
+            "category": "UCSB",
+            "doc_type": "News Conferences",
+            "title": "The President's News Conference With President Emmanuel Macron of France",
+            "body_sentiment_score": 0.1964870803058147,
+            "title_sentiment_score": 0.0227415338158607,
+            "link": "https://www.presidency.ucsb.edu/documents/the-presidents-news-conference-with-president-emmanuel-macron-france"
+          },
+          {
+            "rank": 3,
+            "similarity": 0.718624,
+            "date": "2025-12-29",
+            "category": "UCSB",
+            "doc_type": "News Conferences",
+            "title": "The President's News Conference With Prime Minister Benjamin Netanyahu of Israel in Palm Beach, Florida",
+            "body_sentiment_score": 0.8214889839291573,
+            "title_sentiment_score": 0.0187179427593946,
+            "link": "https://www.presidency.ucsb.edu/documents/the-presidents-news-conference-with-prime-minister-benjamin-netanyahu-israel-palm-beach"
+          },
+          {
+            "rank": 4,
+            "similarity": 0.697182,
+            "date": "2025-05-30",
+            "category": "UCSB",
+            "doc_type": "News Conferences",
+            "title": "The President's News Conference With White House Senior Adviser Elon R. Musk",
+            "body_sentiment_score": 0.6042971555143595,
+            "title_sentiment_score": -0.0187297947704792,
+            "link": "https://www.presidency.ucsb.edu/documents/the-presidents-news-conference-with-white-house-senior-adviser-elon-r-musk"
+          },
+          {
+            "rank": 5,
+            "similarity": 0.693556,
+            "date": "2018-07-30",
+            "category": "UCSB",
+            "doc_type": "News Conferences",
+            "title": "The President's News Conference With Prime Minister Giuseppe Conte of Italy",
+            "body_sentiment_score": 0.8113262709230185,
+            "title_sentiment_score": 0.0165466163307428,
+            "link": "https://www.presidency.ucsb.edu/documents/the-presidents-news-conference-with-prime-minister-giuseppe-conte-italy"
+          }
+        ],
+        "profile_feature_ranking": [
+          {
+            "feature": "body_emb_cluster_pc1",
+            "centroid_value": 0.7332183840532749,
+            "z_diff": 0.6185084235122849,
+            "abs_z": 0.6185084235122849
+          },
+          {
+            "feature": "ret_5",
+            "centroid_value": -0.013307133235183297,
+            "z_diff": -0.5617188036422087,
+            "abs_z": 0.5617188036422087
+          },
+          {
+            "feature": "vix_z_score_5",
+            "centroid_value": 0.3739444812719133,
+            "z_diff": 0.433166431123326,
+            "abs_z": 0.433166431123326
+          },
+          {
+            "feature": "body_emb_cluster_pc9",
+            "centroid_value": -0.24346050945999376,
+            "z_diff": -0.35754888004214563,
+            "abs_z": 0.35754888004214563
+          },
+          {
+            "feature": "negative_count_ratio_5d",
+            "centroid_value": 0.2946935155290019,
+            "z_diff": 0.3414667886707522,
+            "abs_z": 0.3414667886707522
+          },
+          {
+            "feature": "vol_5",
+            "centroid_value": 0.014438981818955886,
+            "z_diff": 0.32661841415539505,
+            "abs_z": 0.32661841415539505
+          },
+          {
+            "feature": "body_emb_cluster_pc2",
+            "centroid_value": -0.04743800094277051,
+            "z_diff": -0.31393875385592873,
+            "abs_z": 0.31393875385592873
+          },
+          {
+            "feature": "body_emb_cluster_pc5",
+            "centroid_value": -0.26794142305366164,
+            "z_diff": -0.2597701931084719,
+            "abs_z": 0.2597701931084719
+          },
+          {
+            "feature": "vol_shock",
+            "centroid_value": 0.9895364618286456,
+            "z_diff": 0.22933092737087823,
+            "abs_z": 0.22933092737087823
+          },
+          {
+            "feature": "body_sentiment_decay_5d",
+            "centroid_value": -0.029376950185153614,
+            "z_diff": -0.2010364134628442,
+            "abs_z": 0.2010364134628442
+          }
+        ]
+      },
+      {
+        "label": "fall",
+        "count": 151,
+        "date_range": {
+          "first": "2024-06-17",
+          "last": "2026-04-23"
+        },
+        "average_predicted_return_pct": -0.12939955225054,
+        "min_predicted_return_pct": -0.29132962226867676,
+        "max_predicted_return_pct": -0.00024437904357910156,
+        "average_actual_return_pct": 0.810501427209284,
+        "direction_accuracy": 0.3841059602649007,
+        "profile_feature_means": {
+          "ret_5": 0.0008,
+          "vol_5": 0.0112,
+          "vol_ratio_5": 1.8983,
+          "drawdown": -0.067,
+          "vix_z_score_5": 0.0073,
+          "vol_shock": 0.8965,
+          "days_since_news": 2.1308,
+          "news_count_lag1": 0.6015,
+          "negative_count_ratio_5d": 0.2077,
+          "title_sentiment_3d_mean": 0.0122,
+          "title_sentiment_5d_mean": 0.0124,
+          "body_sentiment_decay_5d": 0.0512,
+          "fomc_recent_5d": 0.2859,
+          "fomc_sentiment_shock": 0.0012,
+          "body_emb_cluster_pc1": 0.0576,
+          "body_emb_cluster_pc2": 0.2771,
+          "body_emb_cluster_pc3": -0.0595,
+          "body_emb_cluster_pc4": -0.0826,
+          "body_emb_cluster_pc5": -0.0312,
+          "body_emb_cluster_pc6": 0.0618,
+          "body_emb_cluster_pc7": -0.1967,
+          "body_emb_cluster_pc8": -0.5397,
+          "body_emb_cluster_pc9": 0.063,
+          "body_emb_cluster_pc10": 0.0706
+        },
+        "representative_embedding_news": [
+          {
+            "rank": 1,
+            "similarity": 0.468712,
+            "date": "2024-02-20",
+            "category": "BIS",
+            "doc_type": "press_release",
+            "title": "Readout of Assistant Secretary Matthew Axelrod’s Participation in the 2024 Munich Security Conference",
+            "body_sentiment_score": 0.1605884819900624,
+            "title_sentiment_score": 0.0274512693285942,
+            "link": "https://www.bis.gov/press-release/readout-assistant-secretary-matthew-axelrods-participation-2024-munich-security-conference"
+          },
+          {
+            "rank": 2,
+            "similarity": 0.421443,
+            "date": "2021-07-21",
+            "category": "BIS",
+            "doc_type": "press_release",
+            "title": "Turkish National Indicted for Wire Fraud and Illegally Exporting Defense Articles to Turkey",
+            "body_sentiment_score": -0.3004404446725784,
+            "title_sentiment_score": -0.7733912765979767,
+            "link": "https://www.bis.gov/press-release/turkish-national-indicted-wire-fraud-illegally-exporting-defense-articles-turkey"
+          },
+          {
+            "rank": 3,
+            "similarity": 0.420856,
+            "date": "2024-02-07",
+            "category": "BIS",
+            "doc_type": "press_release",
+            "title": "Justice Department Announces Charges and Arrest in Two Separate Illicit Technology Transfer Schemes to Benefit Governments of China and Iran",
+            "body_sentiment_score": -0.7966285664588213,
+            "title_sentiment_score": -0.7910203952342272,
+            "link": "https://www.bis.gov/press-release/justice-department-announces-charges-arrest-two-separate-illicit-technology-transfer-schemes-benefit"
+          },
+          {
+            "rank": 4,
+            "similarity": 0.420614,
+            "date": "2024-09-05",
+            "category": "BIS",
+            "doc_type": "press_release",
+            "title": "Department of Commerce Implements Controls on Quantum Computing and Other Advanced Technologies Alongside International Partners",
+            "body_sentiment_score": 0.3903128105013906,
+            "title_sentiment_score": 0.0692502940073609,
+            "link": "https://www.bis.gov/press-release/department-commerce-implements-controls-quantum-computing-other-advanced-technologies-alongside"
+          },
+          {
+            "rank": 5,
+            "similarity": 0.404944,
+            "date": "2021-03-30",
+            "category": "BIS",
+            "doc_type": "press_release",
+            "title": "Russian national and engineering company admit guilt in scheme to evade U.S. national security trade sanctions",
+            "body_sentiment_score": -0.2952685247733518,
+            "title_sentiment_score": -0.6880350671708584,
+            "link": "https://www.bis.gov/press-release/russian-national-engineering-company-admit-guilt-scheme-evade-u.s.-national-security-trade-sanctions"
+          }
+        ],
+        "profile_feature_ranking": [
+          {
+            "feature": "body_sentiment_decay_5d",
+            "centroid_value": 0.05123300610523197,
+            "z_diff": 0.18038658754654893,
+            "abs_z": 0.18038658754654893
+          },
+          {
+            "feature": "vol_5",
+            "centroid_value": 0.011219511297716919,
+            "z_diff": -0.15942881879973378,
+            "abs_z": 0.15942881879973378
+          },
+          {
+            "feature": "body_emb_cluster_pc8",
+            "centroid_value": -0.5397430372599518,
+            "z_diff": -0.14598345677460736,
+            "abs_z": 0.14598345677460736
+          },
+          {
+            "feature": "body_emb_cluster_pc6",
+            "centroid_value": 0.06179887765687582,
+            "z_diff": 0.11644890557102057,
+            "abs_z": 0.11644890557102057
+          },
+          {
+            "feature": "vol_shock",
+            "centroid_value": 0.8964875027091209,
+            "z_diff": -0.10961959401621907,
+            "abs_z": 0.10961959401621907
+          },
+          {
+            "feature": "ret_5",
+            "centroid_value": 0.0007594663186807691,
+            "z_diff": -0.08888443927594643,
+            "abs_z": 0.08888443927594643
+          },
+          {
+            "feature": "vol_ratio_5",
+            "centroid_value": 1.8983290323303772,
+            "z_diff": 0.06624761380709798,
+            "abs_z": 0.06624761380709798
+          },
+          {
+            "feature": "body_emb_cluster_pc10",
+            "centroid_value": 0.0706128160090997,
+            "z_diff": 0.05382999584286399,
+            "abs_z": 0.05382999584286399
+          },
+          {
+            "feature": "body_emb_cluster_pc1",
+            "centroid_value": 0.057627233453679975,
+            "z_diff": -0.0537777837083448,
+            "abs_z": 0.0537777837083448
+          },
+          {
+            "feature": "body_emb_cluster_pc9",
+            "centroid_value": 0.0630391755574406,
+            "z_diff": -0.046274993266448496,
+            "abs_z": 0.046274993266448496
+          }
+        ]
+      },
+      {
+        "label": "neutral",
+        "count": 173,
+        "date_range": {
+          "first": "2024-06-13",
+          "last": "2026-04-21"
+        },
+        "average_predicted_return_pct": 0.11573616479862595,
+        "min_predicted_return_pct": 0.0027298927307128906,
+        "max_predicted_return_pct": 0.2959609031677246,
+        "average_actual_return_pct": 0.23582562664432125,
+        "direction_accuracy": 0.5664739884393064,
+        "profile_feature_means": {
+          "ret_5": 0.0109,
+          "vol_5": 0.0111,
+          "vol_ratio_5": 1.7488,
+          "drawdown": -0.0686,
+          "vix_z_score_5": -0.0454,
+          "vol_shock": 0.8934,
+          "days_since_news": 2.211,
+          "news_count_lag1": 0.6007,
+          "negative_count_ratio_5d": 0.1555,
+          "title_sentiment_3d_mean": 0.0247,
+          "title_sentiment_5d_mean": 0.0212,
+          "body_sentiment_decay_5d": 0.0417,
+          "fomc_recent_5d": 0.2559,
+          "fomc_sentiment_shock": 0.0052,
+          "body_emb_cluster_pc1": -0.0334,
+          "body_emb_cluster_pc2": 0.3046,
+          "body_emb_cluster_pc3": -0.2285,
+          "body_emb_cluster_pc4": -0.0184,
+          "body_emb_cluster_pc5": 0.0514,
+          "body_emb_cluster_pc6": -0.0562,
+          "body_emb_cluster_pc7": -0.0808,
+          "body_emb_cluster_pc8": -0.4691,
+          "body_emb_cluster_pc9": 0.2387,
+          "body_emb_cluster_pc10": -0.0072
+        },
+        "representative_embedding_news": [
+          {
+            "rank": 1,
+            "similarity": 0.528754,
+            "date": "2024-02-20",
+            "category": "BIS",
+            "doc_type": "press_release",
+            "title": "Readout of Assistant Secretary Matthew Axelrod’s Participation in the 2024 Munich Security Conference",
+            "body_sentiment_score": 0.1605884819900624,
+            "title_sentiment_score": 0.0274512693285942,
+            "link": "https://www.bis.gov/press-release/readout-assistant-secretary-matthew-axelrods-participation-2024-munich-security-conference"
+          },
+          {
+            "rank": 2,
+            "similarity": 0.511169,
+            "date": "2022-12-21",
+            "category": "BIS",
+            "doc_type": "press_release",
+            "title": "Commerce Imposes Additional Restrictions on Exports to Wagner Group",
+            "body_sentiment_score": -0.2006557724278222,
+            "title_sentiment_score": -0.5752426087856293,
+            "link": "https://www.bis.gov/press-release/commerce-imposes-additional-restrictions-exports-wagner-group"
+          },
+          {
+            "rank": 3,
+            "similarity": 0.500333,
+            "date": "2024-10-30",
+            "category": "BIS",
+            "doc_type": "press_release",
+            "title": "Commerce Targets Illicit Procurement Networks Supplying Russia’s Military and Restricts Chemical Precursors Enabling Russia’s Use of Chemical Weapons Against Ukraine",
+            "body_sentiment_score": 0.0861054562635964,
+            "title_sentiment_score": -0.1525682844221592,
+            "link": "https://www.bis.gov/press-release/commerce-targets-illicit-procurement-networks-supplying-russias-military-restricts-chemical-precursors"
+          },
+          {
+            "rank": 4,
+            "similarity": 0.485887,
+            "date": "2024-06-12",
+            "category": "BIS",
+            "doc_type": "press_release",
+            "title": "Department of Commerce Announces Additional Export Restrictions to Counter Russian Aggression",
+            "body_sentiment_score": -0.1603708400212485,
+            "title_sentiment_score": -0.6444395780563354,
+            "link": "https://www.bis.gov/press-release/department-commerce-announces-additional-export-restrictions-counter-russian-aggression"
+          },
+          {
+            "rank": 5,
+            "similarity": 0.482931,
+            "date": "2024-09-24",
+            "category": "BIS",
+            "doc_type": "press_release",
+            "title": "G7 Announces Industry Guidance on Preventing Evasion of Export Controls and Sanctions Imposed on Russia",
+            "body_sentiment_score": 0.3478885758934507,
+            "title_sentiment_score": 0.2479061484336853,
+            "link": "https://www.bis.gov/press-release/g7-announces-industry-guidance-preventing-evasion-export-controls-sanctions-imposed-russia"
+          }
+        ],
+        "profile_feature_ranking": [
+          {
+            "feature": "ret_5",
+            "centroid_value": 0.010929215077520666,
+            "z_diff": 0.2529612691866744,
+            "abs_z": 0.2529612691866744
+          },
+          {
+            "feature": "negative_count_ratio_5d",
+            "centroid_value": 0.15545587995853813,
+            "z_diff": -0.20070934630304266,
+            "abs_z": 0.20070934630304266
+          },
+          {
+            "feature": "vol_5",
+            "centroid_value": 0.011086523164544393,
+            "z_diff": -0.1795061929263026,
+            "abs_z": 0.1795061929263026
+          },
+          {
+            "feature": "body_emb_cluster_pc3",
+            "centroid_value": -0.22851477341010526,
+            "z_diff": -0.1595158157603283,
+            "abs_z": 0.1595158157603283
+          },
+          {
+            "feature": "body_emb_cluster_pc1",
+            "centroid_value": -0.0333876985426817,
+            "z_diff": -0.14434747719525975,
+            "abs_z": 0.14434747719525975
+          },
+          {
+            "feature": "body_sentiment_decay_5d",
+            "centroid_value": 0.04173707852314949,
+            "z_diff": 0.13545460442180726,
+            "abs_z": 0.13545460442180726
+          },
+          {
+            "feature": "body_emb_cluster_pc9",
+            "centroid_value": 0.23874327893150005,
+            "z_diff": 0.13216597047082698,
+            "abs_z": 0.13216597047082698
+          },
+          {
+            "feature": "vol_shock",
+            "centroid_value": 0.8933864572154327,
+            "z_diff": -0.12091580836269593,
+            "abs_z": 0.12091580836269593
+          },
+          {
+            "feature": "fomc_sentiment_shock",
+            "centroid_value": 0.005248189694309337,
+            "z_diff": 0.10866154401410077,
+            "abs_z": 0.10866154401410077
+          },
+          {
+            "feature": "vix_z_score_5",
+            "centroid_value": -0.045447820022683445,
+            "z_diff": -0.098121702909895,
+            "abs_z": 0.098121702909895
+          }
+        ]
+      },
+      {
+        "label": "rise",
+        "count": 51,
+        "date_range": {
+          "first": "2024-07-19",
+          "last": "2026-04-20"
+        },
+        "average_predicted_return_pct": 0.40386050355200587,
+        "min_predicted_return_pct": 0.30074119567871094,
+        "max_predicted_return_pct": 0.5934834480285645,
+        "average_actual_return_pct": -0.43208243050075823,
+        "direction_accuracy": 0.5294117647058824,
+        "profile_feature_means": {
+          "ret_5": 0.0075,
+          "vol_5": 0.0128,
+          "vol_ratio_5": 1.8185,
+          "drawdown": -0.0588,
+          "vix_z_score_5": 0.1401,
+          "vol_shock": 0.9687,
+          "days_since_news": 2.3693,
+          "news_count_lag1": 0.5768,
+          "negative_count_ratio_5d": 0.2175,
+          "title_sentiment_3d_mean": 0.0188,
+          "title_sentiment_5d_mean": 0.0226,
+          "body_sentiment_decay_5d": -0.0391,
+          "fomc_recent_5d": 0.3119,
+          "fomc_sentiment_shock": -0.0017,
+          "body_emb_cluster_pc1": 0.1535,
+          "body_emb_cluster_pc2": 0.2775,
+          "body_emb_cluster_pc3": -0.0879,
+          "body_emb_cluster_pc4": -0.1596,
+          "body_emb_cluster_pc5": 0.1369,
+          "body_emb_cluster_pc6": -0.2697,
+          "body_emb_cluster_pc7": -0.156,
+          "body_emb_cluster_pc8": -0.1416,
+          "body_emb_cluster_pc9": 0.025,
+          "body_emb_cluster_pc10": -0.1171
+        },
+        "representative_embedding_news": [
+          {
+            "rank": 1,
+            "similarity": 0.664466,
+            "date": "2018-08-01",
+            "category": "FOMC",
+            "doc_type": "statement",
+            "title": "Federal Reserve issues FOMC statement",
+            "body_sentiment_score": 0.3705634111710661,
+            "title_sentiment_score": -0.0491516161710023,
+            "link": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20180801a.htm"
+          },
+          {
+            "rank": 2,
+            "similarity": 0.657733,
+            "date": "2018-09-26",
+            "category": "FOMC",
+            "doc_type": "statement",
+            "title": "Federal Reserve issues FOMC statement",
+            "body_sentiment_score": 0.4199731890199246,
+            "title_sentiment_score": -0.0491516161710023,
+            "link": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20180926a.htm"
+          },
+          {
+            "rank": 3,
+            "similarity": 0.65762,
+            "date": "2018-11-08",
+            "category": "FOMC",
+            "doc_type": "statement",
+            "title": "Federal Reserve issues FOMC statement",
+            "body_sentiment_score": 0.3354999311640301,
+            "title_sentiment_score": -0.049151612445712,
+            "link": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20181108a.htm"
+          },
+          {
+            "rank": 4,
+            "similarity": 0.654151,
+            "date": "2017-04-05",
+            "category": "FOMC",
+            "doc_type": "minutes",
+            "title": "Minutes of the Federal Open Market Committee",
+            "body_sentiment_score": -0.4580605456380031,
+            "title_sentiment_score": -0.0241492707282304,
+            "link": "https://www.federalreserve.gov/monetarypolicy/fomcminutes20170315.htm"
+          },
+          {
+            "rank": 5,
+            "similarity": 0.653699,
+            "date": "2026-03-18",
+            "category": "FOMC",
+            "doc_type": "statement",
+            "title": "Federal Reserve issues FOMC statement",
+            "body_sentiment_score": -0.0213897106051444,
+            "title_sentiment_score": -0.049151612445712,
+            "link": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260318a.htm"
+          }
+        ],
+        "profile_feature_ranking": [
+          {
+            "feature": "body_emb_cluster_pc8",
+            "centroid_value": -0.14160404704167856,
+            "z_diff": 0.27091368785360836,
+            "abs_z": 0.27091368785360836
+          },
+          {
+            "feature": "body_sentiment_decay_5d",
+            "centroid_value": -0.03910179301955809,
+            "z_diff": -0.24705155735997167,
+            "abs_z": 0.24705155735997167
+          },
+          {
+            "feature": "body_emb_cluster_pc6",
+            "centroid_value": -0.2697181821041085,
+            "z_diff": -0.21292335611537186,
+            "abs_z": 0.21292335611537186
+          },
+          {
+            "feature": "drawdown",
+            "centroid_value": -0.05877249905571232,
+            "z_diff": 0.2063149864525385,
+            "abs_z": 0.2063149864525385
+          },
+          {
+            "feature": "body_emb_cluster_pc5",
+            "centroid_value": 0.1368697327369836,
+            "z_diff": 0.16452024419242292,
+            "abs_z": 0.16452024419242292
+          },
+          {
+            "feature": "vol_shock",
+            "centroid_value": 0.9687320522193,
+            "z_diff": 0.15354646346107445,
+            "abs_z": 0.15354646346107445
+          },
+          {
+            "feature": "ret_5",
+            "centroid_value": 0.007484844091850418,
+            "z_diff": 0.13718225952519508,
+            "abs_z": 0.13718225952519508
+          },
+          {
+            "feature": "vix_z_score_5",
+            "centroid_value": 0.14007927516752608,
+            "z_diff": 0.1369048913121389,
+            "abs_z": 0.1369048913121389
+          },
+          {
+            "feature": "body_emb_cluster_pc4",
+            "centroid_value": -0.15962868568616861,
+            "z_diff": -0.12227882733138178,
+            "abs_z": 0.12227882733138178
+          },
+          {
+            "feature": "body_emb_cluster_pc10",
+            "centroid_value": -0.11710846824075713,
+            "z_diff": -0.11346543759224247,
+            "abs_z": 0.11346543759224247
+          }
+        ]
+      },
+      {
+        "label": "rise_strong",
+        "count": 45,
+        "date_range": {
+          "first": "2024-06-21",
+          "last": "2026-04-17"
+        },
+        "average_predicted_return_pct": 1.0045682059393994,
+        "min_predicted_return_pct": 0.6021022796630859,
+        "max_predicted_return_pct": 2.0756840705871804,
+        "average_actual_return_pct": 0.9131266490124513,
+        "direction_accuracy": 0.6444444444444445,
+        "profile_feature_means": {
+          "ret_5": -0.0038,
+          "vol_5": 0.0176,
+          "vol_ratio_5": 1.9601,
+          "drawdown": -0.0797,
+          "vix_z_score_5": -0.067,
+          "vol_shock": 1.0416,
+          "days_since_news": 2.5519,
+          "news_count_lag1": 0.6852,
+          "negative_count_ratio_5d": 0.2993,
+          "title_sentiment_3d_mean": 0.0023,
+          "title_sentiment_5d_mean": 0.0125,
+          "body_sentiment_decay_5d": -0.1213,
+          "fomc_recent_5d": 0.3652,
+          "fomc_sentiment_shock": -0.0204,
+          "body_emb_cluster_pc1": 0.1541,
+          "body_emb_cluster_pc2": 0.2572,
+          "body_emb_cluster_pc3": 0.2295,
+          "body_emb_cluster_pc4": 0.2438,
+          "body_emb_cluster_pc5": -0.1766,
+          "body_emb_cluster_pc6": -0.013,
+          "body_emb_cluster_pc7": -0.1998,
+          "body_emb_cluster_pc8": 0.0805,
+          "body_emb_cluster_pc9": 0.2236,
+          "body_emb_cluster_pc10": -0.0537
+        },
+        "representative_embedding_news": [
+          {
+            "rank": 1,
+            "similarity": 0.865435,
+            "date": "2018-01-03",
+            "category": "FOMC",
+            "doc_type": "minutes",
+            "title": "Minutes of the Federal Open Market Committee",
+            "body_sentiment_score": 0.8665689182504216,
+            "title_sentiment_score": -0.024149278178811,
+            "link": "https://www.federalreserve.gov/monetarypolicy/fomcminutes20171213.htm"
+          },
+          {
+            "rank": 2,
+            "similarity": 0.840558,
+            "date": "2017-04-05",
+            "category": "FOMC",
+            "doc_type": "minutes",
+            "title": "Minutes of the Federal Open Market Committee",
+            "body_sentiment_score": -0.4580605456380031,
+            "title_sentiment_score": -0.0241492707282304,
+            "link": "https://www.federalreserve.gov/monetarypolicy/fomcminutes20170315.htm"
+          },
+          {
+            "rank": 3,
+            "similarity": 0.826947,
+            "date": "2017-05-24",
+            "category": "FOMC",
+            "doc_type": "minutes",
+            "title": "Minutes of the Federal Open Market Committee",
+            "body_sentiment_score": -0.6103485226631165,
+            "title_sentiment_score": -0.024149278178811,
+            "link": "https://www.federalreserve.gov/monetarypolicy/fomcminutes20170503.htm"
+          },
+          {
+            "rank": 4,
+            "similarity": 0.818743,
+            "date": "2020-11-25",
+            "category": "FOMC",
+            "doc_type": "minutes",
+            "title": "Minutes of the Federal Open Market Committee",
+            "body_sentiment_score": 0.8431667660339099,
+            "title_sentiment_score": -0.0241492707282304,
+            "link": "https://www.federalreserve.gov/monetarypolicy/fomcminutes20201105.htm"
+          },
+          {
+            "rank": 5,
+            "similarity": 0.815691,
+            "date": "2018-07-05",
+            "category": "FOMC",
+            "doc_type": "minutes",
+            "title": "Minutes of the Federal Open Market Committee",
+            "body_sentiment_score": 0.9125159932300448,
+            "title_sentiment_score": -0.024149278178811,
+            "link": "https://www.federalreserve.gov/monetarypolicy/fomcminutes20180613.htm"
+          }
+        ],
+        "profile_feature_ranking": [
+          {
+            "feature": "vol_5",
+            "centroid_value": 0.017591928571434344,
+            "z_diff": 0.8026224758752274,
+            "abs_z": 0.8026224758752274
+          },
+          {
+            "feature": "body_sentiment_decay_5d",
+            "centroid_value": -0.12131946144630112,
+            "z_diff": -0.6360817872530979,
+            "abs_z": 0.6360817872530979
+          },
+          {
+            "feature": "body_emb_cluster_pc8",
+            "centroid_value": 0.0804935182332191,
+            "z_diff": 0.5034752883670914,
+            "abs_z": 0.5034752883670914
+          },
+          {
+            "feature": "fomc_sentiment_shock",
+            "centroid_value": -0.020408214078938853,
+            "z_diff": -0.4730693636732939,
+            "abs_z": 0.4730693636732939
+          },
+          {
+            "feature": "vol_shock",
+            "centroid_value": 1.0416446442360823,
+            "z_diff": 0.41914600711666056,
+            "abs_z": 0.41914600711666056
+          },
+          {
+            "feature": "negative_count_ratio_5d",
+            "centroid_value": 0.2992871838861686,
+            "z_diff": 0.35935403118988885,
+            "abs_z": 0.35935403118988885
+          },
+          {
+            "feature": "body_emb_cluster_pc3",
+            "centroid_value": 0.22953736989044,
+            "z_diff": 0.3419212984284231,
+            "abs_z": 0.3419212984284231
+          },
+          {
+            "feature": "body_emb_cluster_pc4",
+            "centroid_value": 0.24376746377334757,
+            "z_diff": 0.30764841311637153,
+            "abs_z": 0.30764841311637153
+          },
+          {
+            "feature": "drawdown",
+            "centroid_value": -0.07971423169988866,
+            "z_diff": -0.29889388899698816,
+            "abs_z": 0.29889388899698816
+          },
+          {
+            "feature": "ret_5",
+            "centroid_value": -0.003826232449726008,
+            "z_diff": -0.2430280156272864,
+            "abs_z": 0.2430280156272864
+          }
+        ]
+      }
+    ]
+  }
+}
