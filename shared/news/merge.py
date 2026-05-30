@@ -8,6 +8,15 @@ NEUTRAL_FILL_DEFAULTS = {
     "body_neutral_prob": 1.0,
 }
 
+CATEGORY_FEATURE_COLUMN_PREFIX = "category_"
+BASE_CATEGORY_FILL_ZERO_COLUMNS = [
+    "category_BIS",
+    "category_EIA",
+    "category_FOMC",
+    "category_FRASER",
+    "category_UCSB",
+]
+
 EMBEDDING_DECAY_MAX_DAYS = 5
 EMBEDDING_DECAY_HALF_LIFE_DAYS = 3.0
 
@@ -23,9 +32,6 @@ SENTIMENT_FILL_ZERO_COLUMNS = [
     "body_positive_prob",
     "body_negative_prob",
     "body_sentiment_score",
-    "category_BIS",
-    "category_FOMC",
-    "category_UCSB",
 ]
 
 REGRESSION_STYLE_NEWS_FEATURE_COLUMNS = [
@@ -52,6 +58,21 @@ def _rolling_zscore(series: pd.Series, window: int, min_periods: int = 5) -> pd.
     return zscore.where(std > 0, 0.0).fillna(0.0)
 
 
+def _zero_fill_columns(df: pd.DataFrame) -> list[str]:
+    category_columns = [
+        column
+        for column in df.columns
+        if column.startswith(CATEGORY_FEATURE_COLUMN_PREFIX)
+    ]
+    return list(
+        dict.fromkeys(
+            SENTIMENT_FILL_ZERO_COLUMNS
+            + BASE_CATEGORY_FILL_ZERO_COLUMNS
+            + category_columns
+        )
+    )
+
+
 def _merge_daily_news_table(
     market_df: pd.DataFrame,
     daily_news_df: pd.DataFrame,
@@ -74,14 +95,15 @@ def _merge_daily_news_table(
             merged[column] = default_value
         merged[column] = merged[column].fillna(default_value)
 
-    for column in SENTIMENT_FILL_ZERO_COLUMNS:
+    zero_fill_columns = _zero_fill_columns(merged)
+    for column in zero_fill_columns:
         if column not in merged.columns:
             merged[column] = 0.0
 
     # 스칼라 감성/카테고리: ffill 대신 0으로 채워 뉴스 없는 날은 무신호(0)로 처리한다.
     # ffill을 쓰면 며칠 전 뉴스 감성이 아무 뉴스 없는 날까지 그대로 전파돼
     # "뉴스 없음"과 "예전 뉴스 잔존 영향"이 섞여 왜곡될 수 있다.
-    merged[SENTIMENT_FILL_ZERO_COLUMNS] = merged[SENTIMENT_FILL_ZERO_COLUMNS].fillna(0.0)
+    merged[zero_fill_columns] = merged[zero_fill_columns].fillna(0.0)
 
     # 임베딩은 마지막 뉴스 벡터를 최대 5일까지만 지수 감쇠해서 이어간다.
     # 5일 이후에는 오래된 문맥을 무신호(0)로 끊어 노이즈 누적을 줄인다.

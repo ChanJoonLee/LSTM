@@ -16,6 +16,9 @@ data/
 │     ├─ xle/
 │     │  ├─ merged_finbert_with_embeddings.csv
 │     │  └─ daily_news_features.csv
+│     ├─ xlf/
+│     │  ├─ merged_finbert_with_embeddings.csv
+│     │  └─ daily_news_features.csv
 │     ├─ merged_finbert_pca.pkl
 │     └─ policy_updates_pca.pkl
 └─ training/
@@ -23,7 +26,11 @@ data/
    │  ├─ market_only/
    │  ├─ market_news/
    │  └─ comparison/
-   └─ xle/
+   ├─ xle/
+   │  ├─ market_only/
+   │  ├─ market_news/
+   │  └─ comparison/
+   └─ xlf/
       ├─ market_only/
       ├─ market_news/
       └─ comparison/
@@ -68,6 +75,8 @@ data/
 | QQQ | market-news | 2026-05-24 17:16 | `qqq_growth_tech` | 51 | 2024-06-13 ~ 2026-04-24 | 14.4487 | 57.82% |
 | XLE | market-only | 2026-05-24 12:05 | `xle_energy` | 40 | 2024-06-26 ~ 2026-04-24 | 1.5820 | 46.19% |
 | XLE | market-news | 2026-05-24 17:26 | `xle_energy` | 42 | 2024-06-13 ~ 2026-04-24 | 1.5403 | 49.04% |
+
+XLF는 입력 CSV가 `data/crawler/features/xlf/merged_finbert_with_embeddings.csv`에 추가되어 있고, 학습 결과는 아직 저장되지 않았다. `shared/run_market_news_training.py --target-ticker XLF --ticker-preset auto` 실행 후 이 표에 같은 형식으로 추가하면 된다.
 
 고확신 구간:
 
@@ -121,6 +130,6 @@ label 기준:
 - `market_model_comparison.json`은 가장 최근 `--market-news-only` 실행으로 market-news와 cluster 중심 payload가 저장되어 있다.
 - baseline 비교는 `market_model_comparison_aligned.json` 또는 각 `market_only/metadata.json`, `market_news/metadata.json`을 함께 확인한다.
 - 현재 코드 기준 XLE auto preset은 25개 시장 피처다. 저장된 XLE market-only 40피처 metadata는 이전 프리셋/결과이므로 최신 코드와 1:1 비교하려면 재실행이 필요하다.
-- 티커별 폴더 구조를 유지하면 QQQ와 XLE 산출물이 서로 덮어써지지 않는다.
+- 티커별 폴더 구조를 유지하면 QQQ, XLE, XLF 산출물이 서로 덮어써지지 않는다.
 
 결과를 갱신할 때는 `--market-news-only` 여부를 꼭 확인한다. 이 플래그를 쓰면 빠르게 market-news와 profile 산출물을 갱신할 수 있지만, market-only baseline과 aligned comparison은 같이 갱신되지 않는다. 최종 비교표를 만들 때는 플래그 없이 실행하는 편이 안전하다.

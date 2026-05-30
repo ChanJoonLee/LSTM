@@ -47,13 +47,14 @@ raw policy/news documents
 | --- | --- | ---: | --- | --- | ---: |
 | QQQ | `qqq_growth_tech` | 34 | SPY, ^VIX, TLT, HYG, UUP, XLK, SOXX, IWM | 5, 7, 10, 15 | 200 |
 | XLE | `xle_energy` | 25 | SPY, ^VIX, TLT, HYG, UUP, USO, XOP, OIH, XLB | 3, 5, 10, 20 | 30 |
+| XLF | `xlf_financials` | 37 | SPY, ^VIX, TLT, HYG, UUP, KBE, KRE, KIE, IAI | 3, 5, 10, 20 | 30 |
 | 기타 | `default` | 20 | SPY, ^VIX, TLT, HYG, UUP | 5, 7, 10, 15 | 200 |
 
-QQQ의 34개 시장 피처는 base 20개, 성장/기술 섹터용 5개, XLK/SOXX/IWM 보충 피처 9개로 구성된다. XLE의 현재 코드상 auto preset은 에너지 섹터 피처 25개를 고정으로 사용한다.
+QQQ의 34개 시장 피처는 base 20개, 성장/기술 섹터용 5개, XLK/SOXX/IWM 보충 피처 9개로 구성된다. XLE의 현재 코드상 auto preset은 에너지 섹터 피처 25개를 고정으로 사용하고, XLF는 금융 섹터 피처 37개를 사용한다.
 
-프리셋은 단순히 이름만 바꾸는 옵션이 아니다. `target_ticker`, 매크로 티커 목록, 시장 피처 목록, horizon 후보, Optuna trial 수, random seed를 함께 정해 준다. 따라서 QQQ와 XLE를 같은 CLI로 실행해도 실제로 쓰는 시장 문맥은 다르다.
+프리셋은 단순히 이름만 바꾸는 옵션이 아니다. `target_ticker`, 매크로 티커 목록, 시장 피처 목록, horizon 후보, Optuna trial 수, random seed를 함께 정해 준다. 따라서 QQQ, XLE, XLF를 같은 CLI로 실행해도 실제로 쓰는 시장 문맥은 다르다.
 
-예를 들어 QQQ는 성장/기술주 문맥을 더 보기 위해 XLK, SOXX, IWM 보충 피처를 붙인다. XLE는 에너지 ETF라서 USO, XOP, OIH, XLB 쪽 피처가 들어간다. 이런 차이를 `shared/config/ticker_presets.py`에 모아 둔 이유는 새 티커를 추가할 때 실험 설정과 출력 경로가 서로 섞이지 않게 하기 위해서다.
+예를 들어 QQQ는 성장/기술주 문맥을 더 보기 위해 XLK, SOXX, IWM 보충 피처를 붙인다. XLE는 에너지 ETF라서 USO, XOP, OIH, XLB 쪽 피처가 들어가고, XLF는 금융 ETF라서 KBE, KRE, KIE, IAI 쪽 피처가 들어간다. 이런 차이를 `shared/config/ticker_presets.py`에 모아 둔 이유는 새 티커를 추가할 때 실험 설정과 출력 경로가 서로 섞이지 않게 하기 위해서다.
 
 ## 실행 흐름
 
@@ -77,7 +78,7 @@ QQQ의 34개 시장 피처는 base 20개, 성장/기술 섹터용 5개, XLK/SOXX
 - `shared/run_market_news_training.py`
   CLI 인자를 config로 바꾸고 전체 파이프라인을 실행한다. `--target-ticker`, `--ticker-preset`, `--market-news-only` 같은 사용자-facing 옵션은 여기서 확인하면 된다.
 - `shared/config/ticker_presets.py`
-  티커별 시장 피처와 매크로 티커 구성을 관리한다. 현재 QQQ/XLE 차이가 여기서 갈린다.
+  티커별 시장 피처와 매크로 티커 구성을 관리한다. 현재 QQQ/XLE/XLF 차이가 여기서 갈린다.
 - `shared/config/schema.py`
   경로와 학습 기본값을 담은 `MarketNewsTrainingConfig`가 있다. 티커별 출력 경로도 여기서 생성된다.
 - `shared/pipelines/market_news.py`
@@ -100,6 +101,7 @@ QQQ의 34개 시장 피처는 base 20개, 성장/기술 섹터용 5개, XLK/SOXX
 ```bash
 python shared/run_market_news_training.py --target-ticker QQQ --ticker-preset auto
 python shared/run_market_news_training.py --target-ticker XLE --ticker-preset auto
+python shared/run_market_news_training.py --target-ticker XLF --ticker-preset auto
 ```
 
 market-news 모델만 빠르게 다시 돌릴 때:
@@ -107,12 +109,13 @@ market-news 모델만 빠르게 다시 돌릴 때:
 ```bash
 python shared/run_market_news_training.py --target-ticker QQQ --market-news-only
 python shared/run_market_news_training.py --target-ticker XLE --market-news-only
+python shared/run_market_news_training.py --target-ticker XLF --market-news-only
 ```
 
 주요 옵션:
 
-- `--target-ticker`: 예측 대상 티커. 예: `QQQ`, `XLE`
-- `--ticker-preset`: `auto`, `none`, `default`, `qqq_legacy`, `qqq_growth_tech`, `xle_energy`
+- `--target-ticker`: 예측 대상 티커. 예: `QQQ`, `XLE`, `XLF`
+- `--ticker-preset`: `auto`, `none`, `default`, `qqq_legacy`, `qqq_growth_tech`, `xle_energy`, `xlf_financials`
 - `--news-input`: 기본값 대신 사용할 뉴스 임베딩 CSV
 - `--horizons`: 쉼표 구분 horizon 후보
 - `--training-embedding-pca-components`: 학습용 `body_emb_*` PCA 차원. 기본값 5
@@ -186,6 +189,8 @@ QQQ auto preset은 여기에 `spy_ret_20`, `vix_speed`, `tlt_ret_20`, `uup_shock
 
 XLE auto preset은 현재 코드 기준 `ret_1`, `ret_3`, `ret_5`, `ret_accel`, `price_to_ma_5`, `bb_pos_5`, `bb_width_5`, `vol_5`, `vol_10`, `drawdown`, `vol_ratio_5`, `rel_strength_5`, `spy_ret_5`, `vix_ret_5`, `vix_z_score_5`, `hyg_ret_5`, `uup_ret_5`, `target_spy_rel_ret_5`, `uso_ret_5`, `uso_shock_5`, `xop_ret_5`, `xop_shock_5`, `oih_ret_5`, `oih_shock_5`, `xlb_shock_5`를 사용한다.
 
+XLF auto preset은 금융 섹터 문맥을 위해 금리/채권 민감도(`tlt_ret_5`, `tlt_ret_20`, `target_tlt_rel_ret_5`, `target_tlt_ratio_20`), 신용/리스크 문맥(`hyg_ret_5`, `hyg_z_score`, `vix_z_score_5`)과 KBE/KRE/KIE/IAI 보조 ETF의 `ret_5`, `shock_5` 피처를 함께 사용한다.
+
 ### 뉴스 피처
 
 스칼라 뉴스 피처 12개:
@@ -258,6 +263,8 @@ profile 피처는 기본 시장/뉴스 피처 14개와 설명용 임베딩 PCA 1
 | XLE | market-only | `xle_energy` | 40 | 2024-06-26 ~ 2026-04-24 | 1.5820 | 46.19% |
 | XLE | market-news | `xle_energy` | 42 | 2024-06-13 ~ 2026-04-24 | 1.5403 | 49.04% |
 
+XLF는 `data/crawler/features/xlf/merged_finbert_with_embeddings.csv`와 `xlf_financials` 프리셋이 준비된 상태이며, 학습 산출물은 첫 실행 후 `data/training/xlf/` 아래에 생성된다.
+
 해석 주의:
 
 - QQQ market-news는 RMSE가 약간 좋아졌지만 방향성 정확도는 market-only보다 낮다.
@@ -297,7 +304,10 @@ data/
 │     ├─ qqq/
 │     │  ├─ merged_finbert_with_embeddings.csv
 │     │  └─ daily_news_features.csv
-│     └─ xle/
+│     ├─ xle/
+│     │  ├─ merged_finbert_with_embeddings.csv
+│     │  └─ daily_news_features.csv
+│     └─ xlf/
 │        ├─ merged_finbert_with_embeddings.csv
 │        └─ daily_news_features.csv
 └─ training/
@@ -305,7 +315,11 @@ data/
    │  ├─ market_only/
    │  ├─ market_news/
    │  └─ comparison/
-   └─ xle/
+   ├─ xle/
+   │  ├─ market_only/
+   │  ├─ market_news/
+   │  └─ comparison/
+   └─ xlf/
       ├─ market_only/
       ├─ market_news/
       └─ comparison/

@@ -44,810 +44,810 @@
     "body_emb_cluster_pc10"
   ],
   "source_model_metrics": {
-    "mae": 1.1661421833028192,
-    "rmse": 1.5403402297229312,
-    "r2_score": 0.9093862857417937,
-    "direction_accuracy": 0.49036402569593146,
-    "mape": 2.6104667866161235,
-    "baseline_mae": 1.1521482610600409,
-    "baseline_rmse": 1.5018345242262392,
-    "baseline_mape": 2.572800952450642,
-    "high_conf_threshold": 0.30247727036476135,
-    "high_conf_long_accuracy": 0.5913978494623656,
-    "high_conf_long_count": 93,
-    "high_conf_short_accuracy": 0.3617021276595745,
-    "high_conf_short_count": 47
+    "mae": 1.1955076857736704,
+    "rmse": 1.6026293466089612,
+    "r2_score": 0.9019095322190659,
+    "direction_accuracy": 0.5203426124197003,
+    "mape": 2.674208492634841,
+    "baseline_mae": 1.1521483264081738,
+    "baseline_rmse": 1.501834435851343,
+    "baseline_mape": 2.572801096022872,
+    "high_conf_threshold": 0.7583120465278625,
+    "high_conf_long_accuracy": 0.5802469135802469,
+    "high_conf_long_count": 81,
+    "high_conf_short_accuracy": 0.3559322033898305,
+    "high_conf_short_count": 59
   },
   "representative_news_method": "Label centroid body_emb_cluster_pc* values are inverse-transformed to the original body_emb_* space, then matched to source news by cosine similarity.",
   "profile_feature_ranking_method": "For each label centroid, original-scale feature values are compared against the global profile mean and sorted by absolute z-difference.",
   "predicted_groups": [
     {
       "label": "fall_strong",
-      "count": 47,
+      "count": 132,
       "date_range": {
-        "first": "2024-08-05",
+        "first": "2024-06-17",
         "last": "2026-04-24"
       },
-      "average_predicted_return_pct": -1.391409939907966,
-      "min_predicted_return_pct": -13.593685626983632,
-      "max_predicted_return_pct": -0.303494930267334,
-      "average_actual_return_pct": 0.27700292000439103,
-      "direction_accuracy": 0.3617021276595745,
+      "average_predicted_return_pct": -1.1584189353567187,
+      "min_predicted_return_pct": -16.14431142807007,
+      "max_predicted_return_pct": -0.30077099800109863,
+      "average_actual_return_pct": 0.31370754837258624,
+      "direction_accuracy": 0.4090909090909091,
       "profile_feature_means": {
-        "ret_5": -0.0133,
-        "vol_5": 0.0144,
-        "vol_ratio_5": 1.8253,
-        "drawdown": -0.0611,
-        "vix_z_score_5": 0.3739,
-        "vol_shock": 0.9895,
-        "days_since_news": 1.9752,
-        "news_count_lag1": 0.539,
-        "negative_count_ratio_5d": 0.2947,
-        "title_sentiment_3d_mean": -0.0037,
-        "title_sentiment_5d_mean": 0.0005,
-        "body_sentiment_decay_5d": -0.0294,
-        "fomc_recent_5d": 0.2176,
-        "fomc_sentiment_shock": 0.0028,
-        "body_emb_cluster_pc1": 0.7332,
-        "body_emb_cluster_pc2": -0.0474,
-        "body_emb_cluster_pc3": 0.0853,
-        "body_emb_cluster_pc4": -0.1734,
-        "body_emb_cluster_pc5": -0.2679,
-        "body_emb_cluster_pc6": -0.237,
-        "body_emb_cluster_pc7": -0.2893,
-        "body_emb_cluster_pc8": -0.4402,
-        "body_emb_cluster_pc9": -0.2435,
-        "body_emb_cluster_pc10": 0.0797
+        "ret_5": 0.0018,
+        "vol_5": 0.0122,
+        "vol_ratio_5": 1.9276,
+        "drawdown": -0.0626,
+        "vix_z_score_5": 0.1203,
+        "vol_shock": 0.9303,
+        "days_since_news": 0.2595,
+        "news_count_lag1": 1.3081,
+        "negative_count_ratio_5d": 0.3696,
+        "title_sentiment_3d_mean": 0.0417,
+        "title_sentiment_5d_mean": 0.0694,
+        "body_sentiment_decay_5d": -0.1123,
+        "fomc_recent_5d": 0.1652,
+        "fomc_sentiment_shock": 0.004,
+        "body_emb_cluster_pc1": -0.7741,
+        "body_emb_cluster_pc2": -0.3821,
+        "body_emb_cluster_pc3": -0.1801,
+        "body_emb_cluster_pc4": 0.0865,
+        "body_emb_cluster_pc5": 0.4563,
+        "body_emb_cluster_pc6": 0.0536,
+        "body_emb_cluster_pc7": -0.733,
+        "body_emb_cluster_pc8": -0.0743,
+        "body_emb_cluster_pc9": 0.1881,
+        "body_emb_cluster_pc10": 0.273
       },
       "representative_embedding_news": [
         {
           "rank": 1,
-          "similarity": 0.739943,
-          "date": "2025-02-27",
-          "category": "UCSB",
-          "doc_type": "News Conferences",
-          "title": "The President's News Conference With Prime Minister Keir Starmer of the United Kingdom",
-          "body_sentiment_score": 0.8548424113541842,
-          "title_sentiment_score": 0.029353454709053,
-          "link": "https://www.presidency.ucsb.edu/documents/the-presidents-news-conference-with-prime-minister-keir-starmer-the-united-kingdom"
+          "similarity": 0.652764,
+          "date": "2025-12-22",
+          "category": "EIA",
+          "doc_type": "TODAY_IN_ENERGY",
+          "title": "It’s been another banner year for Today in Energy!",
+          "body_sentiment_score": 0.3480365924994207,
+          "title_sentiment_score": 0.5226922184228897,
+          "link": "https://www.eia.gov/todayinenergy/detail.php?id=66924"
         },
         {
           "rank": 2,
-          "similarity": 0.736525,
-          "date": "2018-04-24",
-          "category": "UCSB",
-          "doc_type": "News Conferences",
-          "title": "The President's News Conference With President Emmanuel Macron of France",
-          "body_sentiment_score": 0.1964870803058147,
-          "title_sentiment_score": 0.0227415338158607,
-          "link": "https://www.presidency.ucsb.edu/documents/the-presidents-news-conference-with-president-emmanuel-macron-france"
+          "similarity": 0.652664,
+          "date": "2023-12-28",
+          "category": "EIA",
+          "doc_type": "TODAY_IN_ENERGY",
+          "title": "U.S. electric capacity mix shifts from fossil fuels to renewables in AEO2023",
+          "body_sentiment_score": 0.1304267519693722,
+          "title_sentiment_score": 0.0129789635539054,
+          "link": "https://www.eia.gov/todayinenergy/detail.php?id=61108"
         },
         {
           "rank": 3,
-          "similarity": 0.718624,
-          "date": "2025-12-29",
-          "category": "UCSB",
-          "doc_type": "News Conferences",
-          "title": "The President's News Conference With Prime Minister Benjamin Netanyahu of Israel in Palm Beach, Florida",
-          "body_sentiment_score": 0.8214889839291573,
-          "title_sentiment_score": 0.0187179427593946,
-          "link": "https://www.presidency.ucsb.edu/documents/the-presidents-news-conference-with-prime-minister-benjamin-netanyahu-israel-palm-beach"
+          "similarity": 0.65147,
+          "date": "2024-11-20",
+          "category": "EIA",
+          "doc_type": "TODAY_IN_ENERGY",
+          "title": "What’s driving decreasing gasoline consumption in China?",
+          "body_sentiment_score": -0.3499184928456439,
+          "title_sentiment_score": -0.7603583000600338,
+          "link": "https://www.eia.gov/todayinenergy/detail.php?id=63764"
         },
         {
           "rank": 4,
-          "similarity": 0.697182,
-          "date": "2025-05-30",
-          "category": "UCSB",
-          "doc_type": "News Conferences",
-          "title": "The President's News Conference With White House Senior Adviser Elon R. Musk",
-          "body_sentiment_score": 0.6042971555143595,
-          "title_sentiment_score": -0.0187297947704792,
-          "link": "https://www.presidency.ucsb.edu/documents/the-presidents-news-conference-with-white-house-senior-adviser-elon-r-musk"
+          "similarity": 0.648444,
+          "date": "2021-06-09",
+          "category": "EIA",
+          "doc_type": "TODAY_IN_ENERGY",
+          "title": "Electric power sector CO2 emissions drop as generation mix shifts from coal to natural gas",
+          "body_sentiment_score": -0.1342912400198657,
+          "title_sentiment_score": -0.9550069672986864,
+          "link": "https://www.eia.gov/todayinenergy/detail.php?id=48296"
         },
         {
           "rank": 5,
-          "similarity": 0.693556,
-          "date": "2018-07-30",
-          "category": "UCSB",
-          "doc_type": "News Conferences",
-          "title": "The President's News Conference With Prime Minister Giuseppe Conte of Italy",
-          "body_sentiment_score": 0.8113262709230185,
-          "title_sentiment_score": 0.0165466163307428,
-          "link": "https://www.presidency.ucsb.edu/documents/the-presidents-news-conference-with-prime-minister-giuseppe-conte-italy"
+          "similarity": 0.646281,
+          "date": "2021-01-13",
+          "category": "EIA",
+          "doc_type": "TODAY_IN_ENERGY",
+          "title": "EIA expects higher wholesale U.S. natural gas prices in 2021 and 2022",
+          "body_sentiment_score": -0.3426988732495716,
+          "title_sentiment_score": 0.8587300404906273,
+          "link": "https://www.eia.gov/todayinenergy/detail.php?id=46456"
         }
       ],
       "profile_feature_ranking": [
         {
-          "feature": "body_emb_cluster_pc1",
-          "centroid_value": 0.7332183840532749,
-          "z_diff": 0.6185084235122849,
-          "abs_z": 0.6185084235122849
+          "feature": "body_sentiment_decay_5d",
+          "centroid_value": -0.11226790469147234,
+          "z_diff": -0.2669472686537026,
+          "abs_z": 0.2669472686537026
         },
         {
-          "feature": "ret_5",
-          "centroid_value": -0.013307133235183297,
-          "z_diff": -0.5617188036422087,
-          "abs_z": 0.5617188036422087
+          "feature": "title_sentiment_3d_mean",
+          "centroid_value": 0.04171829451807523,
+          "z_diff": -0.22148960112303984,
+          "abs_z": 0.22148960112303984
+        },
+        {
+          "feature": "title_sentiment_5d_mean",
+          "centroid_value": 0.06937422078241236,
+          "z_diff": -0.14224702277974016,
+          "abs_z": 0.14224702277974016
+        },
+        {
+          "feature": "body_emb_cluster_pc10",
+          "centroid_value": 0.27301877812730796,
+          "z_diff": -0.12009235740973545,
+          "abs_z": 0.12009235740973545
+        },
+        {
+          "feature": "body_emb_cluster_pc7",
+          "centroid_value": -0.7330457099418143,
+          "z_diff": -0.11886064431644854,
+          "abs_z": 0.11886064431644854
+        },
+        {
+          "feature": "drawdown",
+          "centroid_value": -0.06264784969073878,
+          "z_diff": 0.11282374706508491,
+          "abs_z": 0.11282374706508491
         },
         {
           "feature": "vix_z_score_5",
-          "centroid_value": 0.3739444812719133,
-          "z_diff": 0.433166431123326,
-          "abs_z": 0.433166431123326
+          "centroid_value": 0.12030823406366556,
+          "z_diff": 0.11185884372485692,
+          "abs_z": 0.11185884372485692
         },
         {
-          "feature": "body_emb_cluster_pc9",
-          "centroid_value": -0.24346050945999376,
-          "z_diff": -0.35754888004214563,
-          "abs_z": 0.35754888004214563
+          "feature": "fomc_sentiment_shock",
+          "centroid_value": 0.004000878288721681,
+          "z_diff": 0.10551005975412855,
+          "abs_z": 0.10551005975412855
         },
         {
           "feature": "negative_count_ratio_5d",
-          "centroid_value": 0.2946935155290019,
-          "z_diff": 0.3414667886707522,
-          "abs_z": 0.3414667886707522
+          "centroid_value": 0.36962368082360614,
+          "z_diff": 0.09869341405405822,
+          "abs_z": 0.09869341405405822
         },
         {
-          "feature": "vol_5",
-          "centroid_value": 0.014438981818955886,
-          "z_diff": 0.32661841415539505,
-          "abs_z": 0.32661841415539505
-        },
-        {
-          "feature": "body_emb_cluster_pc2",
-          "centroid_value": -0.04743800094277051,
-          "z_diff": -0.31393875385592873,
-          "abs_z": 0.31393875385592873
-        },
-        {
-          "feature": "body_emb_cluster_pc5",
-          "centroid_value": -0.26794142305366164,
-          "z_diff": -0.2597701931084719,
-          "abs_z": 0.2597701931084719
-        },
-        {
-          "feature": "vol_shock",
-          "centroid_value": 0.9895364618286456,
-          "z_diff": 0.22933092737087823,
-          "abs_z": 0.22933092737087823
-        },
-        {
-          "feature": "body_sentiment_decay_5d",
-          "centroid_value": -0.029376950185153614,
-          "z_diff": -0.2010364134628442,
-          "abs_z": 0.2010364134628442
+          "feature": "vol_ratio_5",
+          "centroid_value": 1.9275861957858584,
+          "z_diff": 0.09584240388543382,
+          "abs_z": 0.09584240388543382
         }
       ]
     },
     {
       "label": "fall",
-      "count": 151,
+      "count": 70,
       "date_range": {
-        "first": "2024-06-17",
-        "last": "2026-04-23"
+        "first": "2024-06-14",
+        "last": "2026-04-07"
       },
-      "average_predicted_return_pct": -0.12939955225054,
-      "min_predicted_return_pct": -0.29132962226867676,
-      "max_predicted_return_pct": -0.00024437904357910156,
-      "average_actual_return_pct": 0.810501427209284,
-      "direction_accuracy": 0.3841059602649007,
+      "average_predicted_return_pct": -0.1389910493578217,
+      "min_predicted_return_pct": -0.2954721450805664,
+      "max_predicted_return_pct": -0.0009655952453502259,
+      "average_actual_return_pct": 0.2748943586910406,
+      "direction_accuracy": 0.42857142857142855,
       "profile_feature_means": {
-        "ret_5": 0.0008,
+        "ret_5": -0.0028,
         "vol_5": 0.0112,
-        "vol_ratio_5": 1.8983,
-        "drawdown": -0.067,
-        "vix_z_score_5": 0.0073,
-        "vol_shock": 0.8965,
-        "days_since_news": 2.1308,
-        "news_count_lag1": 0.6015,
-        "negative_count_ratio_5d": 0.2077,
-        "title_sentiment_3d_mean": 0.0122,
-        "title_sentiment_5d_mean": 0.0124,
-        "body_sentiment_decay_5d": 0.0512,
-        "fomc_recent_5d": 0.2859,
-        "fomc_sentiment_shock": 0.0012,
-        "body_emb_cluster_pc1": 0.0576,
-        "body_emb_cluster_pc2": 0.2771,
-        "body_emb_cluster_pc3": -0.0595,
-        "body_emb_cluster_pc4": -0.0826,
-        "body_emb_cluster_pc5": -0.0312,
-        "body_emb_cluster_pc6": 0.0618,
-        "body_emb_cluster_pc7": -0.1967,
-        "body_emb_cluster_pc8": -0.5397,
-        "body_emb_cluster_pc9": 0.063,
-        "body_emb_cluster_pc10": 0.0706
+        "vol_ratio_5": 1.7465,
+        "drawdown": -0.0739,
+        "vix_z_score_5": -0.0068,
+        "vol_shock": 0.8829,
+        "days_since_news": 0.2131,
+        "news_count_lag1": 1.3095,
+        "negative_count_ratio_5d": 0.3263,
+        "title_sentiment_3d_mean": 0.11,
+        "title_sentiment_5d_mean": 0.1151,
+        "body_sentiment_decay_5d": -0.0283,
+        "fomc_recent_5d": 0.1423,
+        "fomc_sentiment_shock": -0.0017,
+        "body_emb_cluster_pc1": -0.7711,
+        "body_emb_cluster_pc2": -0.2611,
+        "body_emb_cluster_pc3": -0.2169,
+        "body_emb_cluster_pc4": 0.2681,
+        "body_emb_cluster_pc5": 0.4172,
+        "body_emb_cluster_pc6": -0.1829,
+        "body_emb_cluster_pc7": -0.6963,
+        "body_emb_cluster_pc8": -0.0467,
+        "body_emb_cluster_pc9": 0.3164,
+        "body_emb_cluster_pc10": 0.4424
       },
       "representative_embedding_news": [
         {
           "rank": 1,
-          "similarity": 0.468712,
-          "date": "2024-02-20",
-          "category": "BIS",
-          "doc_type": "press_release",
-          "title": "Readout of Assistant Secretary Matthew Axelrod’s Participation in the 2024 Munich Security Conference",
-          "body_sentiment_score": 0.1605884819900624,
-          "title_sentiment_score": 0.0274512693285942,
-          "link": "https://www.bis.gov/press-release/readout-assistant-secretary-matthew-axelrods-participation-2024-munich-security-conference"
+          "similarity": 0.686954,
+          "date": "2020-02-07",
+          "category": "EIA",
+          "doc_type": "TODAY_IN_ENERGY",
+          "title": "EIA projects generation from coal and nuclear power plants will plateau after 2025",
+          "body_sentiment_score": -0.3156289872662538,
+          "title_sentiment_score": 0.7398660313338041,
+          "link": "https://www.eia.gov/todayinenergy/detail.php?id=42755"
         },
         {
           "rank": 2,
-          "similarity": 0.421443,
-          "date": "2021-07-21",
-          "category": "BIS",
-          "doc_type": "press_release",
-          "title": "Turkish National Indicted for Wire Fraud and Illegally Exporting Defense Articles to Turkey",
-          "body_sentiment_score": -0.3004404446725784,
-          "title_sentiment_score": -0.7733912765979767,
-          "link": "https://www.bis.gov/press-release/turkish-national-indicted-wire-fraud-illegally-exporting-defense-articles-turkey"
+          "similarity": 0.674358,
+          "date": "2023-12-28",
+          "category": "EIA",
+          "doc_type": "TODAY_IN_ENERGY",
+          "title": "U.S. electric capacity mix shifts from fossil fuels to renewables in AEO2023",
+          "body_sentiment_score": 0.1304267519693722,
+          "title_sentiment_score": 0.0129789635539054,
+          "link": "https://www.eia.gov/todayinenergy/detail.php?id=61108"
         },
         {
           "rank": 3,
-          "similarity": 0.420856,
-          "date": "2024-02-07",
-          "category": "BIS",
-          "doc_type": "press_release",
-          "title": "Justice Department Announces Charges and Arrest in Two Separate Illicit Technology Transfer Schemes to Benefit Governments of China and Iran",
-          "body_sentiment_score": -0.7966285664588213,
-          "title_sentiment_score": -0.7910203952342272,
-          "link": "https://www.bis.gov/press-release/justice-department-announces-charges-arrest-two-separate-illicit-technology-transfer-schemes-benefit"
+          "similarity": 0.672226,
+          "date": "2020-02-10",
+          "category": "EIA",
+          "doc_type": "TODAY_IN_ENERGY",
+          "title": "EIA projects total U.S. energy-related CO2 emissions to be relatively flat through 2050",
+          "body_sentiment_score": -0.3641752597813523,
+          "title_sentiment_score": 0.8320437856018543,
+          "link": "https://www.eia.gov/todayinenergy/detail.php?id=42775"
         },
         {
           "rank": 4,
-          "similarity": 0.420614,
-          "date": "2024-09-05",
-          "category": "BIS",
-          "doc_type": "press_release",
-          "title": "Department of Commerce Implements Controls on Quantum Computing and Other Advanced Technologies Alongside International Partners",
-          "body_sentiment_score": 0.3903128105013906,
-          "title_sentiment_score": 0.0692502940073609,
-          "link": "https://www.bis.gov/press-release/department-commerce-implements-controls-quantum-computing-other-advanced-technologies-alongside"
+          "similarity": 0.666286,
+          "date": "2025-12-22",
+          "category": "EIA",
+          "doc_type": "TODAY_IN_ENERGY",
+          "title": "It’s been another banner year for Today in Energy!",
+          "body_sentiment_score": 0.3480365924994207,
+          "title_sentiment_score": 0.5226922184228897,
+          "link": "https://www.eia.gov/todayinenergy/detail.php?id=66924"
         },
         {
           "rank": 5,
-          "similarity": 0.404944,
-          "date": "2021-03-30",
-          "category": "BIS",
-          "doc_type": "press_release",
-          "title": "Russian national and engineering company admit guilt in scheme to evade U.S. national security trade sanctions",
-          "body_sentiment_score": -0.2952685247733518,
-          "title_sentiment_score": -0.6880350671708584,
-          "link": "https://www.bis.gov/press-release/russian-national-engineering-company-admit-guilt-scheme-evade-u.s.-national-security-trade-sanctions"
+          "similarity": 0.664735,
+          "date": "2021-01-13",
+          "category": "EIA",
+          "doc_type": "TODAY_IN_ENERGY",
+          "title": "EIA expects higher wholesale U.S. natural gas prices in 2021 and 2022",
+          "body_sentiment_score": -0.3426988732495716,
+          "title_sentiment_score": 0.8587300404906273,
+          "link": "https://www.eia.gov/todayinenergy/detail.php?id=46456"
         }
       ],
       "profile_feature_ranking": [
         {
-          "feature": "body_sentiment_decay_5d",
-          "centroid_value": 0.05123300610523197,
-          "z_diff": 0.18038658754654893,
-          "abs_z": 0.18038658754654893
+          "feature": "ret_5",
+          "centroid_value": -0.002772045887402335,
+          "z_diff": -0.2075926506138895,
+          "abs_z": 0.2075926506138895
         },
         {
-          "feature": "vol_5",
-          "centroid_value": 0.011219511297716919,
-          "z_diff": -0.15942881879973378,
-          "abs_z": 0.15942881879973378
+          "feature": "body_emb_cluster_pc4",
+          "centroid_value": 0.26813605206347424,
+          "z_diff": 0.18228443089715637,
+          "abs_z": 0.18228443089715637
         },
         {
-          "feature": "body_emb_cluster_pc8",
-          "centroid_value": -0.5397430372599518,
-          "z_diff": -0.14598345677460736,
-          "abs_z": 0.14598345677460736
+          "feature": "fomc_recent_5d",
+          "centroid_value": 0.14226190476190478,
+          "z_diff": -0.17351299297249254,
+          "abs_z": 0.17351299297249254
         },
         {
-          "feature": "body_emb_cluster_pc6",
-          "centroid_value": 0.06179887765687582,
-          "z_diff": 0.11644890557102057,
-          "abs_z": 0.11644890557102057
+          "feature": "drawdown",
+          "centroid_value": -0.07392434172706208,
+          "z_diff": -0.15921614437095305,
+          "abs_z": 0.15921614437095305
         },
         {
           "feature": "vol_shock",
-          "centroid_value": 0.8964875027091209,
-          "z_diff": -0.10961959401621907,
-          "abs_z": 0.10961959401621907
+          "centroid_value": 0.8828967621086031,
+          "z_diff": -0.15912642597596074,
+          "abs_z": 0.15912642597596074
         },
         {
-          "feature": "ret_5",
-          "centroid_value": 0.0007594663186807691,
-          "z_diff": -0.08888443927594643,
-          "abs_z": 0.08888443927594643
+          "feature": "vol_5",
+          "centroid_value": 0.011238232811597831,
+          "z_diff": -0.15660247080001616,
+          "abs_z": 0.15660247080001616
         },
         {
-          "feature": "vol_ratio_5",
-          "centroid_value": 1.8983290323303772,
-          "z_diff": 0.06624761380709798,
-          "abs_z": 0.06624761380709798
+          "feature": "body_emb_cluster_pc6",
+          "centroid_value": -0.18286666220068992,
+          "z_diff": -0.14149624495527238,
+          "abs_z": 0.14149624495527238
         },
         {
-          "feature": "body_emb_cluster_pc10",
-          "centroid_value": 0.0706128160090997,
-          "z_diff": 0.05382999584286399,
-          "abs_z": 0.05382999584286399
+          "feature": "body_emb_cluster_pc2",
+          "centroid_value": -0.2610875579134979,
+          "z_diff": 0.12942910388780088,
+          "abs_z": 0.12942910388780088
         },
         {
-          "feature": "body_emb_cluster_pc1",
-          "centroid_value": 0.057627233453679975,
-          "z_diff": -0.0537777837083448,
-          "abs_z": 0.0537777837083448
+          "feature": "negative_count_ratio_5d",
+          "centroid_value": 0.3263339602935595,
+          "z_diff": -0.1216402091655196,
+          "abs_z": 0.1216402091655196
         },
         {
-          "feature": "body_emb_cluster_pc9",
-          "centroid_value": 0.0630391755574406,
-          "z_diff": -0.046274993266448496,
-          "abs_z": 0.046274993266448496
+          "feature": "body_emb_cluster_pc8",
+          "centroid_value": -0.04666603289493686,
+          "z_diff": 0.09080833395681738,
+          "abs_z": 0.09080833395681738
         }
       ]
     },
     {
       "label": "neutral",
-      "count": 173,
+      "count": 76,
       "date_range": {
         "first": "2024-06-13",
-        "last": "2026-04-21"
+        "last": "2026-04-22"
       },
-      "average_predicted_return_pct": 0.11573616479862595,
-      "min_predicted_return_pct": 0.0027298927307128906,
-      "max_predicted_return_pct": 0.2959609031677246,
-      "average_actual_return_pct": 0.23582562664432125,
-      "direction_accuracy": 0.5664739884393064,
+      "average_predicted_return_pct": 0.16432200607500608,
+      "min_predicted_return_pct": 0.019001960754416736,
+      "max_predicted_return_pct": 0.2996087074279785,
+      "average_actual_return_pct": 0.8800621286313587,
+      "direction_accuracy": 0.6447368421052632,
       "profile_feature_means": {
-        "ret_5": 0.0109,
-        "vol_5": 0.0111,
-        "vol_ratio_5": 1.7488,
-        "drawdown": -0.0686,
-        "vix_z_score_5": -0.0454,
-        "vol_shock": 0.8934,
-        "days_since_news": 2.211,
-        "news_count_lag1": 0.6007,
-        "negative_count_ratio_5d": 0.1555,
-        "title_sentiment_3d_mean": 0.0247,
-        "title_sentiment_5d_mean": 0.0212,
-        "body_sentiment_decay_5d": 0.0417,
-        "fomc_recent_5d": 0.2559,
-        "fomc_sentiment_shock": 0.0052,
-        "body_emb_cluster_pc1": -0.0334,
-        "body_emb_cluster_pc2": 0.3046,
-        "body_emb_cluster_pc3": -0.2285,
-        "body_emb_cluster_pc4": -0.0184,
-        "body_emb_cluster_pc5": 0.0514,
-        "body_emb_cluster_pc6": -0.0562,
-        "body_emb_cluster_pc7": -0.0808,
-        "body_emb_cluster_pc8": -0.4691,
-        "body_emb_cluster_pc9": 0.2387,
-        "body_emb_cluster_pc10": -0.0072
+        "ret_5": 0.0065,
+        "vol_5": 0.0112,
+        "vol_ratio_5": 1.8182,
+        "drawdown": -0.0648,
+        "vix_z_score_5": -0.069,
+        "vol_shock": 0.9106,
+        "days_since_news": 0.1952,
+        "news_count_lag1": 1.3246,
+        "negative_count_ratio_5d": 0.3531,
+        "title_sentiment_3d_mean": 0.0703,
+        "title_sentiment_5d_mean": 0.0759,
+        "body_sentiment_decay_5d": -0.0317,
+        "fomc_recent_5d": 0.2189,
+        "fomc_sentiment_shock": -0.0022,
+        "body_emb_cluster_pc1": -0.7285,
+        "body_emb_cluster_pc2": -0.4538,
+        "body_emb_cluster_pc3": -0.1844,
+        "body_emb_cluster_pc4": 0.0545,
+        "body_emb_cluster_pc5": 0.5057,
+        "body_emb_cluster_pc6": 0.1891,
+        "body_emb_cluster_pc7": -0.5901,
+        "body_emb_cluster_pc8": -0.135,
+        "body_emb_cluster_pc9": 0.3164,
+        "body_emb_cluster_pc10": 0.3012
       },
       "representative_embedding_news": [
         {
           "rank": 1,
-          "similarity": 0.528754,
-          "date": "2024-02-20",
-          "category": "BIS",
-          "doc_type": "press_release",
-          "title": "Readout of Assistant Secretary Matthew Axelrod’s Participation in the 2024 Munich Security Conference",
-          "body_sentiment_score": 0.1605884819900624,
-          "title_sentiment_score": 0.0274512693285942,
-          "link": "https://www.bis.gov/press-release/readout-assistant-secretary-matthew-axelrods-participation-2024-munich-security-conference"
+          "similarity": 0.700129,
+          "date": "2024-11-20",
+          "category": "EIA",
+          "doc_type": "TODAY_IN_ENERGY",
+          "title": "What’s driving decreasing gasoline consumption in China?",
+          "body_sentiment_score": -0.3499184928456439,
+          "title_sentiment_score": -0.7603583000600338,
+          "link": "https://www.eia.gov/todayinenergy/detail.php?id=63764"
         },
         {
           "rank": 2,
-          "similarity": 0.511169,
-          "date": "2022-12-21",
-          "category": "BIS",
-          "doc_type": "press_release",
-          "title": "Commerce Imposes Additional Restrictions on Exports to Wagner Group",
-          "body_sentiment_score": -0.2006557724278222,
-          "title_sentiment_score": -0.5752426087856293,
-          "link": "https://www.bis.gov/press-release/commerce-imposes-additional-restrictions-exports-wagner-group"
+          "similarity": 0.647042,
+          "date": "2021-10-07",
+          "category": "EIA",
+          "doc_type": "TODAY_IN_ENERGY",
+          "title": "EIA projects nearly 50% increase in world energy use by 2050, led by growth in renewables",
+          "body_sentiment_score": 0.6402530808255035,
+          "title_sentiment_score": 0.8866872880607843,
+          "link": "https://www.eia.gov/todayinenergy/detail.php?id=49876"
         },
         {
           "rank": 3,
-          "similarity": 0.500333,
-          "date": "2024-10-30",
-          "category": "BIS",
-          "doc_type": "press_release",
-          "title": "Commerce Targets Illicit Procurement Networks Supplying Russia’s Military and Restricts Chemical Precursors Enabling Russia’s Use of Chemical Weapons Against Ukraine",
-          "body_sentiment_score": 0.0861054562635964,
-          "title_sentiment_score": -0.1525682844221592,
-          "link": "https://www.bis.gov/press-release/commerce-targets-illicit-procurement-networks-supplying-russias-military-restricts-chemical-precursors"
+          "similarity": 0.644754,
+          "date": "2025-09-17",
+          "category": "EIA",
+          "doc_type": "TODAY_IN_ENERGY",
+          "title": "Summer diesel margins tighten with European supply shift",
+          "body_sentiment_score": -0.5586729675938178,
+          "title_sentiment_score": -0.912182591855526,
+          "link": "https://www.eia.gov/todayinenergy/detail.php?id=66125"
         },
         {
           "rank": 4,
-          "similarity": 0.485887,
-          "date": "2024-06-12",
-          "category": "BIS",
-          "doc_type": "press_release",
-          "title": "Department of Commerce Announces Additional Export Restrictions to Counter Russian Aggression",
-          "body_sentiment_score": -0.1603708400212485,
-          "title_sentiment_score": -0.6444395780563354,
-          "link": "https://www.bis.gov/press-release/department-commerce-announces-additional-export-restrictions-counter-russian-aggression"
+          "similarity": 0.627473,
+          "date": "2024-11-21",
+          "category": "EIA",
+          "doc_type": "TODAY_IN_ENERGY",
+          "title": "U.S. propane inventories are well stocked heading into the winter heating season",
+          "body_sentiment_score": -0.1065165558875086,
+          "title_sentiment_score": 0.9079573657363652,
+          "link": "https://www.eia.gov/todayinenergy/detail.php?id=63784"
         },
         {
           "rank": 5,
-          "similarity": 0.482931,
-          "date": "2024-09-24",
-          "category": "BIS",
-          "doc_type": "press_release",
-          "title": "G7 Announces Industry Guidance on Preventing Evasion of Export Controls and Sanctions Imposed on Russia",
-          "body_sentiment_score": 0.3478885758934507,
-          "title_sentiment_score": 0.2479061484336853,
-          "link": "https://www.bis.gov/press-release/g7-announces-industry-guidance-preventing-evasion-export-controls-sanctions-imposed-russia"
+          "similarity": 0.620228,
+          "date": "2021-10-06",
+          "category": "EIA",
+          "doc_type": "TODAY_IN_ENERGY",
+          "title": "EIA projects accelerating renewable consumption and steady liquid fuels growth to 2050",
+          "body_sentiment_score": 0.5382503196915207,
+          "title_sentiment_score": 0.9021784160286188,
+          "link": "https://www.eia.gov/todayinenergy/detail.php?id=49856"
         }
       ],
       "profile_feature_ranking": [
         {
-          "feature": "ret_5",
-          "centroid_value": 0.010929215077520666,
-          "z_diff": 0.2529612691866744,
-          "abs_z": 0.2529612691866744
-        },
-        {
-          "feature": "negative_count_ratio_5d",
-          "centroid_value": 0.15545587995853813,
-          "z_diff": -0.20070934630304266,
-          "abs_z": 0.20070934630304266
+          "feature": "body_emb_cluster_pc6",
+          "centroid_value": 0.189131579417848,
+          "z_diff": 0.1932893440462885,
+          "abs_z": 0.1932893440462885
         },
         {
           "feature": "vol_5",
-          "centroid_value": 0.011086523164544393,
-          "z_diff": -0.1795061929263026,
-          "abs_z": 0.1795061929263026
+          "centroid_value": 0.011166709266305527,
+          "z_diff": -0.16740046614121343,
+          "abs_z": 0.16740046614121343
         },
         {
-          "feature": "body_emb_cluster_pc3",
-          "centroid_value": -0.22851477341010526,
-          "z_diff": -0.1595158157603283,
-          "abs_z": 0.1595158157603283
-        },
-        {
-          "feature": "body_emb_cluster_pc1",
-          "centroid_value": -0.0333876985426817,
-          "z_diff": -0.14434747719525975,
-          "abs_z": 0.14434747719525975
-        },
-        {
-          "feature": "body_sentiment_decay_5d",
-          "centroid_value": 0.04173707852314949,
-          "z_diff": 0.13545460442180726,
-          "abs_z": 0.13545460442180726
-        },
-        {
-          "feature": "body_emb_cluster_pc9",
-          "centroid_value": 0.23874327893150005,
-          "z_diff": 0.13216597047082698,
-          "abs_z": 0.13216597047082698
-        },
-        {
-          "feature": "vol_shock",
-          "centroid_value": 0.8933864572154327,
-          "z_diff": -0.12091580836269593,
-          "abs_z": 0.12091580836269593
-        },
-        {
-          "feature": "fomc_sentiment_shock",
-          "centroid_value": 0.005248189694309337,
-          "z_diff": 0.10866154401410077,
-          "abs_z": 0.10866154401410077
+          "feature": "days_since_news",
+          "centroid_value": 0.19517543859649125,
+          "z_diff": -0.13198846029884997,
+          "abs_z": 0.13198846029884997
         },
         {
           "feature": "vix_z_score_5",
-          "centroid_value": -0.045447820022683445,
-          "z_diff": -0.098121702909895,
-          "abs_z": 0.098121702909895
+          "centroid_value": -0.06904129240421161,
+          "z_diff": -0.1280100243651366,
+          "abs_z": 0.1280100243651366
+        },
+        {
+          "feature": "fomc_recent_5d",
+          "centroid_value": 0.2189327485380117,
+          "z_diff": 0.12398458209077007,
+          "abs_z": 0.12398458209077007
+        },
+        {
+          "feature": "title_sentiment_3d_mean",
+          "centroid_value": 0.07032350087274014,
+          "z_diff": -0.11822020856793515,
+          "abs_z": 0.11822020856793515
+        },
+        {
+          "feature": "title_sentiment_5d_mean",
+          "centroid_value": 0.07587811052232507,
+          "z_diff": -0.11477357017748768,
+          "abs_z": 0.11477357017748768
+        },
+        {
+          "feature": "ret_5",
+          "centroid_value": 0.00651025411244655,
+          "z_diff": 0.10442238891559141,
+          "abs_z": 0.10442238891559141
+        },
+        {
+          "feature": "fomc_sentiment_shock",
+          "centroid_value": -0.002176094835786678,
+          "z_diff": -0.09660412137127489,
+          "abs_z": 0.09660412137127489
+        },
+        {
+          "feature": "body_emb_cluster_pc10",
+          "centroid_value": 0.3012377454082563,
+          "z_diff": -0.09336994268191379,
+          "abs_z": 0.09336994268191379
         }
       ]
     },
     {
       "label": "rise",
-      "count": 51,
+      "count": 70,
       "date_range": {
-        "first": "2024-07-19",
-        "last": "2026-04-20"
+        "first": "2024-06-28",
+        "last": "2026-03-05"
       },
-      "average_predicted_return_pct": 0.40386050355200587,
-      "min_predicted_return_pct": 0.30074119567871094,
-      "max_predicted_return_pct": 0.5934834480285645,
-      "average_actual_return_pct": -0.43208243050075823,
-      "direction_accuracy": 0.5294117647058824,
+      "average_predicted_return_pct": 0.4446620600564149,
+      "min_predicted_return_pct": 0.3018975257873757,
+      "max_predicted_return_pct": 0.596153736114502,
+      "average_actual_return_pct": 0.014115212938588926,
+      "direction_accuracy": 0.5428571428571428,
       "profile_feature_means": {
-        "ret_5": 0.0075,
-        "vol_5": 0.0128,
-        "vol_ratio_5": 1.8185,
-        "drawdown": -0.0588,
-        "vix_z_score_5": 0.1401,
-        "vol_shock": 0.9687,
-        "days_since_news": 2.3693,
-        "news_count_lag1": 0.5768,
-        "negative_count_ratio_5d": 0.2175,
-        "title_sentiment_3d_mean": 0.0188,
-        "title_sentiment_5d_mean": 0.0226,
-        "body_sentiment_decay_5d": -0.0391,
-        "fomc_recent_5d": 0.3119,
-        "fomc_sentiment_shock": -0.0017,
-        "body_emb_cluster_pc1": 0.1535,
-        "body_emb_cluster_pc2": 0.2775,
-        "body_emb_cluster_pc3": -0.0879,
-        "body_emb_cluster_pc4": -0.1596,
-        "body_emb_cluster_pc5": 0.1369,
-        "body_emb_cluster_pc6": -0.2697,
-        "body_emb_cluster_pc7": -0.156,
-        "body_emb_cluster_pc8": -0.1416,
-        "body_emb_cluster_pc9": 0.025,
-        "body_emb_cluster_pc10": -0.1171
+        "ret_5": 0.0079,
+        "vol_5": 0.0116,
+        "vol_ratio_5": 1.77,
+        "drawdown": -0.0643,
+        "vix_z_score_5": -0.0565,
+        "vol_shock": 0.9189,
+        "days_since_news": 0.2905,
+        "news_count_lag1": 1.2274,
+        "negative_count_ratio_5d": 0.3821,
+        "title_sentiment_3d_mean": 0.1343,
+        "title_sentiment_5d_mean": 0.0976,
+        "body_sentiment_decay_5d": -0.0275,
+        "fomc_recent_5d": 0.175,
+        "fomc_sentiment_shock": -0.0012,
+        "body_emb_cluster_pc1": -0.9063,
+        "body_emb_cluster_pc2": -0.4553,
+        "body_emb_cluster_pc3": -0.177,
+        "body_emb_cluster_pc4": -0.0393,
+        "body_emb_cluster_pc5": 0.5258,
+        "body_emb_cluster_pc6": -0.2304,
+        "body_emb_cluster_pc7": -0.6618,
+        "body_emb_cluster_pc8": -0.1706,
+        "body_emb_cluster_pc9": 0.2795,
+        "body_emb_cluster_pc10": 0.5468
       },
       "representative_embedding_news": [
         {
           "rank": 1,
-          "similarity": 0.664466,
-          "date": "2018-08-01",
-          "category": "FOMC",
-          "doc_type": "statement",
-          "title": "Federal Reserve issues FOMC statement",
-          "body_sentiment_score": 0.3705634111710661,
-          "title_sentiment_score": -0.0491516161710023,
-          "link": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20180801a.htm"
+          "similarity": 0.666151,
+          "date": "2025-12-22",
+          "category": "EIA",
+          "doc_type": "TODAY_IN_ENERGY",
+          "title": "It’s been another banner year for Today in Energy!",
+          "body_sentiment_score": 0.3480365924994207,
+          "title_sentiment_score": 0.5226922184228897,
+          "link": "https://www.eia.gov/todayinenergy/detail.php?id=66924"
         },
         {
           "rank": 2,
-          "similarity": 0.657733,
-          "date": "2018-09-26",
-          "category": "FOMC",
-          "doc_type": "statement",
-          "title": "Federal Reserve issues FOMC statement",
-          "body_sentiment_score": 0.4199731890199246,
-          "title_sentiment_score": -0.0491516161710023,
-          "link": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20180926a.htm"
+          "similarity": 0.657628,
+          "date": "2021-10-06",
+          "category": "EIA",
+          "doc_type": "TODAY_IN_ENERGY",
+          "title": "EIA projects accelerating renewable consumption and steady liquid fuels growth to 2050",
+          "body_sentiment_score": 0.5382503196915207,
+          "title_sentiment_score": 0.9021784160286188,
+          "link": "https://www.eia.gov/todayinenergy/detail.php?id=49856"
         },
         {
           "rank": 3,
-          "similarity": 0.65762,
-          "date": "2018-11-08",
-          "category": "FOMC",
-          "doc_type": "statement",
-          "title": "Federal Reserve issues FOMC statement",
-          "body_sentiment_score": 0.3354999311640301,
-          "title_sentiment_score": -0.049151612445712,
-          "link": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20181108a.htm"
+          "similarity": 0.655287,
+          "date": "2021-01-13",
+          "category": "EIA",
+          "doc_type": "TODAY_IN_ENERGY",
+          "title": "EIA expects higher wholesale U.S. natural gas prices in 2021 and 2022",
+          "body_sentiment_score": -0.3426988732495716,
+          "title_sentiment_score": 0.8587300404906273,
+          "link": "https://www.eia.gov/todayinenergy/detail.php?id=46456"
         },
         {
           "rank": 4,
-          "similarity": 0.654151,
-          "date": "2017-04-05",
-          "category": "FOMC",
-          "doc_type": "minutes",
-          "title": "Minutes of the Federal Open Market Committee",
-          "body_sentiment_score": -0.4580605456380031,
-          "title_sentiment_score": -0.0241492707282304,
-          "link": "https://www.federalreserve.gov/monetarypolicy/fomcminutes20170315.htm"
+          "similarity": 0.644298,
+          "date": "2020-02-10",
+          "category": "EIA",
+          "doc_type": "TODAY_IN_ENERGY",
+          "title": "EIA projects total U.S. energy-related CO2 emissions to be relatively flat through 2050",
+          "body_sentiment_score": -0.3641752597813523,
+          "title_sentiment_score": 0.8320437856018543,
+          "link": "https://www.eia.gov/todayinenergy/detail.php?id=42775"
         },
         {
           "rank": 5,
-          "similarity": 0.653699,
-          "date": "2026-03-18",
-          "category": "FOMC",
-          "doc_type": "statement",
-          "title": "Federal Reserve issues FOMC statement",
-          "body_sentiment_score": -0.0213897106051444,
-          "title_sentiment_score": -0.049151612445712,
-          "link": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260318a.htm"
+          "similarity": 0.634376,
+          "date": "2024-11-21",
+          "category": "EIA",
+          "doc_type": "TODAY_IN_ENERGY",
+          "title": "U.S. propane inventories are well stocked heading into the winter heating season",
+          "body_sentiment_score": -0.1065165558875086,
+          "title_sentiment_score": 0.9079573657363652,
+          "link": "https://www.eia.gov/todayinenergy/detail.php?id=63784"
         }
       ],
       "profile_feature_ranking": [
         {
-          "feature": "body_emb_cluster_pc8",
-          "centroid_value": -0.14160404704167856,
-          "z_diff": 0.27091368785360836,
-          "abs_z": 0.27091368785360836
-        },
-        {
-          "feature": "body_sentiment_decay_5d",
-          "centroid_value": -0.03910179301955809,
-          "z_diff": -0.24705155735997167,
-          "abs_z": 0.24705155735997167
-        },
-        {
           "feature": "body_emb_cluster_pc6",
-          "centroid_value": -0.2697181821041085,
-          "z_diff": -0.21292335611537186,
-          "abs_z": 0.21292335611537186
+          "centroid_value": -0.23039318583765744,
+          "z_diff": -0.18426847726414108,
+          "abs_z": 0.18426847726414108
         },
         {
-          "feature": "drawdown",
-          "centroid_value": -0.05877249905571232,
-          "z_diff": 0.2063149864525385,
-          "abs_z": 0.2063149864525385
+          "feature": "body_emb_cluster_pc1",
+          "centroid_value": -0.9063081661945768,
+          "z_diff": -0.1809152837359584,
+          "abs_z": 0.1809152837359584
         },
         {
-          "feature": "body_emb_cluster_pc5",
-          "centroid_value": 0.1368697327369836,
-          "z_diff": 0.16452024419242292,
-          "abs_z": 0.16452024419242292
-        },
-        {
-          "feature": "vol_shock",
-          "centroid_value": 0.9687320522193,
-          "z_diff": 0.15354646346107445,
-          "abs_z": 0.15354646346107445
+          "feature": "negative_count_ratio_5d",
+          "centroid_value": 0.3820503074178455,
+          "z_diff": 0.16194177020838182,
+          "abs_z": 0.16194177020838182
         },
         {
           "feature": "ret_5",
-          "centroid_value": 0.007484844091850418,
-          "z_diff": 0.13718225952519508,
-          "abs_z": 0.13718225952519508
-        },
-        {
-          "feature": "vix_z_score_5",
-          "centroid_value": 0.14007927516752608,
-          "z_diff": 0.1369048913121389,
-          "abs_z": 0.1369048913121389
-        },
-        {
-          "feature": "body_emb_cluster_pc4",
-          "centroid_value": -0.15962868568616861,
-          "z_diff": -0.12227882733138178,
-          "abs_z": 0.12227882733138178
+          "centroid_value": 0.007932138826473338,
+          "z_diff": 0.1522175921799392,
+          "abs_z": 0.1522175921799392
         },
         {
           "feature": "body_emb_cluster_pc10",
-          "centroid_value": -0.11710846824075713,
-          "z_diff": -0.11346543759224247,
-          "abs_z": 0.11346543759224247
+          "centroid_value": 0.546793153962707,
+          "z_diff": 0.13916278612853594,
+          "abs_z": 0.13916278612853594
+        },
+        {
+          "feature": "body_emb_cluster_pc4",
+          "centroid_value": -0.03930887020991941,
+          "z_diff": -0.1211760339928501,
+          "abs_z": 0.1211760339928501
+        },
+        {
+          "feature": "days_since_news",
+          "centroid_value": 0.2904761904761905,
+          "z_diff": 0.11688619565075448,
+          "abs_z": 0.11688619565075448
+        },
+        {
+          "feature": "title_sentiment_3d_mean",
+          "centroid_value": 0.13432384108771006,
+          "z_diff": 0.11283130615893365,
+          "abs_z": 0.11283130615893365
+        },
+        {
+          "feature": "news_count_lag1",
+          "centroid_value": 1.2273809523809525,
+          "z_diff": -0.11228631316445141,
+          "abs_z": 0.11228631316445141
+        },
+        {
+          "feature": "vix_z_score_5",
+          "centroid_value": -0.05647618714665397,
+          "z_diff": -0.1120924901004111,
+          "abs_z": 0.1120924901004111
         }
       ]
     },
     {
       "label": "rise_strong",
-      "count": 45,
+      "count": 119,
       "date_range": {
-        "first": "2024-06-21",
-        "last": "2026-04-17"
+        "first": "2024-06-25",
+        "last": "2026-04-21"
       },
-      "average_predicted_return_pct": 1.0045682059393994,
-      "min_predicted_return_pct": 0.6021022796630859,
-      "max_predicted_return_pct": 2.0756840705871804,
-      "average_actual_return_pct": 0.9131266490124513,
-      "direction_accuracy": 0.6444444444444445,
+      "average_predicted_return_pct": 1.06789504780489,
+      "min_predicted_return_pct": 0.606846809387207,
+      "max_predicted_return_pct": 2.9108524322509766,
+      "average_actual_return_pct": 0.5607765326828748,
+      "direction_accuracy": 0.6050420168067226,
       "profile_feature_means": {
-        "ret_5": -0.0038,
-        "vol_5": 0.0176,
-        "vol_ratio_5": 1.9601,
-        "drawdown": -0.0797,
-        "vix_z_score_5": -0.067,
-        "vol_shock": 1.0416,
-        "days_since_news": 2.5519,
-        "news_count_lag1": 0.6852,
-        "negative_count_ratio_5d": 0.2993,
-        "title_sentiment_3d_mean": 0.0023,
-        "title_sentiment_5d_mean": 0.0125,
-        "body_sentiment_decay_5d": -0.1213,
-        "fomc_recent_5d": 0.3652,
-        "fomc_sentiment_shock": -0.0204,
-        "body_emb_cluster_pc1": 0.1541,
-        "body_emb_cluster_pc2": 0.2572,
-        "body_emb_cluster_pc3": 0.2295,
-        "body_emb_cluster_pc4": 0.2438,
-        "body_emb_cluster_pc5": -0.1766,
-        "body_emb_cluster_pc6": -0.013,
-        "body_emb_cluster_pc7": -0.1998,
-        "body_emb_cluster_pc8": 0.0805,
-        "body_emb_cluster_pc9": 0.2236,
-        "body_emb_cluster_pc10": -0.0537
+        "ret_5": 0.0042,
+        "vol_5": 0.0141,
+        "vol_ratio_5": 1.8247,
+        "drawdown": -0.072,
+        "vix_z_score_5": 0.0735,
+        "vol_shock": 0.9629,
+        "days_since_news": 0.2556,
+        "news_count_lag1": 1.2857,
+        "negative_count_ratio_5d": 0.3222,
+        "title_sentiment_3d_mean": 0.1696,
+        "title_sentiment_5d_mean": 0.1538,
+        "body_sentiment_decay_5d": -0.0,
+        "fomc_recent_5d": 0.2241,
+        "fomc_sentiment_shock": 0.0017,
+        "body_emb_cluster_pc1": -0.5927,
+        "body_emb_cluster_pc2": -0.4159,
+        "body_emb_cluster_pc3": -0.1248,
+        "body_emb_cluster_pc4": 0.0621,
+        "body_emb_cluster_pc5": 0.5364,
+        "body_emb_cluster_pc6": -0.0378,
+        "body_emb_cluster_pc7": -0.3883,
+        "body_emb_cluster_pc8": -0.2661,
+        "body_emb_cluster_pc9": 0.1456,
+        "body_emb_cluster_pc10": 0.492
       },
       "representative_embedding_news": [
         {
           "rank": 1,
-          "similarity": 0.865435,
-          "date": "2018-01-03",
-          "category": "FOMC",
-          "doc_type": "minutes",
-          "title": "Minutes of the Federal Open Market Committee",
-          "body_sentiment_score": 0.8665689182504216,
-          "title_sentiment_score": -0.024149278178811,
-          "link": "https://www.federalreserve.gov/monetarypolicy/fomcminutes20171213.htm"
+          "similarity": 0.648737,
+          "date": "2024-11-20",
+          "category": "EIA",
+          "doc_type": "TODAY_IN_ENERGY",
+          "title": "What’s driving decreasing gasoline consumption in China?",
+          "body_sentiment_score": -0.3499184928456439,
+          "title_sentiment_score": -0.7603583000600338,
+          "link": "https://www.eia.gov/todayinenergy/detail.php?id=63764"
         },
         {
           "rank": 2,
-          "similarity": 0.840558,
-          "date": "2017-04-05",
-          "category": "FOMC",
-          "doc_type": "minutes",
-          "title": "Minutes of the Federal Open Market Committee",
-          "body_sentiment_score": -0.4580605456380031,
-          "title_sentiment_score": -0.0241492707282304,
-          "link": "https://www.federalreserve.gov/monetarypolicy/fomcminutes20170315.htm"
+          "similarity": 0.642674,
+          "date": "2021-10-06",
+          "category": "EIA",
+          "doc_type": "TODAY_IN_ENERGY",
+          "title": "EIA projects accelerating renewable consumption and steady liquid fuels growth to 2050",
+          "body_sentiment_score": 0.5382503196915207,
+          "title_sentiment_score": 0.9021784160286188,
+          "link": "https://www.eia.gov/todayinenergy/detail.php?id=49856"
         },
         {
           "rank": 3,
-          "similarity": 0.826947,
-          "date": "2017-05-24",
-          "category": "FOMC",
-          "doc_type": "minutes",
-          "title": "Minutes of the Federal Open Market Committee",
-          "body_sentiment_score": -0.6103485226631165,
-          "title_sentiment_score": -0.024149278178811,
-          "link": "https://www.federalreserve.gov/monetarypolicy/fomcminutes20170503.htm"
+          "similarity": 0.628724,
+          "date": "2024-11-21",
+          "category": "EIA",
+          "doc_type": "TODAY_IN_ENERGY",
+          "title": "U.S. propane inventories are well stocked heading into the winter heating season",
+          "body_sentiment_score": -0.1065165558875086,
+          "title_sentiment_score": 0.9079573657363652,
+          "link": "https://www.eia.gov/todayinenergy/detail.php?id=63784"
         },
         {
           "rank": 4,
-          "similarity": 0.818743,
-          "date": "2020-11-25",
-          "category": "FOMC",
-          "doc_type": "minutes",
-          "title": "Minutes of the Federal Open Market Committee",
-          "body_sentiment_score": 0.8431667660339099,
-          "title_sentiment_score": -0.0241492707282304,
-          "link": "https://www.federalreserve.gov/monetarypolicy/fomcminutes20201105.htm"
+          "similarity": 0.621821,
+          "date": "2021-10-07",
+          "category": "EIA",
+          "doc_type": "TODAY_IN_ENERGY",
+          "title": "EIA projects nearly 50% increase in world energy use by 2050, led by growth in renewables",
+          "body_sentiment_score": 0.6402530808255035,
+          "title_sentiment_score": 0.8866872880607843,
+          "link": "https://www.eia.gov/todayinenergy/detail.php?id=49876"
         },
         {
           "rank": 5,
-          "similarity": 0.815691,
-          "date": "2018-07-05",
-          "category": "FOMC",
-          "doc_type": "minutes",
-          "title": "Minutes of the Federal Open Market Committee",
-          "body_sentiment_score": 0.9125159932300448,
-          "title_sentiment_score": -0.024149278178811,
-          "link": "https://www.federalreserve.gov/monetarypolicy/fomcminutes20180613.htm"
+          "similarity": 0.609293,
+          "date": "2020-02-19",
+          "category": "EIA",
+          "doc_type": "TODAY_IN_ENERGY",
+          "title": "EIA expects natural gas production and exports to continue increasing in most scenarios",
+          "body_sentiment_score": 0.2657646356252381,
+          "title_sentiment_score": 0.9318082323297858,
+          "link": "https://www.eia.gov/todayinenergy/detail.php?id=42875"
         }
       ],
       "profile_feature_ranking": [
         {
           "feature": "vol_5",
-          "centroid_value": 0.017591928571434344,
-          "z_diff": 0.8026224758752274,
-          "abs_z": 0.8026224758752274
+          "centroid_value": 0.01409937791416983,
+          "z_diff": 0.2753480339156074,
+          "abs_z": 0.2753480339156074
+        },
+        {
+          "feature": "title_sentiment_3d_mean",
+          "centroid_value": 0.16959439753484135,
+          "z_diff": 0.24016368384624875,
+          "abs_z": 0.24016368384624875
+        },
+        {
+          "feature": "title_sentiment_5d_mean",
+          "centroid_value": 0.15384855072369735,
+          "z_diff": 0.21458582533986503,
+          "abs_z": 0.21458582533986503
+        },
+        {
+          "feature": "body_emb_cluster_pc7",
+          "centroid_value": -0.3883360438256277,
+          "z_diff": 0.20299079854222318,
+          "abs_z": 0.20299079854222318
         },
         {
           "feature": "body_sentiment_decay_5d",
-          "centroid_value": -0.12131946144630112,
-          "z_diff": -0.6360817872530979,
-          "abs_z": 0.6360817872530979
+          "centroid_value": -3.430710727857916e-05,
+          "z_diff": 0.1802330431528471,
+          "abs_z": 0.1802330431528471
         },
         {
-          "feature": "body_emb_cluster_pc8",
-          "centroid_value": 0.0804935182332191,
-          "z_diff": 0.5034752883670914,
-          "abs_z": 0.5034752883670914
+          "feature": "body_emb_cluster_pc1",
+          "centroid_value": -0.5926561183633581,
+          "z_diff": 0.15987544682406019,
+          "abs_z": 0.15987544682406019
         },
         {
-          "feature": "fomc_sentiment_shock",
-          "centroid_value": -0.020408214078938853,
-          "z_diff": -0.4730693636732939,
-          "abs_z": 0.4730693636732939
-        },
-        {
-          "feature": "vol_shock",
-          "centroid_value": 1.0416446442360823,
-          "z_diff": 0.41914600711666056,
-          "abs_z": 0.41914600711666056
+          "feature": "fomc_recent_5d",
+          "centroid_value": 0.22408963585434177,
+          "z_diff": 0.14399429368286795,
+          "abs_z": 0.14399429368286795
         },
         {
           "feature": "negative_count_ratio_5d",
-          "centroid_value": 0.2992871838861686,
-          "z_diff": 0.35935403118988885,
-          "abs_z": 0.35935403118988885
+          "centroid_value": 0.322249146293219,
+          "z_diff": -0.1424308693465755,
+          "abs_z": 0.1424308693465755
         },
         {
-          "feature": "body_emb_cluster_pc3",
-          "centroid_value": 0.22953736989044,
-          "z_diff": 0.3419212984284231,
-          "abs_z": 0.3419212984284231
+          "feature": "vol_shock",
+          "centroid_value": 0.9628691635667779,
+          "z_diff": 0.1321898954378392,
+          "abs_z": 0.1321898954378392
         },
         {
-          "feature": "body_emb_cluster_pc4",
-          "centroid_value": 0.24376746377334757,
-          "z_diff": 0.30764841311637153,
-          "abs_z": 0.30764841311637153
-        },
-        {
-          "feature": "drawdown",
-          "centroid_value": -0.07971423169988866,
-          "z_diff": -0.29889388899698816,
-          "abs_z": 0.29889388899698816
-        },
-        {
-          "feature": "ret_5",
-          "centroid_value": -0.003826232449726008,
-          "z_diff": -0.2430280156272864,
-          "abs_z": 0.2430280156272864
+          "feature": "body_emb_cluster_pc8",
+          "centroid_value": -0.266132949750312,
+          "z_diff": -0.11533879694223598,
+          "abs_z": 0.11533879694223598
         }
       ]
     }
