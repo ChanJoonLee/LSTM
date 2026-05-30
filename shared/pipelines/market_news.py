@@ -20,7 +20,11 @@ import pandas as pd
 
 from shared.common.utils import write_json
 from shared.config.schema import MarketNewsTrainingConfig
-from shared.market.data import build_market_feature_frame, download_market_data
+from shared.market.data import (
+    build_market_feature_frame,
+    download_market_data,
+    supplementary_ticker_feature_columns,
+)
 from shared.news.features import build_daily_news_feature_table, load_news_source_table
 from shared.news.merge import merge_news_features_into_market_frame
 from shared.cluster import (
@@ -39,6 +43,7 @@ from shared.cluster import (
 from shared.training.xgboost_pipeline import (
     build_comparison_artifacts,
     run_aligned_horizon_comparison_suite,
+    run_mean_return_baseline,
     run_training_experiment,
     seed_everything,
 )
@@ -52,33 +57,18 @@ __all__ = [
     "merge_news_features_into_market_frame",
     "run_market_news_training_pipeline",
     "run_aligned_horizon_comparison_suite",
+    "run_mean_return_baseline",
     "run_training_experiment",
     "seed_everything",
 ]
 
+def _write_dataframe_csv(df: pd.DataFrame, output_path) -> None:
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(output_path, index=False, encoding="utf-8-sig")
 
-REGRESSION_STYLE_MARKET_FEATURE_COLUMNS = [
-    "ret_3",
-    "ret_5",
-    "ret_accel",
-    "price_to_ma_5",
-    "slope_5",
-    "bb_pos_5",
-    "bb_width_5",
-    "macd_hist",
-    "rsi_14",
-    "vol_5",
-    "vol_shock",
-    "vix_z_score_5",
-    "drawdown",
-    "vol_ratio_5",
-    "rel_strength_5",
-    "uup_ret_5",
-    "tlt_shock_5",
-    "hyg_ret_5",
-    "target_spy_rel_ret_5",
-    "target_tlt_rel_ret_5",
-]
+
+def _dedupe_feature_columns(columns: list[str]) -> list[str]:
+    return list(dict.fromkeys(columns))
 
 
 def _require_feature_columns(
@@ -94,7 +84,7 @@ def _require_feature_columns(
         raise ValueError(
             f"{source_name} is missing required regression-style feature columns: {missing_columns}"
         )
-    return candidate_columns.copy()
+    return _dedupe_feature_columns(candidate_columns)
 
 
 def _resolve_aligned_comparison_start_date(
@@ -153,10 +143,9 @@ def run_market_news_training_pipeline(
     # 1) 크롤러 산출물 로드 후, 문서 단위 뉴스를 거래일 기준 숫자 피처로 압축한다.
     news_source_df = load_news_source_table(config.news_input_path)
     daily_news_features = build_daily_news_feature_table(news_source_df)
-    daily_news_features.to_csv(
+    _write_dataframe_csv(
+        daily_news_features,
         config.daily_news_features_output_path,
-        index=False,
-        encoding="utf-8-sig",
     )
 
     # 2) 가격/거시 자산 시계열로부터 공통 시장 피처 프레임을 만든다.
@@ -164,11 +153,23 @@ def run_market_news_training_pipeline(
     market_feature_df, _market_feature_columns = build_market_feature_frame(
         raw_market_df,
         config.target_ticker,
+        supplementary_tickers=config.macro_tickers,
     )
-    regression_market_feature_columns = _require_feature_columns(
+    configured_market_feature_columns = _require_feature_columns(
         market_feature_df,
-        REGRESSION_STYLE_MARKET_FEATURE_COLUMNS,
+        list(config.market_feature_columns),
         "market feature frame",
+    )
+    supplementary_market_feature_columns = _require_feature_columns(
+        market_feature_df,
+        supplementary_ticker_feature_columns(
+            config.macro_tickers,
+            config.supplementary_ticker_feature_suffixes,
+        ),
+        "supplementary market feature frame",
+    )
+    model_market_feature_columns = _dedupe_feature_columns(
+        configured_market_feature_columns + supplementary_market_feature_columns
     )
 
     # 3) team regression script와 같은 고정 horizon/고정 피처로 baseline 실험을 수행한다.
@@ -176,14 +177,14 @@ def run_market_news_training_pipeline(
         market_only_result = run_training_experiment(
             experiment_name="market_only",
             feature_df=market_feature_df,
-            candidate_feature_columns=regression_market_feature_columns,
+            candidate_feature_columns=model_market_feature_columns,
             training_frame_output_path=config.market_only_training_frame_output_path,
             predictions_output_path=config.market_only_predictions_output_path,
             model_output_path=config.market_only_model_output_path,
             metadata_output_path=config.market_only_metadata_output_path,
             config=config,
             forced_horizon=config.regression_style_fixed_horizon,
-            forced_selected_features=regression_market_feature_columns,
+            forced_selected_features=model_market_feature_columns,
         )
 
     # 4) team regression script 방식으로 뉴스 피처를 병합하고, 같은 horizon/피처 구조로 재학습한다.
@@ -204,14 +205,14 @@ def run_market_news_training_pipeline(
         for column in regression_news_feature_columns
         if not column.startswith("body_emb_")
     ]
-    fixed_market_news_feature_columns = (
-        regression_market_feature_columns + scalar_news_feature_columns
+    fixed_market_news_feature_columns = _dedupe_feature_columns(
+        model_market_feature_columns + scalar_news_feature_columns
     )
     market_news_result = run_training_experiment(
         experiment_name="market_news",
         feature_df=merged_feature_df,
-        candidate_feature_columns=(
-            regression_market_feature_columns + regression_news_feature_columns
+        candidate_feature_columns=_dedupe_feature_columns(
+            model_market_feature_columns + regression_news_feature_columns
         ),
         training_frame_output_path=config.merged_training_frame_output_path,
         predictions_output_path=config.predictions_output_path,
@@ -224,8 +225,14 @@ def run_market_news_training_pipeline(
         n_embedding_pca_components=config.training_embedding_pca_components,
     )
 
+    # 5a) 훈련 구간 평균 수익률을 상수로 예측하는 naive baseline — market_news_only 여부와 무관하게 항상 실행.
+    mean_return_baseline_result = run_mean_return_baseline(merged_feature_df, config)
+
     if config.market_news_only:
-        comparison_payload: dict = {"market_news": market_news_result}
+        comparison_payload: dict = {
+            "mean_return_baseline": mean_return_baseline_result,
+            "market_news": market_news_result,
+        }
     else:
         # 5) 뉴스 커버리지가 실제로 존재하는 기간 + 동일 horizon 기준의 공정 비교 결과를 만든다.
         aligned_comparison_start_date = _resolve_aligned_comparison_start_date(
@@ -235,21 +242,20 @@ def run_market_news_training_pipeline(
         aligned_comparison_df, aligned_comparison_payload = run_aligned_horizon_comparison_suite(
             market_only_feature_df=market_feature_df,
             market_news_feature_df=merged_feature_df,
-            market_only_feature_columns=regression_market_feature_columns,
-            market_news_feature_columns=(
-                regression_market_feature_columns + regression_news_feature_columns
+            market_only_feature_columns=model_market_feature_columns,
+            market_news_feature_columns=_dedupe_feature_columns(
+                model_market_feature_columns + regression_news_feature_columns
             ),
             aligned_start_date=aligned_comparison_start_date,
             config=config,
-            forced_market_only_features=regression_market_feature_columns,
+            forced_market_only_features=model_market_feature_columns,
             forced_market_news_features=fixed_market_news_feature_columns,
             market_news_embedding_columns_for_pca=embedding_news_feature_columns,
             market_news_n_embedding_pca_components=config.training_embedding_pca_components,
         )
-        aligned_comparison_df.to_csv(
+        _write_dataframe_csv(
+            aligned_comparison_df,
             config.aligned_comparison_output_path,
-            index=False,
-            encoding="utf-8-sig",
         )
         write_json(aligned_comparison_payload, config.aligned_comparison_metadata_output_path)
 
@@ -258,7 +264,8 @@ def run_market_news_training_pipeline(
             market_only_result,
             market_news_result,
         )
-        comparison_df.to_csv(config.comparison_output_path, index=False, encoding="utf-8-sig")
+        _write_dataframe_csv(comparison_df, config.comparison_output_path)
+        comparison_payload["mean_return_baseline"] = mean_return_baseline_result
         comparison_payload["aligned_shared_period_comparison"] = aligned_comparison_payload
 
     # 7) market_news 회귀 모델의 예측 수익률을 고정 구간으로 나누고 profile을 요약한다.

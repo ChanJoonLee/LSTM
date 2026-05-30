@@ -513,6 +513,7 @@ def _save_xgboost_model_with_estimator_type(
         else:
             raise TypeError("Could not determine estimator type before saving XGBoost model.")
 
+    output_path.parent.mkdir(parents=True, exist_ok=True)
     model.save_model(str(output_path))
 
 
@@ -746,12 +747,14 @@ def run_training_experiment(
 
     if persist_artifacts:
         if training_frame_output_path is not None:
+            training_frame_output_path.parent.mkdir(parents=True, exist_ok=True)
             supervised_frame.to_csv(
                 training_frame_output_path,
                 index=False,
                 encoding="utf-8-sig",
             )
         if predictions_output_path is not None:
+            predictions_output_path.parent.mkdir(parents=True, exist_ok=True)
             predictions.to_csv(predictions_output_path, index=False, encoding="utf-8-sig")
         if model_output_path is not None:
             _save_xgboost_model_with_estimator_type(final_model, model_output_path)
@@ -1063,3 +1066,95 @@ def run_aligned_horizon_comparison_suite(
         "summary": summary,
     }
     return comparison_df, payload
+
+
+def run_mean_return_baseline(
+    feature_df: pd.DataFrame,
+    config: MarketNewsTrainingConfig,
+) -> dict:
+    """
+    훈련 구간 평균 로그수익률을 테스트 전체에 상수로 예측하는 naive baseline.
+
+    "항상 역사적 평균만큼 오른다"고 예측하는 전략의 방향 정확도를 측정한다.
+    XGBoost 모델과 동일한 horizon·train_ratio로 분할해 직접 비교가 가능하다.
+    """
+    horizon = config.regression_style_fixed_horizon
+    supervised = build_supervised_frame(feature_df, [], horizon)
+
+    split_index = int(len(supervised) * config.train_ratio)
+    train_frame = supervised.iloc[:split_index].copy()
+    test_frame = supervised.iloc[split_index:].copy()
+
+    mean_train_logret = float(train_frame["target_logret"].mean())
+
+    predicted_logret = np.full(len(test_frame), mean_train_logret)
+    current_price = test_frame["target_price"].to_numpy()
+    future_price = test_frame["target_future_price"].to_numpy()
+    predicted_future_price = current_price * np.exp(predicted_logret / 100.0)
+
+    mae = float(mean_absolute_error(future_price, predicted_future_price))
+    rmse = float(np.sqrt(mean_squared_error(future_price, predicted_future_price)))
+    r2 = float(r2_score(future_price, predicted_future_price))
+    direction_accuracy = _compute_direction_accuracy(
+        predicted_future_price - current_price,
+        future_price - current_price,
+    )
+    mape = float(np.mean(np.abs((future_price - predicted_future_price) / future_price)) * 100)
+
+    baseline_future_price = current_price.copy()
+    baseline_rmse = float(np.sqrt(mean_squared_error(future_price, baseline_future_price)))
+    baseline_mae = float(mean_absolute_error(future_price, baseline_future_price))
+    baseline_mape = float(
+        np.mean(np.abs((future_price - baseline_future_price) / future_price)) * 100
+    )
+
+    actual_logret = test_frame["target_logret"].to_numpy()
+    actual_downside_count = int((actual_logret < 0).sum())
+    actual_upside_count = int((actual_logret >= 0).sum())
+    predicted_down_count = int((predicted_logret < 0).sum())
+    predicted_up_count = int((predicted_logret >= 0).sum())
+    predicted_up_precision: float | None = (
+        direction_accuracy if predicted_up_count > 0 else None
+    )
+
+    metrics = {
+        "mae": mae,
+        "rmse": rmse,
+        "r2_score": r2,
+        "direction_accuracy": direction_accuracy,
+        "mape": mape,
+        "actual_downside_count": actual_downside_count,
+        "actual_upside_count": actual_upside_count,
+        "predicted_down_count": predicted_down_count,
+        "predicted_down_rate": float(predicted_down_count / len(test_frame)),
+        "predicted_down_precision": None,
+        "predicted_up_count": predicted_up_count,
+        "predicted_up_rate": float(predicted_up_count / len(test_frame)),
+        "predicted_up_precision": predicted_up_precision,
+        "mean_train_logret": mean_train_logret,
+        "baseline_mae": baseline_mae,
+        "baseline_rmse": baseline_rmse,
+        "baseline_mape": baseline_mape,
+        "high_conf_threshold": None,
+        "high_conf_long_accuracy": None,
+        "high_conf_short_accuracy": None,
+        "high_conf_long_count": None,
+        "high_conf_short_count": None,
+    }
+
+    return {
+        "experiment_name": "mean_return_baseline",
+        "best_horizon": int(horizon),
+        "best_horizon_direction_score": None,
+        "selected_feature_count": 0,
+        "selected_features": [],
+        "feature_frame_start_date": _serialize_timestamp(supervised["Date"].iloc[0]),
+        "feature_frame_end_date": _serialize_timestamp(supervised["Date"].iloc[-1]),
+        "train_rows": int(len(train_frame)),
+        "test_rows": int(len(test_frame)),
+        "train_start_date": _serialize_timestamp(train_frame["Date"].iloc[0]),
+        "train_end_date": _serialize_timestamp(train_frame["Date"].iloc[-1]),
+        "test_start_date": _serialize_timestamp(test_frame["Date"].iloc[0]),
+        "test_end_date": _serialize_timestamp(test_frame["Date"].iloc[-1]),
+        "metrics": metrics,
+    }

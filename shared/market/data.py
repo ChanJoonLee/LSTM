@@ -1,12 +1,17 @@
 from __future__ import annotations
 
-from typing import Callable
+from typing import Callable, Iterable
 
 import numpy as np
 import pandas as pd
 import yfinance as yf
 
 from shared.config.schema import MarketNewsTrainingConfig
+from shared.config.ticker_presets import (
+    DEFAULT_SUPPLEMENTARY_TICKER_FEATURE_SUFFIXES,
+    FIXED_MACRO_TICKERS,
+    ticker_slug,
+)
 
 
 FeatureBuilder = Callable[[pd.DataFrame], list[str]]
@@ -24,16 +29,51 @@ def _get_series(data: pd.DataFrame, field: str, ticker: str) -> pd.Series:
     return series
 
 
+_FIXED_MACRO_TICKER_KEYS = {ticker.upper() for ticker in FIXED_MACRO_TICKERS}
+
+
+def _is_fixed_macro_ticker(ticker: str) -> bool:
+    return ticker.upper() in _FIXED_MACRO_TICKER_KEYS
+
+
+def _ticker_feature_prefix(ticker: str) -> str:
+    return ticker_slug(ticker)
+
+
+def supplementary_ticker_feature_columns(
+    tickers: Iterable[str],
+    suffixes: Iterable[str] = DEFAULT_SUPPLEMENTARY_TICKER_FEATURE_SUFFIXES,
+) -> list[str]:
+    """
+    Return feature columns generated for non-fixed macro tickers.
+
+    Fixed macro tickers already have hand-curated regression features, so this
+    helper only lists the supplemental feature block for additional tickers.
+    """
+    columns: list[str] = []
+    seen: set[str] = set()
+    for ticker in tickers:
+        if _is_fixed_macro_ticker(ticker):
+            continue
+        prefix = _ticker_feature_prefix(ticker)
+        if prefix in seen:
+            continue
+        seen.add(prefix)
+        columns.extend(f"{prefix}_{suffix}" for suffix in suffixes)
+    return columns
+
+
 def download_market_data(config: MarketNewsTrainingConfig) -> pd.DataFrame:
     """
     학습에 사용할 가격 데이터를 다운로드한다.
 
-    기존 `training/train_regression.py`의 입력 가정을 유지하기 위해
-    타깃 ETF 외에 거시 맥락용 자산도 함께 내려받는다.
+    SPY, ^VIX, TLT, HYG, UUP는 피처 계산에 하드코딩된 고정 매크로 티커라
+    config.macro_tickers 설정과 무관하게 항상 다운로드한다.
+    config.macro_tickers에 추가 티커(예: USO)를 넣으면 보충 피처로 활용된다.
     """
-    tickers = [config.target_ticker, *config.macro_tickers]
+    tickers_set = {config.target_ticker, *FIXED_MACRO_TICKERS, *config.macro_tickers}
     raw = yf.download(
-        tickers=tickers,
+        tickers=sorted(tickers_set),
         start=config.start_date,
         end=config.end_date,
         auto_adjust=True,
@@ -319,9 +359,53 @@ def _add_relative_strength_features(df: pd.DataFrame) -> list[str]:
     ]
 
 
+def _add_supplementary_ticker_features(
+    df: pd.DataFrame,
+    raw: pd.DataFrame,
+    supplementary_tickers: tuple[str, ...],
+) -> list[str]:
+    """
+    고정 매크로 5개 외 추가 티커(예: USO, XOP)의 기본 피처를 자동 생성한다.
+
+    생성 피처: {t}_ret_5, {t}_ret_20, {t}_shock_5 (단기/중기 수익률 + 충격)
+    티커가 raw에 없으면 조용히 건너뛴다.
+    """
+    price_field = "Adj Close" if "Adj Close" in raw.columns.get_level_values(0) else "Close"
+    added: list[str] = []
+    seen: set[str] = set()
+
+    for ticker in supplementary_tickers:
+        if _is_fixed_macro_ticker(ticker):
+            continue
+        t = _ticker_feature_prefix(ticker)
+        if t in seen:
+            continue
+        seen.add(t)
+        try:
+            series = _get_series(raw, price_field, ticker)
+        except KeyError:
+            continue
+
+        col_price = f"{t}_price"
+        df[col_price] = series.values
+
+        ret5_col = f"{t}_ret_5"
+        ret20_col = f"{t}_ret_20"
+        shock_col = f"{t}_shock_5"
+
+        df[ret5_col] = series.pct_change(5).values
+        df[ret20_col] = series.pct_change(20).values
+        df[shock_col] = df[ret5_col] / (series.pct_change(20).rolling(20).std().values + 1e-9)
+
+        added.extend([ret5_col, ret20_col, shock_col])
+
+    return added
+
+
 def build_market_feature_frame(
     raw: pd.DataFrame,
     target_ticker: str,
+    supplementary_tickers: tuple[str, ...] = (),
 ) -> tuple[pd.DataFrame, list[str]]:
     """
     가격 원천 데이터를 모델 입력용 시장 피처 테이블로 변환한다.
@@ -342,5 +426,10 @@ def build_market_feature_frame(
     market_feature_columns: list[str] = []
     for builder in feature_builders:
         market_feature_columns.extend(builder(df))
+
+    if supplementary_tickers:
+        market_feature_columns.extend(
+            _add_supplementary_ticker_features(df, raw, supplementary_tickers)
+        )
 
     return df, market_feature_columns

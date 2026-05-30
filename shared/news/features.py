@@ -6,6 +6,16 @@ import numpy as np
 import pandas as pd
 
 
+CATEGORY_FEATURE_COLUMN_PREFIX = "category_"
+BASE_CATEGORY_FEATURE_COLUMNS: tuple[str, ...] = (
+    "category_BIS",
+    "category_EIA",
+    "category_FOMC",
+    "category_FRASER",
+    "category_UCSB",
+)
+
+
 def _parse_embedding_string(x: object) -> "list[float] | None":
     if x is None:
         return None
@@ -60,24 +70,6 @@ def _validate_embedding_lists(
     return int(lengths.iloc[0])
 
 
-CATEGORY_TO_PREFIX = {
-    "FOMC": "fomc",
-    "BIS": "bis",
-    "UCSB": "ucsb",
-    "UCSB Presidency Project": "ucsb",
-}
-
-DOC_TYPE_TO_FEATURE = {
-    "statement": "fomc_statement_count",
-    "minutes": "fomc_minutes_count",
-    "implementation_note": "fomc_implementation_note_count",
-    "press_release": "bis_press_release_count",
-    "presidential_actions": "ucsb_presidential_actions_count",
-    "briefings_statements": "ucsb_briefings_statements_count",
-    "executive_orders": "ucsb_executive_orders_count",
-}
-
-
 def _validate_required_columns(
     df: pd.DataFrame,
     required_columns: Iterable[str],
@@ -102,9 +94,56 @@ def _normalize_category(raw_value: object) -> str:
         return "FOMC"
     if upper_text == "BIS":
         return "BIS"
+    if upper_text == "EIA" or "ENERGY INFORMATION ADMINISTRATION" in upper_text:
+        return "EIA"
+    if upper_text == "FRASER" or "FEDERAL RESERVE ARCHIVAL SYSTEM" in upper_text:
+        return "FRASER"
     if "UCSB" in upper_text or "PRESIDENCY PROJECT" in upper_text:
         return "UCSB"
     return text
+
+
+def _category_feature_column(category: object) -> str:
+    category_text = _normalize_category(category)
+    normalized_chars: list[str] = []
+    previous_was_underscore = False
+
+    for char in category_text.upper():
+        if char.isalnum():
+            normalized_chars.append(char)
+            previous_was_underscore = False
+            continue
+
+        if previous_was_underscore:
+            continue
+
+        normalized_chars.append("_")
+        previous_was_underscore = True
+
+    suffix = "".join(normalized_chars).strip("_") or "UNKNOWN"
+    return f"{CATEGORY_FEATURE_COLUMN_PREFIX}{suffix}"
+
+
+def _ordered_category_feature_columns(categories: pd.Series) -> list[str]:
+    observed_columns = {
+        _category_feature_column(category)
+        for category in categories.dropna().unique()
+    }
+    ordered_base_columns = [
+        column for column in BASE_CATEGORY_FEATURE_COLUMNS if column in observed_columns
+    ]
+    extra_columns = sorted(observed_columns - set(BASE_CATEGORY_FEATURE_COLUMNS))
+    return ordered_base_columns + extra_columns
+
+
+def _ensure_category_feature_columns(prepared: pd.DataFrame) -> list[str]:
+    category_columns = _ordered_category_feature_columns(prepared["category"])
+    row_category_columns = prepared["category"].map(_category_feature_column)
+
+    for column in category_columns:
+        prepared[column] = row_category_columns.eq(column).astype(int)
+
+    return category_columns
 
 
 def _normalize_doc_type(raw_value: object) -> str:
@@ -232,12 +271,7 @@ def build_daily_news_feature_table(news_df: pd.DataFrame) -> pd.DataFrame:
     prepared["date"] = pd.to_datetime(prepared["date"], errors="coerce").dt.tz_localize(None)
     prepared = prepared.dropna(subset=["date"]).copy()
 
-    if "category_BIS" not in prepared.columns:
-        prepared["category_BIS"] = prepared["category"].eq("BIS").astype(int)
-    if "category_FOMC" not in prepared.columns:
-        prepared["category_FOMC"] = prepared["category"].eq("FOMC").astype(int)
-    if "category_UCSB" not in prepared.columns:
-        prepared["category_UCSB"] = prepared["category"].eq("UCSB").astype(int)
+    category_feature_columns = _ensure_category_feature_columns(prepared)
 
     probability_defaults = {
         "title_positive_prob": 0.0,
@@ -269,9 +303,7 @@ def build_daily_news_feature_table(news_df: pd.DataFrame) -> pd.DataFrame:
         prepared[col] = prepared[col].fillna(0.0)
 
     regression_daily_columns = [
-        "category_BIS",
-        "category_FOMC",
-        "category_UCSB",
+        *category_feature_columns,
         "title_positive_prob",
         "title_negative_prob",
         "title_neutral_prob",

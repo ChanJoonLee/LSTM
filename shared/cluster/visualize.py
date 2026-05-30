@@ -8,7 +8,7 @@ from __future__ import annotations
 - 파이프라인 통합 (설정된 뉴스 창 실제 학습 벡터 사용):
       save_cluster_visualization(vectors, labels, counts, centroids, scaler, ...)
 
-- 단독 실행 (daily_news_features 개별 행 사용):
+- 단독 실행 (저장된 training frame + predictions 사용):
       python shared/cluster/visualize.py
 """
 
@@ -33,13 +33,14 @@ from shared.cluster.model import (
     CLUSTER_BASE_FEATURE_COLS,
     CLUSTER_FEATURE_COLS,
     VOLATILITY_LABELS,
-    build_event_dataset_with_embedding_pca,
+    build_predicted_return_cluster_dataset,
     load_cluster_model,
     rank_cluster_features,
 )
 
 
 _LABEL_COLORS: dict[str, str] = {
+    "fall_strong": "#a50026",
     "fall": "#d73027",
     "neutral": "#9e9e9e",
     "rise": "#91cf60",
@@ -269,12 +270,13 @@ def save_cluster_visualization(
 
 
 def main() -> None:
-    """단독 실행 모드 — cluster_model.json 과 daily_news_features.csv 로 시각화를 재생성한다."""
+    """단독 실행 모드 - 저장된 QQQ profile cluster 산출물로 시각화를 재생성한다."""
     from shared.common.utils import training_data_path
 
-    model_path = training_data_path("comparison", "qqq_volatility_cluster_model.json")
-    news_path = training_data_path("market_news", "qqq_market_news_training_frame.csv")
-    out_path = training_data_path("comparison", "qqq_cluster_visualization.png")
+    model_path = training_data_path("qqq", "comparison", "volatility_cluster_model.json")
+    training_frame_path = training_data_path("qqq", "market_news", "training_frame.csv")
+    predictions_path = training_data_path("qqq", "market_news", "predictions.csv")
+    out_path = training_data_path("qqq", "comparison", "cluster_visualization.png")
 
     with open(model_path, encoding="utf-8") as f:
         model_dict = json.load(f)
@@ -282,29 +284,30 @@ def main() -> None:
     centroids, scaler = load_cluster_model(model_dict)
     feature_columns = model_dict.get("feature_columns", CLUSTER_FEATURE_COLS)
 
-    news_df = pd.read_csv(news_path, encoding="utf-8-sig")
+    training_frame = pd.read_csv(training_frame_path, encoding="utf-8-sig")
+    predictions = pd.read_csv(predictions_path, encoding="utf-8-sig")
     embedding_pca = model_dict.get("embedding_pca")
     if embedding_pca is not None:
-        X_raw, _labels, _dates, feature_columns, _embedding_pca = (
-            build_event_dataset_with_embedding_pca(
-                news_df,
-                news_df,
-                horizon=model_dict.get("horizon", 5),
+        X_raw, point_labels, _dates, feature_columns, _embedding_pca, _records = (
+            build_predicted_return_cluster_dataset(
+                training_frame,
+                training_frame,
+                predictions,
                 window_days=model_dict.get("window_days", 5),
                 base_feature_columns=model_dict.get(
                     "base_feature_columns",
                     CLUSTER_BASE_FEATURE_COLS,
                 ),
+                embedding_feature_columns=list(embedding_pca.get("source_columns", [])),
                 embedding_pca=embedding_pca,
             )
         )
-        point_labels = _assign_nearest_labels(scaler.transform(X_raw), centroids)
         counts = np.array(
             [sum(1 for l in point_labels if l == lbl) for lbl in VOLATILITY_LABELS],
             dtype=int,
         )
     else:
-        X_raw = news_df[feature_columns].dropna().to_numpy(dtype=float)
+        X_raw = training_frame[feature_columns].dropna().to_numpy(dtype=float)
         X_scaled = scaler.transform(X_raw)
 
         point_labels = _assign_nearest_labels(X_scaled, centroids)
