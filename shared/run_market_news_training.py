@@ -297,10 +297,19 @@ def main() -> None:
 
     result = run_market_news_training_pipeline(config)
     market_news = result["market_news"]
+    mean_baseline = result.get("mean_return_baseline", {})
 
     print("=== Shared XGBoost Training Completed ===")
     print(f"Target ticker: {config.target_ticker}")
     print(f"Ticker preset: {config.preset_name}")
+
+    if mean_baseline:
+        b_metrics = mean_baseline.get("metrics", {})
+        print("--- Mean return baseline (항상 평균 수익률 예측) ---")
+        print(f"  Direction accuracy : {b_metrics.get('direction_accuracy', 0) * 100:.2f}%")
+        print(f"  RMSE               : {b_metrics.get('rmse', 0):.4f}")
+        print(f"  Mean train logret  : {b_metrics.get('mean_train_logret', 0):+.4f}")
+        print(f"  Test rows          : {mean_baseline.get('test_rows', 0)}")
 
     if not config.market_news_only:
         market_only = result["market_only"]

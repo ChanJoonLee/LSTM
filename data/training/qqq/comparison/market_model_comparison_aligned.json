@@ -53,19 +53,19 @@
         "test_start_date": "2024-06-26",
         "test_end_date": "2026-04-24",
         "metrics": {
-          "mae": 11.245953033641692,
-          "rmse": 14.56129446410292,
-          "r2_score": 0.941212454591707,
-          "direction_accuracy": 0.5860566448801743,
-          "mape": 2.1373672470520315,
-          "baseline_mae": 11.566194156156387,
-          "baseline_rmse": 14.708945031073425,
-          "baseline_mape": 2.1916295997529733,
-          "high_conf_threshold": 0.46349748969078064,
-          "high_conf_long_accuracy": 0.6666666666666666,
-          "high_conf_long_count": 135,
-          "high_conf_short_accuracy": 1.0,
-          "high_conf_short_count": 3
+          "mae": 11.316956629891692,
+          "rmse": 14.674785903953099,
+          "r2_score": 0.9402924995066341,
+          "direction_accuracy": 0.5773420479302832,
+          "mape": 2.1509834841238593,
+          "baseline_mae": 11.566193291824108,
+          "baseline_rmse": 14.708943566898853,
+          "baseline_mape": 2.1916294186376946,
+          "high_conf_threshold": 0.4998844265937805,
+          "high_conf_long_accuracy": 0.6504065040650406,
+          "high_conf_long_count": 123,
+          "high_conf_short_accuracy": 0.4,
+          "high_conf_short_count": 15
         },
         "config": {
           "target_ticker": "QQQ",
@@ -79,6 +79,11 @@
             "XLK",
             "SOXX",
             "IWM"
+          ],
+          "supplementary_ticker_feature_suffixes": [
+            "ret_5",
+            "ret_20",
+            "shock_5"
           ],
           "market_feature_columns": [
             "ret_3",
@@ -109,7 +114,7 @@
           ],
           "start_date": "2017-01-12",
           "end_date": "2026-05-02",
-          "news_input_path": "C:\\Users\\admin\\data-ml\\data\\crawler\\features\\merged_finbert_with_embeddings.csv",
+          "news_input_path": "C:\\Users\\admin\\data-ml\\data\\crawler\\features\\qqq\\merged_finbert_with_embeddings.csv",
           "market_only_training_frame_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\qqq\\market_only\\training_frame.csv",
           "market_only_predictions_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\qqq\\market_only\\predictions.csv",
           "market_only_model_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\qqq\\market_only\\xgboost_model.json",
@@ -135,7 +140,6 @@
             15
           ],
           "top_feature_count": 30,
-          "embedding_top_feature_count": 4,
           "training_embedding_pca_components": 5,
           "optuna_trials": 200,
           "train_ratio": 0.8,
@@ -215,19 +219,19 @@
         "test_start_date": "2024-06-26",
         "test_end_date": "2026-04-24",
         "metrics": {
-          "mae": 11.307607012182483,
-          "rmse": 14.637137568467672,
-          "r2_score": 0.9405984650275261,
-          "direction_accuracy": 0.5838779956427015,
-          "mape": 2.149216397692838,
-          "baseline_mae": 11.566194156156387,
-          "baseline_rmse": 14.708945031073425,
-          "baseline_mape": 2.1916295997529733,
-          "high_conf_threshold": 0.4578036069869995,
-          "high_conf_long_accuracy": 0.6194029850746269,
-          "high_conf_long_count": 134,
-          "high_conf_short_accuracy": 0.25,
-          "high_conf_short_count": 4
+          "mae": 11.299360786804458,
+          "rmse": 14.622599645075493,
+          "r2_score": 0.9407164062974182,
+          "direction_accuracy": 0.5816993464052288,
+          "mape": 2.1481877437882204,
+          "baseline_mae": 11.566193291824108,
+          "baseline_rmse": 14.708943566898853,
+          "baseline_mape": 2.1916294186376946,
+          "high_conf_threshold": 0.45295828580856323,
+          "high_conf_long_accuracy": 0.6434108527131783,
+          "high_conf_long_count": 129,
+          "high_conf_short_accuracy": 0.6666666666666666,
+          "high_conf_short_count": 9
         },
         "embedding_pca": {
           "source_columns": [
@@ -563,6 +567,11 @@
             "SOXX",
             "IWM"
           ],
+          "supplementary_ticker_feature_suffixes": [
+            "ret_5",
+            "ret_20",
+            "shock_5"
+          ],
           "market_feature_columns": [
             "ret_3",
             "ret_5",
@@ -592,7 +601,7 @@
           ],
           "start_date": "2017-01-12",
           "end_date": "2026-05-02",
-          "news_input_path": "C:\\Users\\admin\\data-ml\\data\\crawler\\features\\merged_finbert_with_embeddings.csv",
+          "news_input_path": "C:\\Users\\admin\\data-ml\\data\\crawler\\features\\qqq\\merged_finbert_with_embeddings.csv",
           "market_only_training_frame_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\qqq\\market_only\\training_frame.csv",
           "market_only_predictions_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\qqq\\market_only\\predictions.csv",
           "market_only_model_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\qqq\\market_only\\xgboost_model.json",
@@ -618,7 +627,6 @@
             15
           ],
           "top_feature_count": 30,
-          "embedding_top_feature_count": 4,
           "training_embedding_pca_components": 5,
           "optuna_trials": 200,
           "train_ratio": 0.8,
@@ -632,11 +640,11 @@
         "feature_selection_mode": "fixed_plus_embedding_pca"
       },
       "delta_market_news_minus_market_only": {
-        "direction_accuracy": -0.002178649237472796,
-        "rmse": 0.07584310436475228,
-        "mae": 0.06165397854079124,
-        "r2_score": -0.0006139895641809057,
-        "mape": 0.011849150640806272
+        "direction_accuracy": 0.004357298474945592,
+        "rmse": -0.052186258877606306,
+        "mae": -0.01759584308723383,
+        "r2_score": 0.0004239067907840788,
+        "mape": -0.0027957403356388966
       },
       "comparison_scope": "aligned_shared_period",
       "shared_horizon": 5,
@@ -694,19 +702,19 @@
         "test_start_date": "2024-06-24",
         "test_end_date": "2026-04-22",
         "metrics": {
-          "mae": 13.22025190120585,
-          "rmse": 17.272377357932726,
-          "r2_score": 0.917283986829886,
-          "direction_accuracy": 0.5599128540305011,
-          "mape": 2.508433891995658,
-          "baseline_mae": 13.428062887752757,
-          "baseline_rmse": 17.316072214047892,
-          "baseline_mape": 2.5395062183966526,
-          "high_conf_threshold": 0.6117614507675171,
-          "high_conf_long_accuracy": 0.5925925925925926,
-          "high_conf_long_count": 135,
-          "high_conf_short_accuracy": 0.6666666666666666,
-          "high_conf_short_count": 3
+          "mae": 13.252896975151575,
+          "rmse": 17.28749432949038,
+          "r2_score": 0.9171391384718208,
+          "direction_accuracy": 0.5490196078431373,
+          "mape": 2.5146616584036705,
+          "baseline_mae": 13.428063353162445,
+          "baseline_rmse": 17.316071682520075,
+          "baseline_mape": 2.5395062711463057,
+          "high_conf_threshold": 0.6594448089599609,
+          "high_conf_long_accuracy": 0.6287878787878788,
+          "high_conf_long_count": 132,
+          "high_conf_short_accuracy": 0.5,
+          "high_conf_short_count": 6
         },
         "config": {
           "target_ticker": "QQQ",
@@ -720,6 +728,11 @@
             "XLK",
             "SOXX",
             "IWM"
+          ],
+          "supplementary_ticker_feature_suffixes": [
+            "ret_5",
+            "ret_20",
+            "shock_5"
           ],
           "market_feature_columns": [
             "ret_3",
@@ -750,7 +763,7 @@
           ],
           "start_date": "2017-01-12",
           "end_date": "2026-05-02",
-          "news_input_path": "C:\\Users\\admin\\data-ml\\data\\crawler\\features\\merged_finbert_with_embeddings.csv",
+          "news_input_path": "C:\\Users\\admin\\data-ml\\data\\crawler\\features\\qqq\\merged_finbert_with_embeddings.csv",
           "market_only_training_frame_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\qqq\\market_only\\training_frame.csv",
           "market_only_predictions_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\qqq\\market_only\\predictions.csv",
           "market_only_model_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\qqq\\market_only\\xgboost_model.json",
@@ -776,7 +789,6 @@
             15
           ],
           "top_feature_count": 30,
-          "embedding_top_feature_count": 4,
           "training_embedding_pca_components": 5,
           "optuna_trials": 200,
           "train_ratio": 0.8,
@@ -856,19 +868,19 @@
         "test_start_date": "2024-06-24",
         "test_end_date": "2026-04-22",
         "metrics": {
-          "mae": 13.209600932448717,
-          "rmse": 17.26014813026057,
-          "r2_score": 0.9174010749220727,
-          "direction_accuracy": 0.55119825708061,
-          "mape": 2.5064655514309053,
-          "baseline_mae": 13.428062887752757,
-          "baseline_rmse": 17.316072214047892,
-          "baseline_mape": 2.5395062183966526,
-          "high_conf_threshold": 0.6072205305099487,
-          "high_conf_long_accuracy": 0.625,
-          "high_conf_long_count": 136,
-          "high_conf_short_accuracy": 0.5,
-          "high_conf_short_count": 2
+          "mae": 13.32666178777864,
+          "rmse": 17.418284550899397,
+          "r2_score": 0.9158806118300465,
+          "direction_accuracy": 0.5533769063180828,
+          "mape": 2.5292768179530403,
+          "baseline_mae": 13.428063353162445,
+          "baseline_rmse": 17.316071682520075,
+          "baseline_mape": 2.5395062711463057,
+          "high_conf_threshold": 0.6169677376747131,
+          "high_conf_long_accuracy": 0.6,
+          "high_conf_long_count": 135,
+          "high_conf_short_accuracy": 0.3333333333333333,
+          "high_conf_short_count": 3
         },
         "embedding_pca": {
           "source_columns": [
@@ -1204,6 +1216,11 @@
             "SOXX",
             "IWM"
           ],
+          "supplementary_ticker_feature_suffixes": [
+            "ret_5",
+            "ret_20",
+            "shock_5"
+          ],
           "market_feature_columns": [
             "ret_3",
             "ret_5",
@@ -1233,7 +1250,7 @@
           ],
           "start_date": "2017-01-12",
           "end_date": "2026-05-02",
-          "news_input_path": "C:\\Users\\admin\\data-ml\\data\\crawler\\features\\merged_finbert_with_embeddings.csv",
+          "news_input_path": "C:\\Users\\admin\\data-ml\\data\\crawler\\features\\qqq\\merged_finbert_with_embeddings.csv",
           "market_only_training_frame_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\qqq\\market_only\\training_frame.csv",
           "market_only_predictions_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\qqq\\market_only\\predictions.csv",
           "market_only_model_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\qqq\\market_only\\xgboost_model.json",
@@ -1259,7 +1276,6 @@
             15
           ],
           "top_feature_count": 30,
-          "embedding_top_feature_count": 4,
           "training_embedding_pca_components": 5,
           "optuna_trials": 200,
           "train_ratio": 0.8,
@@ -1273,11 +1289,11 @@
         "feature_selection_mode": "fixed_plus_embedding_pca"
       },
       "delta_market_news_minus_market_only": {
-        "direction_accuracy": -0.008714596949891074,
-        "rmse": -0.012229227672154508,
-        "mae": -0.010650968757133228,
-        "r2_score": 0.00011708809218669014,
-        "mape": -0.001968340564752591
+        "direction_accuracy": 0.004357298474945481,
+        "rmse": 0.13079022140901841,
+        "mae": 0.07376481262706491,
+        "r2_score": -0.0012585266417742824,
+        "mape": 0.01461515954936976
       },
       "comparison_scope": "aligned_shared_period",
       "shared_horizon": 7,
@@ -1335,19 +1351,19 @@
         "test_start_date": "2024-06-20",
         "test_end_date": "2026-04-17",
         "metrics": {
-          "mae": 15.567887457737253,
-          "rmse": 20.557456168932365,
-          "r2_score": 0.8828642065164936,
-          "direction_accuracy": 0.5698689956331878,
-          "mape": 2.9606429307209243,
-          "baseline_mae": 15.834145158659423,
-          "baseline_rmse": 20.548731307016226,
-          "baseline_mape": 2.9953151336198682,
-          "high_conf_threshold": 0.8722648620605469,
-          "high_conf_long_accuracy": 0.6058394160583942,
-          "high_conf_long_count": 137,
+          "mae": 15.61667166797027,
+          "rmse": 20.674207342719704,
+          "r2_score": 0.8815299424280737,
+          "direction_accuracy": 0.5589519650655022,
+          "mape": 2.9696540515922267,
+          "baseline_mae": 15.834144492336756,
+          "baseline_rmse": 20.54873164514858,
+          "baseline_mape": 2.9953150103725457,
+          "high_conf_threshold": 0.9023120999336243,
+          "high_conf_long_accuracy": 0.6165413533834586,
+          "high_conf_long_count": 133,
           "high_conf_short_accuracy": 0.0,
-          "high_conf_short_count": 1
+          "high_conf_short_count": 5
         },
         "config": {
           "target_ticker": "QQQ",
@@ -1361,6 +1377,11 @@
             "XLK",
             "SOXX",
             "IWM"
+          ],
+          "supplementary_ticker_feature_suffixes": [
+            "ret_5",
+            "ret_20",
+            "shock_5"
           ],
           "market_feature_columns": [
             "ret_3",
@@ -1391,7 +1412,7 @@
           ],
           "start_date": "2017-01-12",
           "end_date": "2026-05-02",
-          "news_input_path": "C:\\Users\\admin\\data-ml\\data\\crawler\\features\\merged_finbert_with_embeddings.csv",
+          "news_input_path": "C:\\Users\\admin\\data-ml\\data\\crawler\\features\\qqq\\merged_finbert_with_embeddings.csv",
           "market_only_training_frame_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\qqq\\market_only\\training_frame.csv",
           "market_only_predictions_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\qqq\\market_only\\predictions.csv",
           "market_only_model_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\qqq\\market_only\\xgboost_model.json",
@@ -1417,7 +1438,6 @@
             15
           ],
           "top_feature_count": 30,
-          "embedding_top_feature_count": 4,
           "training_embedding_pca_components": 5,
           "optuna_trials": 200,
           "train_ratio": 0.8,
@@ -1497,19 +1517,19 @@
         "test_start_date": "2024-06-20",
         "test_end_date": "2026-04-17",
         "metrics": {
-          "mae": 15.562046168877322,
-          "rmse": 20.677237999672265,
-          "r2_score": 0.8814952028784289,
-          "direction_accuracy": 0.5764192139737991,
-          "mape": 2.96039622763891,
-          "baseline_mae": 15.834145158659423,
-          "baseline_rmse": 20.548731307016226,
-          "baseline_mape": 2.9953151336198682,
-          "high_conf_threshold": 0.8864397406578064,
-          "high_conf_long_accuracy": 0.5895522388059702,
-          "high_conf_long_count": 134,
+          "mae": 15.658578596304649,
+          "rmse": 20.743129542388537,
+          "r2_score": 0.880738731704829,
+          "direction_accuracy": 0.5611353711790393,
+          "mape": 2.979159976298533,
+          "baseline_mae": 15.834144492336756,
+          "baseline_rmse": 20.54873164514858,
+          "baseline_mape": 2.9953150103725457,
+          "high_conf_threshold": 0.8789499998092651,
+          "high_conf_long_accuracy": 0.5939849624060151,
+          "high_conf_long_count": 133,
           "high_conf_short_accuracy": 0.0,
-          "high_conf_short_count": 4
+          "high_conf_short_count": 5
         },
         "embedding_pca": {
           "source_columns": [
@@ -1845,6 +1865,11 @@
             "SOXX",
             "IWM"
           ],
+          "supplementary_ticker_feature_suffixes": [
+            "ret_5",
+            "ret_20",
+            "shock_5"
+          ],
           "market_feature_columns": [
             "ret_3",
             "ret_5",
@@ -1874,7 +1899,7 @@
           ],
           "start_date": "2017-01-12",
           "end_date": "2026-05-02",
-          "news_input_path": "C:\\Users\\admin\\data-ml\\data\\crawler\\features\\merged_finbert_with_embeddings.csv",
+          "news_input_path": "C:\\Users\\admin\\data-ml\\data\\crawler\\features\\qqq\\merged_finbert_with_embeddings.csv",
           "market_only_training_frame_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\qqq\\market_only\\training_frame.csv",
           "market_only_predictions_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\qqq\\market_only\\predictions.csv",
           "market_only_model_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\qqq\\market_only\\xgboost_model.json",
@@ -1900,7 +1925,6 @@
             15
           ],
           "top_feature_count": 30,
-          "embedding_top_feature_count": 4,
           "training_embedding_pca_components": 5,
           "optuna_trials": 200,
           "train_ratio": 0.8,
@@ -1914,11 +1938,11 @@
         "feature_selection_mode": "fixed_plus_embedding_pca"
       },
       "delta_market_news_minus_market_only": {
-        "direction_accuracy": 0.0065502183406113135,
-        "rmse": 0.11978183073989968,
-        "mae": -0.005841288859931737,
-        "r2_score": -0.001369003638064692,
-        "mape": -0.0002467030820141325
+        "direction_accuracy": 0.0021834061135371785,
+        "rmse": 0.06892219966883317,
+        "mae": 0.041906928334379145,
+        "r2_score": -0.0007912107232447285,
+        "mape": 0.009505924706306068
       },
       "comparison_scope": "aligned_shared_period",
       "shared_horizon": 10,
@@ -1976,19 +2000,19 @@
         "test_start_date": "2024-06-13",
         "test_end_date": "2026-04-10",
         "metrics": {
-          "mae": 18.365883835730084,
-          "rmse": 25.08715716906109,
-          "r2_score": 0.8256668302453545,
-          "direction_accuracy": 0.6258205689277899,
-          "mape": 3.4870074643887747,
-          "baseline_mae": 19.0772680370239,
-          "baseline_rmse": 25.105545946421266,
-          "baseline_mape": 3.6007438111083916,
-          "high_conf_threshold": 1.2517081499099731,
-          "high_conf_long_accuracy": 0.5939849624060151,
-          "high_conf_long_count": 133,
+          "mae": 18.517255973055107,
+          "rmse": 25.384829833673024,
+          "r2_score": 0.8215051768577286,
+          "direction_accuracy": 0.6192560175054704,
+          "mape": 3.515858870866058,
+          "baseline_mae": 19.07726843769232,
+          "baseline_rmse": 25.105548015098385,
+          "baseline_mape": 3.6007438816031954,
+          "high_conf_threshold": 1.3060619831085205,
+          "high_conf_long_accuracy": 0.5538461538461539,
+          "high_conf_long_count": 130,
           "high_conf_short_accuracy": 0.0,
-          "high_conf_short_count": 4
+          "high_conf_short_count": 7
         },
         "config": {
           "target_ticker": "QQQ",
@@ -2002,6 +2026,11 @@
             "XLK",
             "SOXX",
             "IWM"
+          ],
+          "supplementary_ticker_feature_suffixes": [
+            "ret_5",
+            "ret_20",
+            "shock_5"
           ],
           "market_feature_columns": [
             "ret_3",
@@ -2032,7 +2061,7 @@
           ],
           "start_date": "2017-01-12",
           "end_date": "2026-05-02",
-          "news_input_path": "C:\\Users\\admin\\data-ml\\data\\crawler\\features\\merged_finbert_with_embeddings.csv",
+          "news_input_path": "C:\\Users\\admin\\data-ml\\data\\crawler\\features\\qqq\\merged_finbert_with_embeddings.csv",
           "market_only_training_frame_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\qqq\\market_only\\training_frame.csv",
           "market_only_predictions_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\qqq\\market_only\\predictions.csv",
           "market_only_model_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\qqq\\market_only\\xgboost_model.json",
@@ -2058,7 +2087,6 @@
             15
           ],
           "top_feature_count": 30,
-          "embedding_top_feature_count": 4,
           "training_embedding_pca_components": 5,
           "optuna_trials": 200,
           "train_ratio": 0.8,
@@ -2138,19 +2166,19 @@
         "test_start_date": "2024-06-13",
         "test_end_date": "2026-04-10",
         "metrics": {
-          "mae": 18.461275632397324,
-          "rmse": 25.273001345936418,
-          "r2_score": 0.82307436363547,
-          "direction_accuracy": 0.6148796498905909,
-          "mape": 3.5058431431075787,
-          "baseline_mae": 19.0772680370239,
-          "baseline_rmse": 25.105545946421266,
-          "baseline_mape": 3.6007438111083916,
-          "high_conf_threshold": 1.2951805591583252,
-          "high_conf_long_accuracy": 0.5648854961832062,
-          "high_conf_long_count": 131,
+          "mae": 18.576131290765552,
+          "rmse": 25.387745797931174,
+          "r2_score": 0.8214641669772544,
+          "direction_accuracy": 0.6105032822757112,
+          "mape": 3.5283129631521333,
+          "baseline_mae": 19.07726843769232,
+          "baseline_rmse": 25.105548015098385,
+          "baseline_mape": 3.6007438816031954,
+          "high_conf_threshold": 1.2900238037109375,
+          "high_conf_long_accuracy": 0.5538461538461539,
+          "high_conf_long_count": 130,
           "high_conf_short_accuracy": 0.0,
-          "high_conf_short_count": 6
+          "high_conf_short_count": 7
         },
         "embedding_pca": {
           "source_columns": [
@@ -2486,6 +2514,11 @@
             "SOXX",
             "IWM"
           ],
+          "supplementary_ticker_feature_suffixes": [
+            "ret_5",
+            "ret_20",
+            "shock_5"
+          ],
           "market_feature_columns": [
             "ret_3",
             "ret_5",
@@ -2515,7 +2548,7 @@
           ],
           "start_date": "2017-01-12",
           "end_date": "2026-05-02",
-          "news_input_path": "C:\\Users\\admin\\data-ml\\data\\crawler\\features\\merged_finbert_with_embeddings.csv",
+          "news_input_path": "C:\\Users\\admin\\data-ml\\data\\crawler\\features\\qqq\\merged_finbert_with_embeddings.csv",
           "market_only_training_frame_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\qqq\\market_only\\training_frame.csv",
           "market_only_predictions_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\qqq\\market_only\\predictions.csv",
           "market_only_model_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\qqq\\market_only\\xgboost_model.json",
@@ -2541,7 +2574,6 @@
             15
           ],
           "top_feature_count": 30,
-          "embedding_top_feature_count": 4,
           "training_embedding_pca_components": 5,
           "optuna_trials": 200,
           "train_ratio": 0.8,
@@ -2555,11 +2587,11 @@
         "feature_selection_mode": "fixed_plus_embedding_pca"
       },
       "delta_market_news_minus_market_only": {
-        "direction_accuracy": -0.01094091903719907,
-        "rmse": 0.18584417687532806,
-        "mae": 0.09539179666723996,
-        "r2_score": -0.0025924666098844362,
-        "mape": 0.018835678718803983
+        "direction_accuracy": -0.008752735229759279,
+        "rmse": 0.0029159642581504386,
+        "mae": 0.058875317710445074,
+        "r2_score": -4.100988047417431e-05,
+        "mape": 0.012454092286075191
       },
       "comparison_scope": "aligned_shared_period",
       "shared_horizon": 15,
@@ -2569,11 +2601,11 @@
   ],
   "skipped_horizons": [],
   "summary": {
-    "best_shared_horizon_by_direction_accuracy_delta": 10,
-    "direction_accuracy_delta": 0.0065502183406113135,
-    "rmse_delta": 0.11978183073989968,
-    "mae_delta": -0.005841288859931737,
-    "r2_score_delta": -0.001369003638064692,
-    "mape_delta": -0.0002467030820141325
+    "best_shared_horizon_by_direction_accuracy_delta": 5,
+    "direction_accuracy_delta": 0.004357298474945592,
+    "rmse_delta": -0.052186258877606306,
+    "mae_delta": -0.01759584308723383,
+    "r2_score_delta": 0.0004239067907840788,
+    "mape_delta": -0.0027957403356388966
   }
 }

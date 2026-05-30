@@ -43,6 +43,7 @@ from shared.cluster import (
 from shared.training.xgboost_pipeline import (
     build_comparison_artifacts,
     run_aligned_horizon_comparison_suite,
+    run_mean_return_baseline,
     run_training_experiment,
     seed_everything,
 )
@@ -56,6 +57,7 @@ __all__ = [
     "merge_news_features_into_market_frame",
     "run_market_news_training_pipeline",
     "run_aligned_horizon_comparison_suite",
+    "run_mean_return_baseline",
     "run_training_experiment",
     "seed_everything",
 ]
@@ -223,8 +225,14 @@ def run_market_news_training_pipeline(
         n_embedding_pca_components=config.training_embedding_pca_components,
     )
 
+    # 5a) 훈련 구간 평균 수익률을 상수로 예측하는 naive baseline — market_news_only 여부와 무관하게 항상 실행.
+    mean_return_baseline_result = run_mean_return_baseline(merged_feature_df, config)
+
     if config.market_news_only:
-        comparison_payload: dict = {"market_news": market_news_result}
+        comparison_payload: dict = {
+            "mean_return_baseline": mean_return_baseline_result,
+            "market_news": market_news_result,
+        }
     else:
         # 5) 뉴스 커버리지가 실제로 존재하는 기간 + 동일 horizon 기준의 공정 비교 결과를 만든다.
         aligned_comparison_start_date = _resolve_aligned_comparison_start_date(
@@ -257,6 +265,7 @@ def run_market_news_training_pipeline(
             market_news_result,
         )
         _write_dataframe_csv(comparison_df, config.comparison_output_path)
+        comparison_payload["mean_return_baseline"] = mean_return_baseline_result
         comparison_payload["aligned_shared_period_comparison"] = aligned_comparison_payload
 
     # 7) market_news 회귀 모델의 예측 수익률을 고정 구간으로 나누고 profile을 요약한다.

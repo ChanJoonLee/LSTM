@@ -48,19 +48,19 @@
   "test_start_date": "2024-06-26",
   "test_end_date": "2026-04-24",
   "metrics": {
-    "mae": 11.245953033641692,
-    "rmse": 14.56129446410292,
-    "r2_score": 0.941212454591707,
-    "direction_accuracy": 0.5860566448801743,
-    "mape": 2.1373672470520315,
-    "baseline_mae": 11.566194156156387,
-    "baseline_rmse": 14.708945031073425,
-    "baseline_mape": 2.1916295997529733,
-    "high_conf_threshold": 0.46349748969078064,
-    "high_conf_long_accuracy": 0.6666666666666666,
-    "high_conf_long_count": 135,
-    "high_conf_short_accuracy": 1.0,
-    "high_conf_short_count": 3
+    "mae": 11.316956629891692,
+    "rmse": 14.674785903953099,
+    "r2_score": 0.9402924995066341,
+    "direction_accuracy": 0.5773420479302832,
+    "mape": 2.1509834841238593,
+    "baseline_mae": 11.566193291824108,
+    "baseline_rmse": 14.708943566898853,
+    "baseline_mape": 2.1916294186376946,
+    "high_conf_threshold": 0.4998844265937805,
+    "high_conf_long_accuracy": 0.6504065040650406,
+    "high_conf_long_count": 123,
+    "high_conf_short_accuracy": 0.4,
+    "high_conf_short_count": 15
   },
   "config": {
     "target_ticker": "QQQ",
@@ -74,6 +74,11 @@
       "XLK",
       "SOXX",
       "IWM"
+    ],
+    "supplementary_ticker_feature_suffixes": [
+      "ret_5",
+      "ret_20",
+      "shock_5"
     ],
     "market_feature_columns": [
       "ret_3",
@@ -104,7 +109,7 @@
     ],
     "start_date": "2017-01-12",
     "end_date": "2026-05-02",
-    "news_input_path": "C:\\Users\\admin\\data-ml\\data\\crawler\\features\\merged_finbert_with_embeddings.csv",
+    "news_input_path": "C:\\Users\\admin\\data-ml\\data\\crawler\\features\\qqq\\merged_finbert_with_embeddings.csv",
     "market_only_training_frame_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\qqq\\market_only\\training_frame.csv",
     "market_only_predictions_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\qqq\\market_only\\predictions.csv",
     "market_only_model_output_path": "C:\\Users\\admin\\data-ml\\data\\training\\qqq\\market_only\\xgboost_model.json",
@@ -130,7 +135,6 @@
       15
     ],
     "top_feature_count": 30,
-    "embedding_top_feature_count": 4,
     "training_embedding_pca_components": 5,
     "optuna_trials": 200,
     "train_ratio": 0.8,
