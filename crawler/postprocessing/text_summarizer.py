@@ -25,8 +25,8 @@ if PROJECT_ROOT_STR not in sys.path:
 from crawler.support_legacy.data_paths import collected_csv_path, summarized_csv_path
 
 
-INPUT_CSV = collected_csv_path("ucsb_presidential_documents.csv")
-OUTPUT_CSV = summarized_csv_path("ucsb_presidential_documents_summarized.csv")
+INPUT_CSV = collected_csv_path("fraser_sample.csv")
+OUTPUT_CSV = summarized_csv_path("fraser_sample_summarized.csv")
 BODY_COL = "body"
 SUMMARY_COL = "body_summary"
 ORIGINAL_LENGTH_COL = "body_original_length"

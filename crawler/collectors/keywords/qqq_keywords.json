@@ -1,0 +1,78 @@
+{
+  "qqq_proxy": {
+    "weight": 0.3,
+    "keywords": [
+      "Nasdaq-100",
+      "Nasdaq 100",
+      "NDX",
+      "technology sector",
+      "large-cap technology",
+      "mega-cap technology"
+    ]
+  },
+  "industries": {
+    "weight": 0.6,
+    "keywords": [
+      "semiconductors",
+      "advanced semiconductors",
+      "microelectronics",
+      "artificial intelligence",
+      "advanced computing",
+      "high-performance computing",
+      "critical technologies",
+      "emerging technologies",
+      "data centers",
+      "cloud computing",
+      "supply chain"
+    ]
+  },
+  "policy_regulation": {
+    "weight": 1.0,
+    "keywords": [
+      "export controls",
+      "export restrictions",
+      "entity list",
+      "blacklist",
+      "sanctions",
+      "trade restrictions",
+      "investment restrictions",
+      "outbound investment",
+      "licensing requirement",
+      "licensing restrictions",
+      "industrial policy",
+      "subsidies",
+      "tax credits",
+      "national security",
+      "foreign adversary"
+    ]
+  },
+  "policy_actions": {
+    "weight": 0.7,
+    "keywords": [
+      "restrict",
+      "restriction",
+      "limit",
+      "limitation",
+      "prohibit",
+      "ban",
+      "block",
+      "control",
+      "regulate",
+      "tighten",
+      "strengthen",
+      "expand",
+      "ease",
+      "enhance",
+      "impose"
+    ]
+  },
+  "macro": {
+    "weight": 0.2,
+    "keywords": [
+      "economic growth",
+      "global economy",
+      "inflation",
+      "financial stability"
+    ]
+  }
+}
