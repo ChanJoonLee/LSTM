@@ -1,0 +1,60 @@
+{
+    "Monetary_Policy_and_Rates": {
+        "weight": 0.8,
+        "keywords": [
+            "interest rates",
+            "federal reserve",
+            "the fed",
+            "monetary policy",
+            "inflation",
+            "quantitative easing",
+            "quantitative tightening",
+            "yield curve",
+            "liquidity",
+            "discount window"
+      ]
+    },
+    "Banking_Regulation_and_Compliance": {
+        "weight": 1.0,
+        "keywords": [
+            "dodd-frank",
+            "banking regulation",
+            "capital requirements",
+            "cfpb",
+            "stress test",
+            "basel",
+            "financial stability",
+            "antitrust",
+            "lending standards",
+            "securities and exchange commission"
+        ]
+    },
+    "Macro_Economic_Risk_and_Credit": {
+        "weight": 0.75,
+        "keywords": [
+            "credit crunch",
+            "default risk",
+            "bank failure",
+            "bailout",
+            "national debt",
+            "debt ceiling",
+            "recession",
+            "foreclosure",
+            "systemic risk",
+            "bankruptcy"
+        ]
+    },
+    "Financial_Markets_and_Housing": {
+        "weight": 1.6,
+        "keywords": [
+            "mortgage rates",
+            "fannie mae",
+            "freddie mac",
+            "housing market",
+            "stock market",
+            "capital gains tax",
+            "wall street",
+            "investment banking"
+        ]
+    }
+}

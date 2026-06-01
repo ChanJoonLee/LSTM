@@ -23,8 +23,8 @@ if PROJECT_ROOT_STR not in sys.path:
 from crawler.support_legacy.data_paths import collected_csv_path
 
 BASE_URL = "https://www.presidency.ucsb.edu"
-DEFAULT_OUTPUT_CSV = collected_csv_path("ucsb_presidential_documents2.csv")
-DEFAULT_KEYWORD_CONFIG_PATH = Path(__file__).with_name("ucsb_keywords.json")
+DEFAULT_OUTPUT_CSV = collected_csv_path("xlf_presidential_documents.csv")
+DEFAULT_KEYWORD_CONFIG_PATH = Path(__file__).with_name("keywords") / "xlf_keywords.json"
 
 # 날짜 기반 수집의 기본 시작점.
 # 별도 인자를 주지 않으면 이 날짜 이후 문서만 모은다.
@@ -67,16 +67,6 @@ STOP_SECTION_TITLES = {
     "simple search of our archives",
 }
 
-GROUP_WEIGHTS = {
-    "policy_regulation": 1.0,
-    "policy_actions": 0.7,
-    "industries": 0.6,
-    "qqq_proxy": 0.3,
-    "macro": 0.2,
-}
-
-CORE_GROUPS = {"policy_regulation", "policy_actions", "industries", "qqq_proxy"}
-MIN_CORE_MATCHES = 1
 MIN_MATCH_SCORE = 1.5
 
 # UCSB 목록 페이지의 날짜 헤더 형식 예: "April 5, 2026"
@@ -117,8 +107,8 @@ def parse_start_date(raw_value: str) -> datetime.date:
 
 
 def normalize_keyword_dictionary(
-    keyword_dictionary: Mapping[str, Sequence[str]],
-) -> dict[str, list[str]]:
+    keyword_dictionary: Mapping[str, Any],
+) -> dict[str, dict[str, Any]]:
     """
     키워드 JSON을 내부에서 쓰기 쉬운 형태로 정리한다.
 
@@ -126,20 +116,34 @@ def normalize_keyword_dictionary(
     - 그룹명과 키워드 문자열의 공백을 정리한다.
     - 빈 문자열은 제거한다.
     - 중복 키워드는 제거한다.
+    - 각 그룹의 가중치를 읽는다. 지정되지 않으면 1.0을 사용한다.
     - 대소문자 구분 없는 정렬로 결과를 고정한다.
     - 최종적으로 유효한 그룹이 하나도 없으면 예외를 발생시킨다.
     """
-    normalized: dict[str, list[str]] = {}
+    normalized: dict[str, dict[str, Any]] = {}
 
-    for group_name, raw_keywords in keyword_dictionary.items():
+    for group_name, raw_group in keyword_dictionary.items():
         group = clean_text(str(group_name))
-        keywords = [
-            clean_text(str(keyword))
-            for keyword in raw_keywords
-            if clean_text(str(keyword))
-        ]
+        raw_keywords: Sequence[str] | Any = raw_group
+        weight = 1.0
+
+        if isinstance(raw_group, Mapping):
+            raw_keywords = raw_group.get("keywords", [])
+            raw_weight = raw_group.get("weight", 1.0)
+            try:
+                weight = float(raw_weight)
+            except (TypeError, ValueError) as exc:
+                raise ValueError(f"Invalid weight for keyword group '{group_name}': {raw_weight!r}") from exc
+
+        if isinstance(raw_keywords, (str, bytes)) or not isinstance(raw_keywords, Sequence):
+            raise ValueError(f"Keyword group '{group_name}' must contain a keyword list.")
+
+        keywords = [clean_text(str(keyword)) for keyword in raw_keywords if clean_text(str(keyword))]
         if group and keywords:
-            normalized[group] = sorted(set(keywords), key=str.lower)
+            normalized[group] = {
+                "weight": weight,
+                "keywords": sorted(set(keywords), key=str.lower),
+            }
 
     if not normalized:
         raise ValueError("Keyword dictionary must include at least one non-empty group.")
@@ -147,7 +151,7 @@ def normalize_keyword_dictionary(
     return normalized
 
 
-def load_keyword_dictionary(keyword_config_path: str | Path | None) -> dict[str, list[str]]:
+def load_keyword_dictionary(keyword_config_path: str | Path | None) -> dict[str, dict[str, Any]]:
     """
     키워드 설정 JSON 파일을 읽고 정규화된 사전 형태로 반환한다.
 
@@ -163,7 +167,7 @@ def load_keyword_dictionary(keyword_config_path: str | Path | None) -> dict[str,
         payload = json.load(file)
 
     if not isinstance(payload, dict):
-        raise ValueError("Keyword config must be a JSON object of group -> keyword list.")
+        raise ValueError("Keyword config must be a JSON object of group -> {weight, keywords}.")
 
     return normalize_keyword_dictionary(payload)
 
@@ -249,20 +253,11 @@ def parse_listing_page(soup: BeautifulSoup, doc_type: str) -> list[dict[str, str
                 "url": urljoin(BASE_URL, href),
                 "published_date": parse_published_date(current_date),
                 "doc_type": doc_type,
-                "category": "UCSB Presidency Project",
+                "category": "UCSB",
             }
         )
-
-    # 같은 페이지 안에서 같은 문서가 반복 노출될 수 있어 URL 기준으로 중복 제거한다.
-    deduped: list[dict[str, str]] = []
-    seen_urls: set[str] = set()
-    for item in items:
-        if item["url"] in seen_urls:
-            continue
-        seen_urls.add(item["url"])
-        deduped.append(item)
-
-    return deduped
+    
+    return items
 
 
 def crawl_listing(
@@ -357,7 +352,7 @@ def extract_article_body(soup: BeautifulSoup) -> str:
 
 def match_keywords(
     text: str,
-    keyword_dictionary: Mapping[str, Sequence[str]],
+    keyword_dictionary: Mapping[str, Any],
 ) -> dict[str, list[str]]:
     """
     제목+본문 텍스트에서 어떤 키워드 그룹이 매치되는지 찾는다.
@@ -371,7 +366,11 @@ def match_keywords(
     lowered_text = text.lower()
     matches: dict[str, list[str]] = {}
 
-    for group_name, keywords in keyword_dictionary.items():
+    for group_name, group_config in keyword_dictionary.items():
+        keywords = group_config.get("keywords", []) if isinstance(group_config, Mapping) else group_config
+        if isinstance(keywords, (str, bytes)) or not isinstance(keywords, Sequence):
+            continue
+
         group_matches = [keyword for keyword in keywords if keyword.lower() in lowered_text]
         if group_matches:
             matches[group_name] = sorted(set(group_matches), key=str.lower)
@@ -379,20 +378,31 @@ def match_keywords(
     return matches
 
 
-def score_keyword_matches(matched_groups: Sequence[str]) -> tuple[float, int]:
+def score_keyword_matches(
+    matched_groups: Sequence[str],
+    keyword_dictionary: Mapping[str, Any],
+) -> float:
     """
     매칭된 키워드 그룹에 가중치를 적용해 점수를 계산한다.
 
-    gate는 core 그룹 매치 수로 계산하고, threshold는 총점을 기준으로 판단한다.
+    threshold는 총점을 기준으로 판단한다.
     """
-    core_matches = sum(1 for group_name in matched_groups if group_name in CORE_GROUPS)
-    score = sum(GROUP_WEIGHTS.get(group_name, 0.0) for group_name in matched_groups)
-    return score, core_matches
+    score = 0.0
+
+    for group_name in matched_groups:
+        group_config = keyword_dictionary.get(group_name, {})
+        if isinstance(group_config, Mapping):
+            try:
+                score += float(group_config.get("weight", 0.0))
+            except (TypeError, ValueError):
+                continue
+
+    return score
 
 
 def parse_article(
     metadata: Mapping[str, str],
-    keyword_dictionary: Mapping[str, Sequence[str]],
+    keyword_dictionary: Mapping[str, Any],
 ) -> dict[str, Any] | None:
     """
     개별 문서 상세 페이지를 읽어 제목/본문/키워드 매칭 결과를 만든다.
@@ -432,11 +442,7 @@ def parse_article(
         key=str.lower,
     )
     matched_groups = sorted(matches.keys(), key=str.lower)
-    score, core_matches = score_keyword_matches(matched_groups)
-
-    if core_matches < MIN_CORE_MATCHES:
-        print("  -> skipped: no core keyword match")
-        return None
+    score = score_keyword_matches(matched_groups, keyword_dictionary)
 
     if score < MIN_MATCH_SCORE:
         print(f"  -> skipped: score {score:.1f} below threshold {MIN_MATCH_SCORE:.1f}")
@@ -453,7 +459,7 @@ def parse_article(
 
 
 def crawl_ucsb_documents(
-    keyword_dictionary: Mapping[str, Sequence[str]],
+    keyword_dictionary: Mapping[str, Any],
     start_date: str = DEFAULT_START_DATE,
     doc_types: Sequence[str] | None = None,
     sleep_sec: float = 0.5,
@@ -524,7 +530,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--keyword-config",
         default=str(DEFAULT_KEYWORD_CONFIG_PATH),
-        help="Path to a JSON file with {group_name: [keywords...]}",
+        help="Path to a JSON file with {group_name: {weight, keywords}}",
     )
     parser.add_argument(
         "--start-date",
