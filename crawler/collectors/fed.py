@@ -17,18 +17,10 @@ if PROJECT_ROOT_STR not in sys.path:
 from crawler.support_legacy.data_paths import collected_csv_path
 
 BASE_URL = "https://www.federalreserve.gov"
-CALENDAR_URL ="https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm"
+CALENDAR_URL = f"{BASE_URL}/monetarypolicy/fomccalendars.htm"
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0"
-}
-
-# 2017-2020 FOMC 캘린더 페이지 URL 맵핑 (과거 형식)
-HISTORICAL_CALENDAR_URLS = {
-    2017: f"{BASE_URL}/monetarypolicy/fomchistorical2017.htm",
-    2018: f"{BASE_URL}/monetarypolicy/fomchistorical2018.htm",
-    2019: f"{BASE_URL}/monetarypolicy/fomchistorical2019.htm",
-    2020: f"{BASE_URL}/monetarypolicy/fomchistorical2020.htm",
 }
 
 
@@ -173,201 +165,94 @@ def crawl_minutes(url: str) -> dict:
     }
 
 
-def crawl_latest_calendar(calendar_url: str = CALENDAR_URL) -> list:
-    """최신 형식의 FOMC 캘린더를 크롤링해 레코드 리스트를 반환한다."""
-    results = []
-    try:
-        response = requests.get(calendar_url, headers=HEADERS, timeout=20)
-        response.raise_for_status()
-        soup = BeautifulSoup(response.text, "html.parser")
+def main() -> None:
+    # FOMC 연간 캘린더 페이지를 가져온다.
+    response = requests.get(CALENDAR_URL, headers=HEADERS, timeout=20)
+    response.raise_for_status()
 
-        sections = soup.find_all("div", class_="panel-default")
+    # 캘린더 HTML을 파싱한다.
+    soup = BeautifulSoup(response.text, "html.parser")
 
-        for section in sections:
-            heading = section.find("h4")
-            if heading is None:
-                continue
-
-            heading_text = heading.get_text(" ", strip=True)
-            match = re.match(r"(\d{4}) FOMC Meetings", heading_text)
-            if not match:
-                continue
-
-            meetings = section.find_all("div", class_="fomc-meeting")
-
-            for meeting in meetings:
-                for link in meeting.find_all("a", href=True):
-                    label = link.get_text(" ", strip=True).lower()
-                    url = urljoin(BASE_URL, link["href"])
-
-                    doc_type = None
-                    article = None
-
-                    if "implementation note" in label:
-                        doc_type = "implementation_note"
-                        try:
-                            article = crawl_implementation_note(url)
-                        except Exception:
-                            continue
-
-                    elif label == "html":
-                        parent_strong = link.parent.find("strong") if link.parent else None
-                        if parent_strong is None:
-                            continue
-
-                        parent_title = parent_strong.get_text(" ", strip=True).lower()
-
-                        if "statement:" in parent_title:
-                            doc_type = "statement"
-                            try:
-                                article = crawl_fomc_statement(url)
-                            except Exception:
-                                continue
-
-                        elif "minutes:" in parent_title:
-                            doc_type = "minutes"
-                            try:
-                                article = crawl_minutes(url)
-                            except Exception:
-                                continue
-
-                            release_match = re.search(
-                                r"Released ([A-Za-z]+ \d{1,2}, \d{4})",
-                                link.parent.get_text(" ", strip=True)
-                            )
-                            release_date = release_match.group(1) if release_match else None
-                            article["release_date"] = release_date
-
-                    if doc_type and article:
-                        results.append({
-                            "release_date": article["release_date"],
-                            "category": "FOMC",
-                            "doc_type": doc_type,
-                            "url": url,
-                            "title": article["title"],
-                            "body": article["body"]
-                        })
-
-                    time.sleep(0.5)
-
-    except Exception as e:
-        print(f"[WARN] Latest calendar crawl failed: {e}")
-
-    return results
-
-
-def crawl_historical_calendars(historical_urls: dict = HISTORICAL_CALENDAR_URLS) -> list:
-    """과거(2017-2020) 형식의 FOMC 캘린더를 연도별로 크롤링해 레코드 리스트를 반환한다."""
     results = []
 
-    for year, calendar_url in sorted(historical_urls.items()):
-        print(f"\n[{year}] 크롤링 시작: {calendar_url}")
-        try:
-            response = requests.get(calendar_url, headers=HEADERS, timeout=20)
-            response.raise_for_status()
-            soup = BeautifulSoup(response.text, "html.parser")
+    # 연도별 패널을 순회하며 "2025 FOMC Meetings" 같은 섹션만 고른다.
+    sections = soup.find_all("div", class_="panel-default")
 
-            meetings = soup.find_all("div", class_="panel-padded")
-            year_count = 0
-
-            for meeting in meetings:
-                for link in meeting.find_all("a", href=True):
-                    label = link.get_text(" ", strip=True).lower()
-                    url = urljoin(BASE_URL, link["href"])
-
-                    doc_type = None
-                    article = None
-
-                    if label == "statement":
-                        doc_type = "statement"
-                        try:
-                            article = crawl_fomc_statement(url)
-                        except Exception as e:
-                            print(f"  [WARN] Statement 파싱 실패 ({url}): {e}")
-                            continue
-
-                    elif label == "html":
-                        parent_title = link.parent.get_text(" ", strip=True) if link.parent else None
-                        if not parent_title or not parent_title.startswith("Minutes"):
-                            continue
-
-                        doc_type = "minutes"
-                        try:
-                            article = crawl_minutes(url)
-                            release_match = re.search(
-                                r"Released ([A-Za-z]+ \d{1,2}, \d{4})",
-                                link.parent.get_text(" ", strip=True)
-                            )
-                            release_date = release_match.group(1) if release_match else None
-                            article["release_date"] = release_date
-                        except Exception as e:
-                            print(f"  [WARN] Minutes 파싱 실패 ({url}): {e}")
-                            continue
-
-                    if doc_type and article:
-                        results.append({
-                            "release_date": article["release_date"],
-                            "category": "FOMC",
-                            "doc_type": doc_type,
-                            "url": url,
-                            "title": article["title"],
-                            "body": article["body"]
-                        })
-                        year_count += 1
-
-                    time.sleep(0.5)
-
-            print(f"[{year}] 크롤링 완료: {year_count}건 수집")
-
-        except Exception as e:
-            print(f"[{year}] 크롤링 실패: {e}")
+    for section in sections:
+        heading = section.find("h4")
+        if heading is None:
             continue
 
-    return results
+        heading_text = heading.get_text(" ", strip=True)
+        match = re.match(r"(\d{4}) FOMC Meetings", heading_text)
+        if not match:
+            continue
 
+        # 각 연도 섹션 안에서 개별 회의 블록을 찾는다.
+        meetings = section.find_all("div", class_="fomc-meeting")
 
-def main() -> None:
-    # 분리된 크롤러 함수를 호출해 결과를 수집
-    results_latest = crawl_latest_calendar()
-    results_hist = crawl_historical_calendars()
+        for meeting in meetings:
+            # 회의 블록 안의 문서 링크를 순회한다.
+            for link in meeting.find_all("a", href=True):
+                label = link.get_text(" ", strip=True).lower()
+                url = urljoin(BASE_URL, link["href"])
 
-    results = []
-    if results_latest:
-        results.extend(results_latest)
-    if results_hist:
-        results.extend(results_hist)
+                doc_type = None
+                article = None
 
-    # 결과를 DataFrame으로 정리한다.
-    new_df = pd.DataFrame(results)
-    print(f"\n새로 수집된 데이터: {len(new_df)}건")
+                # Implementation Note 링크는 전용 파서로 처리한다.
+                if "implementation note" in label:
+                    doc_type = "implementation_note"
+                    article = crawl_implementation_note(url)
 
-    # 기존 fed_fomc_links.csv가 있으면 읽어서 병합한다.
-    existing_csv = collected_csv_path("fed_fomc_links.csv")
-    existing_path = Path(existing_csv)
+                # HTML 링크는 부모 strong 텍스트를 보고
+                # statement인지 minutes인지 구분한다.
+                elif label == "html":
+                    parent_strong = link.parent.find("strong") if link.parent else None
+                    if parent_strong is None:
+                        continue
 
-    if existing_path.exists():
-        existing_df = pd.read_csv(existing_csv, encoding="utf-8-sig")
-        print(f"기존 데이터: {len(existing_df)}건")
-        merged_df = pd.concat([existing_df, new_df], ignore_index=True)
-        print(f"병합 후 (중복 제거 전): {len(merged_df)}건")
-        merged_df = merged_df.drop_duplicates(subset=["url"]).reset_index(drop=True)
-        print(f"중복 제거 후: {len(merged_df)}건")
-    else:
-        print("기존 데이터 없음. 새 데이터만 저장합니다.")
-        merged_df = new_df.drop_duplicates().reset_index(drop=True)
+                    parent_title = parent_strong.get_text(" ", strip=True).lower()
 
-    print(f"\n문서 유형 분포:\n{merged_df['doc_type'].value_counts()}")
-    print(f"\n샘플:\n{merged_df.head(10)}")
+                    if "statement:" in parent_title:
+                        doc_type = "statement"
+                        article = crawl_fomc_statement(url)
 
-    # 최신순으로 정렬 (release_date 기준, 최신이 위)
-    merged_df['_sort_date'] = pd.to_datetime(merged_df['release_date'], errors='coerce')
-    merged_df = merged_df.sort_values(by='_sort_date', ascending=False, na_position='last').reset_index(drop=True)
-    merged_df = merged_df.drop(columns=['_sort_date'])
+                    elif "minutes:" in parent_title:
+                        doc_type = "minutes"
+                        article = crawl_minutes(url)
 
-    # 최종 결과를 fed_fomc_links.csv에 저장한다.
-    output_csv = collected_csv_path("fed_fomc_links.csv")
-    merged_df.to_csv(output_csv, index=False, encoding="utf-8-sig")
-    print(f"\n저장 완료: {output_csv}")
+                        # minutes 공개일은 상세 페이지보다 캘린더 문구가 더 명확해서
+                        # 현재 링크가 속한 블록의 Released 문구에서 추출한다.
+                        release_match = re.search(
+                            r"Released ([A-Za-z]+ \d{1,2}, \d{4})",
+                            link.parent.get_text(" ", strip=True)
+                        )
+
+                        release_date = release_match.group(1) if release_match else None
+                        article["release_date"] = release_date
+
+                # 문서 파싱이 성공한 경우 표준 레코드로 저장한다.
+                if doc_type and article:
+                    results.append({
+                        "release_date": article["release_date"],
+                        "category": "FOMC",
+                        "doc_type": doc_type,
+                        "url": url,
+                        "title": article["title"],
+                        "body": article["body"]
+                    })
+
+                # 연속 요청 부담을 줄이기 위해 짧게 쉰다.
+                time.sleep(0.5)
+
+    # 결과를 DataFrame으로 정리하고 중복을 제거한다.
+    df = pd.DataFrame(results).drop_duplicates()
+
+    print(df.head(20))
+
+    # 수집 결과를 CSV로 저장한다.
+    df.to_csv(collected_csv_path("fed_fomc_links.csv"), index=False, encoding="utf-8-sig")
 
 
 if __name__ == "__main__":

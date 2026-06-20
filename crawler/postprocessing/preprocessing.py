@@ -16,8 +16,8 @@ if PROJECT_ROOT_STR not in sys.path:
 from crawler.support_legacy.data_paths import feature_csv_path, summarized_csv_path
 
 
-DEFAULT_MERGED_OUTPUT_CSV = feature_csv_path("xlf_merged_table_sorted.csv")
-DEFAULT_ENCODED_OUTPUT_CSV = feature_csv_path("xlf_merged_table_sorted_encoded.csv")
+DEFAULT_MERGED_OUTPUT_CSV = feature_csv_path("merged_table_sorted.csv")
+DEFAULT_ENCODED_OUTPUT_CSV = feature_csv_path("merged_table_sorted_encoded.csv")
 # Note: cyclical time features removed per request
 DATE_COL = "date"
 BODY_COL = "body"
@@ -150,7 +150,6 @@ def one_hot_encode_category(
     keep_category: bool = True,
     prefix: str = "category",
     dtype: str = "int64",
-    expected_categories: Optional[list[str]] = None,
 ) -> pd.DataFrame:
     """
     One-hot encode the `category` column from an existing DataFrame.
@@ -162,16 +161,6 @@ def one_hot_encode_category(
         )
 
     encoded = pd.get_dummies(df["category"], prefix=prefix, dtype=dtype)
-
-    if expected_categories is not None:
-        for category in expected_categories:
-            column_name = f"{prefix}_{category}" if prefix else str(category)
-            if column_name not in encoded.columns:
-                encoded[column_name] = 0
-
-        ordered_columns = [f"{prefix}_{category}" if prefix else str(category) for category in expected_categories]
-        ordered_columns.extend([column for column in encoded.columns if column not in ordered_columns])
-        encoded = encoded[ordered_columns]
 
     if keep_category:
         return pd.concat([df, encoded], axis=1)
@@ -201,8 +190,8 @@ def read_csv_and_one_hot_encode_category(
 def main() -> None:
     csv_candidates = [
         summarized_csv_path("fed_fomc_links_summarized.csv"),
-        summarized_csv_path("xlf_presidential_documents_summarized.csv"),
-        summarized_csv_path("fraser_sample_summarized.csv"),
+        summarized_csv_path("ucsb_presidential_documents_summarized.csv"),
+        summarized_csv_path("bis_press_releases_summarized.csv"),
     ]
     csv_paths = _existing_csv_paths(csv_candidates)
 

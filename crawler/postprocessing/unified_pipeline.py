@@ -31,15 +31,7 @@ MAX_SUMMARY_CHARS = 10_000
 SLEEP_BETWEEN_SUMMARIZE_SEC = 0.5
 EMBEDDING_COL = f"{BODY_SUMMARY_COL}_embedding"
 PCA_DIM = 30
-EXPECTED_CATEGORY_VALUES = ["BIS", "EIA", "FOMC", "FRASER", "UCSB", "YAHOO"]
-
-
-def _sector_pca_model_path(sector: str | None) -> str:
-    """섹터별 PCA 모델 경로를 반환한다."""
-    sector_key = str(sector or "").strip().lower()
-    if not sector_key:
-        return feature_csv_path("policy_updates_pca.pkl")
-    return feature_csv_path(f"{sector_key}_merged_finbert_pca.pkl")
+PCA_MODEL_PATH = feature_csv_path("policy_updates_pca.pkl")
 
 
 def _resolve_pca_components(embeddings: object, requested_components: int = PCA_DIM) -> int:
@@ -51,11 +43,8 @@ def _resolve_pca_components(embeddings: object, requested_components: int = PCA_
     return max(1, min(requested_components, n_samples, n_features))
 
 
-def _load_or_fit_pca(embeddings, requested_components: int = PCA_DIM, pca_path: str | None = None):
+def _load_or_fit_pca(embeddings, requested_components: int = PCA_DIM, pca_path: str = PCA_MODEL_PATH):
     """기존 PCA 모델이 있으면 재사용하고, 없으면 새로 학습한다."""
-    if pca_path is None:
-        pca_path = _sector_pca_model_path(None)
-
     pca_file = Path(pca_path)
     if pca_file.exists():
         return joblib.load(pca_file), True
@@ -122,12 +111,7 @@ def apply_one_hot_encoding(df: pd.DataFrame, category_col: str = "category") -> 
     """
     df = df.copy()
     try:
-        df = one_hot_encode_category(
-            df,
-            keep_category=True,
-            prefix=f"{category_col}_",
-            expected_categories=EXPECTED_CATEGORY_VALUES,
-        )
+        df = one_hot_encode_category(df, keep_category=True, prefix=f"{category_col}_")
         print(f"[UNIFIED] One-hot Encoding: applied to {category_col}")
     except Exception as e:
         print(f"[UNIFIED] WARN: one-hot encoding failed: {e}")
@@ -180,34 +164,21 @@ def apply_embeddings(df: pd.DataFrame, body_summary_col: str = BODY_SUMMARY_COL)
         return df
     
     print(f"[UNIFIED] Embeddings: encoding {len(df)} rows...")
+    
+    summaries = df[body_summary_col].fillna("").astype(str).tolist()
+    embeddings = encode_summaries(summaries)
 
-    if "sector" not in df.columns:
-        df["sector"] = ""
+    pca_model, is_loaded = _load_or_fit_pca(embeddings, requested_components=PCA_DIM, pca_path=PCA_MODEL_PATH)
+    reduced_embeddings = _reduce_embeddings(embeddings, pca_model)
 
-    df["sector"] = df["sector"].fillna("").astype(str)
-    df[EMBEDDING_COL] = None
+    if not is_loaded:
+        joblib.dump(pca_model, PCA_MODEL_PATH)
+        print(f"[UNIFIED] PCA: saved new model to {PCA_MODEL_PATH}")
 
-    for sector_value, sector_df in df.groupby("sector", dropna=False, sort=False):
-        sector_label = str(sector_value or "").strip()
-        pca_path = _sector_pca_model_path(sector_label)
+    # CSV에는 축소된 벡터를 list 형태로 저장한다.
+    df[EMBEDDING_COL] = reduced_embeddings.tolist()
 
-        summaries = sector_df[body_summary_col].fillna("").astype(str).tolist()
-        embeddings = encode_summaries(summaries)
-
-        pca_model, is_loaded = _load_or_fit_pca(embeddings, requested_components=PCA_DIM, pca_path=pca_path)
-        reduced_embeddings = _reduce_embeddings(embeddings, pca_model)
-
-        if not is_loaded:
-            joblib.dump(pca_model, pca_path)
-            print(f"[UNIFIED] PCA: saved new model to {pca_path}")
-
-        reduced_vectors = reduced_embeddings.tolist()
-        for row_index, vector in zip(sector_df.index, reduced_vectors):
-            df.at[row_index, EMBEDDING_COL] = vector
-        print(
-            f"[UNIFIED] Embeddings: sector={sector_label or 'default'} "
-            f"shape={embeddings.shape} -> PCA shape={reduced_embeddings.shape}"
-        )
+    print(f"[UNIFIED] Embeddings: complete, shape={embeddings.shape} -> PCA shape={reduced_embeddings.shape}")
     
     return df
 

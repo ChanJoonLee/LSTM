@@ -145,6 +145,177 @@ def _compute_direction_accuracy(
     return float((predicted_direction == actual_direction).mean())
 
 
+def _safe_rate(numerator: int, denominator: int) -> float | None:
+    if denominator == 0:
+        return None
+    return float(numerator / denominator)
+
+
+def _zero_if_none(value: float | None) -> float:
+    return 0.0 if value is None else float(value)
+
+
+def _compute_direction_metrics(
+    predicted_values: np.ndarray,
+    actual_values: np.ndarray,
+) -> dict:
+    predicted_up = predicted_values > 0
+    predicted_down = predicted_values < 0
+    actual_up = actual_values > 0
+    actual_down = actual_values < 0
+
+    predicted_up_count = int(predicted_up.sum())
+    predicted_down_count = int(predicted_down.sum())
+    actual_up_count = int(actual_up.sum())
+    actual_down_count = int(actual_down.sum())
+    total_count = int(len(actual_values))
+
+    true_up_count = int((predicted_up & actual_up).sum())
+    true_down_count = int((predicted_down & actual_down).sum())
+
+    return {
+        "direction_accuracy": _compute_direction_accuracy(predicted_values, actual_values),
+        "actual_up_count": actual_up_count,
+        "actual_down_count": actual_down_count,
+        "actual_up_rate": _safe_rate(actual_up_count, total_count),
+        "actual_down_rate": _safe_rate(actual_down_count, total_count),
+        "predicted_up_count": predicted_up_count,
+        "predicted_down_count": predicted_down_count,
+        "predicted_up_rate": _safe_rate(predicted_up_count, total_count),
+        "predicted_down_rate": _safe_rate(predicted_down_count, total_count),
+        "up_precision": _safe_rate(true_up_count, predicted_up_count),
+        "down_precision": _safe_rate(true_down_count, predicted_down_count),
+        "up_recall": _safe_rate(true_up_count, actual_up_count),
+        "down_recall": _safe_rate(true_down_count, actual_down_count),
+    }
+
+
+def _simple_return_from_logret(logret_pct: np.ndarray) -> np.ndarray:
+    return np.exp(logret_pct / 100.0) - 1.0
+
+
+def _compute_strong_regime_metrics(
+    predicted_logret: np.ndarray,
+    actual_logret: np.ndarray,
+) -> dict:
+    predicted_return = _simple_return_from_logret(predicted_logret)
+    actual_return = _simple_return_from_logret(actual_logret)
+
+    fall_strong = predicted_return < -0.003
+    rise_strong = predicted_return >= 0.006
+    strong = fall_strong | rise_strong
+
+    fall_strong_count = int(fall_strong.sum())
+    rise_strong_count = int(rise_strong.sum())
+    strong_count = int(strong.sum())
+    total_count = int(len(predicted_return))
+
+    fall_strong_hits = int((fall_strong & (actual_return < 0.0)).sum())
+    rise_strong_hits = int((rise_strong & (actual_return > 0.0)).sum())
+    strong_hits = fall_strong_hits + rise_strong_hits
+
+    return {
+        "fall_strong_count": fall_strong_count,
+        "rise_strong_count": rise_strong_count,
+        "strong_regime_count": strong_count,
+        "strong_regime_rate": _safe_rate(strong_count, total_count),
+        "fall_strong_precision": _safe_rate(fall_strong_hits, fall_strong_count),
+        "rise_strong_precision": _safe_rate(rise_strong_hits, rise_strong_count),
+        "strong_regime_precision": _safe_rate(strong_hits, strong_count),
+    }
+
+
+def _compute_signal_return_metrics(
+    predicted_logret: np.ndarray,
+    actual_logret: np.ndarray,
+) -> dict:
+    actual_return = _simple_return_from_logret(actual_logret)
+    signal = np.sign(predicted_logret)
+    signal_return = signal * actual_return
+    active_mask = signal != 0.0
+    long_mask = signal > 0.0
+    short_mask = signal < 0.0
+
+    def average_pct(mask: np.ndarray) -> float | None:
+        if int(mask.sum()) == 0:
+            return None
+        return float(signal_return[mask].mean() * 100.0)
+
+    def cumulative_pct(mask: np.ndarray) -> float | None:
+        if int(mask.sum()) == 0:
+            return None
+        return float((np.prod(1.0 + signal_return[mask]) - 1.0) * 100.0)
+
+    high_conf_cutoff = float(np.quantile(np.abs(predicted_logret), 0.7))
+    high_conf_mask = active_mask & (np.abs(predicted_logret) >= high_conf_cutoff)
+
+    return {
+        "buy_and_hold_avg_return_pct": float(actual_return.mean() * 100.0),
+        "buy_and_hold_cumulative_return_pct": float(
+            (np.prod(1.0 + actual_return) - 1.0) * 100.0
+        ),
+        "model_signal_avg_return_pct": average_pct(active_mask),
+        "model_signal_cumulative_return_pct": cumulative_pct(active_mask),
+        "model_signal_long_avg_return_pct": average_pct(long_mask),
+        "model_signal_short_avg_return_pct": average_pct(short_mask),
+        "model_signal_high_conf_avg_return_pct": average_pct(high_conf_mask),
+        "model_signal_high_conf_cumulative_return_pct": cumulative_pct(high_conf_mask),
+        "model_signal_active_count": int(active_mask.sum()),
+        "model_signal_high_conf_count": int(high_conf_mask.sum()),
+    }
+
+
+def _score_asymmetric_direction_objective(
+    predicted_values: np.ndarray,
+    actual_values: np.ndarray,
+    rmse: float,
+) -> float:
+    metrics = _compute_direction_metrics(predicted_values, actual_values)
+
+    up_precision = _zero_if_none(metrics["up_precision"])
+    down_precision = _zero_if_none(metrics["down_precision"])
+    up_recall = _zero_if_none(metrics["up_recall"])
+    down_recall = _zero_if_none(metrics["down_recall"])
+    predicted_down_rate = _zero_if_none(metrics["predicted_down_rate"])
+    actual_down_rate = _zero_if_none(metrics["actual_down_rate"])
+    strong_metrics = _compute_strong_regime_metrics(predicted_values, actual_values)
+    side_precisions = [
+        float(value)
+        for value in (
+            strong_metrics["fall_strong_precision"],
+            strong_metrics["rise_strong_precision"],
+        )
+        if value is not None
+    ]
+    side_strong_precision = (
+        0.0 if not side_precisions else float(np.mean(side_precisions))
+    )
+    strong_regime_precision = _zero_if_none(strong_metrics["strong_regime_precision"])
+
+    balanced_precision = (up_precision + down_precision) / 2.0
+    balanced_recall = (up_recall + down_recall) / 2.0
+    direction_mix_balance = 1.0 - abs(predicted_down_rate - actual_down_rate)
+    min_strong_count = max(5, int(len(actual_values) * 0.05))
+    strong_support = min(
+        1.0,
+        strong_metrics["strong_regime_count"] / max(1, min_strong_count),
+    )
+    strong_precision = (
+        (strong_regime_precision * 0.6) + (side_strong_precision * 0.4)
+    ) * strong_support
+
+    return float(
+        (metrics["direction_accuracy"] * 0.25)
+        + (balanced_precision * 0.25)
+        + (strong_precision * 0.20)
+        + (balanced_recall * 0.13)
+        + (down_precision * 0.09)
+        + (down_recall * 0.04)
+        + (direction_mix_balance * 0.04)
+        - (rmse * 0.05)
+    )
+
+
 def _score_selected_features_with_time_series_cv(
     X_train_full: pd.DataFrame,
     y_train_full: pd.Series,
@@ -353,9 +524,14 @@ def optimize_model_hyperparameters(
             model.fit(X_tr, y_tr)
 
             predicted_logret = model.predict(X_va)
-            direction_accuracy = _compute_direction_accuracy(predicted_logret, y_va.to_numpy())
             rmse = float(np.sqrt(mean_squared_error(y_va, predicted_logret)))
-            combined_scores.append(direction_accuracy - (rmse * 0.1))
+            combined_scores.append(
+                _score_asymmetric_direction_objective(
+                    predicted_logret,
+                    y_va.to_numpy(),
+                    rmse,
+                )
+            )
 
         return float(np.mean(combined_scores))
 
@@ -386,11 +562,13 @@ def evaluate_model(
 
     mae = float(mean_absolute_error(future_price, predicted_future_price))
     rmse = float(np.sqrt(mean_squared_error(future_price, predicted_future_price)))
+    logret_rmse = float(np.sqrt(mean_squared_error(y_test, predicted_logret)))
     r2 = float(r2_score(future_price, predicted_future_price))
-    direction_accuracy = _compute_direction_accuracy(
+    direction_metrics = _compute_direction_metrics(
         predicted_future_price - current_price,
         future_price - current_price,
     )
+    direction_accuracy = direction_metrics["direction_accuracy"]
     mape = float(np.mean(np.abs((future_price - predicted_future_price) / future_price)) * 100)
 
     baseline_future_price = current_price.copy()
@@ -404,6 +582,10 @@ def evaluate_model(
     high_conf_mask = np.abs(predicted_logret) >= conf_cutoff
     long_mask = high_conf_mask & (predicted_logret > 0)
     short_mask = high_conf_mask & (predicted_logret < 0)
+    predicted_simple_return = predicted_future_price / current_price - 1.0
+    actual_simple_return = future_price / current_price - 1.0
+    model_signal = np.sign(predicted_logret)
+    model_signal_return = model_signal * actual_simple_return
 
     long_count = int(long_mask.sum())
     short_count = int(short_mask.sum())
@@ -419,18 +601,27 @@ def evaluate_model(
     metrics = {
         "mae": mae,
         "rmse": rmse,
+        "logret_rmse": logret_rmse,
         "r2_score": r2,
         "direction_accuracy": direction_accuracy,
         "mape": mape,
         "baseline_mae": baseline_mae,
         "baseline_rmse": baseline_rmse,
         "baseline_mape": baseline_mape,
+        "direction_objective_score": _score_asymmetric_direction_objective(
+            predicted_logret,
+            y_test.to_numpy(),
+            logret_rmse,
+        ),
         "high_conf_threshold": conf_cutoff,
         "high_conf_long_accuracy": high_conf_long_accuracy,
         "high_conf_long_count": long_count,
         "high_conf_short_accuracy": high_conf_short_accuracy,
         "high_conf_short_count": short_count,
     }
+    metrics.update(direction_metrics)
+    metrics.update(_compute_strong_regime_metrics(predicted_logret, y_test.to_numpy()))
+    metrics.update(_compute_signal_return_metrics(predicted_logret, y_test.to_numpy()))
 
     predictions = pd.DataFrame(
         {
@@ -441,6 +632,10 @@ def evaluate_model(
             "Pred_Future_Price": predicted_future_price,
             "Pred_LogRet": predicted_logret,
             "Actual_LogRet": y_test.to_numpy(),
+            "Pred_Return": predicted_simple_return,
+            "Actual_Return": actual_simple_return,
+            "Model_Signal": model_signal,
+            "Model_Signal_Return": model_signal_return,
         }
     )
     return metrics, predictions
@@ -771,7 +966,7 @@ def _build_delta_metrics(
     """
     market+news 실험이 market-only 대비 얼마나 변했는지 계산한다.
     """
-    return {
+    delta = {
         "direction_accuracy": (
             market_news_metrics["direction_accuracy"]
             - market_only_metrics["direction_accuracy"]
@@ -781,6 +976,15 @@ def _build_delta_metrics(
         "r2_score": market_news_metrics["r2_score"] - market_only_metrics["r2_score"],
         "mape": market_news_metrics["mape"] - market_only_metrics["mape"],
     }
+    for key in (
+        "model_signal_avg_return_pct",
+        "model_signal_cumulative_return_pct",
+        "model_signal_high_conf_avg_return_pct",
+        "buy_and_hold_avg_return_pct",
+    ):
+        if key in market_news_metrics and key in market_only_metrics:
+            delta[key] = market_news_metrics[key] - market_only_metrics[key]
+    return delta
 
 
 def _build_comparison_rows(
@@ -807,6 +1011,15 @@ def _build_comparison_rows(
             "mae": market_only_metrics["mae"],
             "r2_score": market_only_metrics["r2_score"],
             "mape": market_only_metrics["mape"],
+            "model_signal_avg_return_pct": market_only_metrics.get(
+                "model_signal_avg_return_pct"
+            ),
+            "model_signal_cumulative_return_pct": market_only_metrics.get(
+                "model_signal_cumulative_return_pct"
+            ),
+            "model_signal_high_conf_avg_return_pct": market_only_metrics.get(
+                "model_signal_high_conf_avg_return_pct"
+            ),
         },
         {
             **extra_columns,
@@ -818,6 +1031,15 @@ def _build_comparison_rows(
             "mae": market_news_metrics["mae"],
             "r2_score": market_news_metrics["r2_score"],
             "mape": market_news_metrics["mape"],
+            "model_signal_avg_return_pct": market_news_metrics.get(
+                "model_signal_avg_return_pct"
+            ),
+            "model_signal_cumulative_return_pct": market_news_metrics.get(
+                "model_signal_cumulative_return_pct"
+            ),
+            "model_signal_high_conf_avg_return_pct": market_news_metrics.get(
+                "model_signal_high_conf_avg_return_pct"
+            ),
         },
         {
             **extra_columns,
@@ -832,6 +1054,15 @@ def _build_comparison_rows(
             "mae": delta_metrics["mae"],
             "r2_score": delta_metrics["r2_score"],
             "mape": delta_metrics["mape"],
+            "model_signal_avg_return_pct": delta_metrics.get(
+                "model_signal_avg_return_pct"
+            ),
+            "model_signal_cumulative_return_pct": delta_metrics.get(
+                "model_signal_cumulative_return_pct"
+            ),
+            "model_signal_high_conf_avg_return_pct": delta_metrics.get(
+                "model_signal_high_conf_avg_return_pct"
+            ),
         },
     ]
 
